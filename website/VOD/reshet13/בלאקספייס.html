@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>בלקשפיש</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto auto auto; /* 5 עמודות */
+            gap: 10px 30px; /* רווחים בין הכפתורים */
+            align-items: start; /* שכל העמודות יתחילו מלמעלה */
+            direction: ltr; /* כדי שהעמודות יהיו משמאל לימין */
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>בלקשפיש</h1>
+
+<div class="grid">
+    <div class="col">
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_5zekadhs/protocol/https/format/applehttp/flavorIds/1_ghp9apxf,1_okaj6pja,1_nu6ykdkm,1_dcc29hbf,1_xg9j4q9b/a.m3u8?uiConfId=50272542&playSessionId=36cd1e47-0c54-33b9-79f5-4c9f74b2cd4a:3c628290-ed8a-83e3-187a-ff5015c44698&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDI2ODE1Lw==&clientTag=html5:v7.188')">1X1</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_94tboixa/protocol/https/format/applehttp/flavorIds/1_oi3u7zrf,1_8vz6vxnl,1_xiwznd42,1_gzgyzgq4,1_hzb7mn7e/a.m3u8?uiConfId=50272542&playSessionId=33ff6758-a173-a088-0d60-0c72df73b308:f79d439d-c8c8-39b3-4ea0-ed0ee4a28251&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDI2ODE4Lw==&clientTag=html5:v7.188')">1X2</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_8jryxbta/protocol/https/format/applehttp/flavorIds/1_gnbc1rvn,1_boahyzjf,1_8zgbvoft,1_crkiotew,1_2cnh8s4o/a.m3u8?uiConfId=50272542&playSessionId=8d2fc66b-0781-1441-5f4d-fcefe3c29434:18975030-c457-1916-5bb3-c582cf930e71&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDI2ODIxLw==&clientTag=html5:v7.188')">1X3</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_4lxbuuky/protocol/https/format/applehttp/flavorIds/1_yqa9rlqg,1_q7ixkklj,1_fw54dudl,1_n6zietyh,1_1hnjwi2v/a.m3u8?uiConfId=50272542&playSessionId=8d2fc66b-0781-1441-5f4d-fcefe3c29434:18975030-c457-1916-5bb3-c582cf930e71&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDI2ODI0Lw==&clientTag=html5:v7.188')">1X4</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_t2qk033v/protocol/https/format/applehttp/flavorIds/1_6df5yb9g,1_4t35gtgr,1_sf8sb1ff,1_jgcw09i3,1_lmoho9rw/a.m3u8?uiConfId=50272542&playSessionId=8d2fc66b-0781-1441-5f4d-fcefe3c29434:9a1b35ee-2146-064f-033a-212448ea9725&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDI2ODMyLw==&clientTag=html5:v7.188')">1X5</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_pkbmbv9x/protocol/https/format/applehttp/flavorIds/1_ch0p7q42,1_1pz8v2wx,1_s28gmjsq,1_9gmupqp1,1_k9lxcz7t/a.m3u8?uiConfId=50272542&playSessionId=8d2fc66b-0781-1441-5f4d-fcefe3c29434:2b3f570f-bc73-639e-5a47-d281397d6605&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDE1ODIwLw==&clientTag=html5:v7.188')">1X6</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_ywfvp6gb/protocol/https/format/applehttp/flavorIds/1_t7rm4akq,1_msgno7w4,1_3uv7q29b,1_5kse6enc,1_2sril7mm/a.m3u8?uiConfId=50272542&playSessionId=8d2fc66b-0781-1441-5f4d-fcefe3c29434:e507e259-562e-0cc3-b9b9-b064050b7361&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDE1Nzc4Lw==&clientTag=html5:v7.188')">1X7</button>
+        <button onclick="goToChannel('https://cdnapisec.kaltura.com/p/2748741/sp/274874100/playManifest/entryId/1_51lze3j0/protocol/https/format/applehttp/flavorIds/1_h0tqxjrh,1_phpuspcg,1_smkvac11,1_zhg00l4f,1_nplmgk4q/a.m3u8?uiConfId=50272542&playSessionId=8d2fc66b-0781-1441-5f4d-fcefe3c29434:3c8a8b90-1a07-aa9d-6fe0-f0726232c12f&referrer=aHR0cHM6Ly8xM3R2LmNvLmlsL2FsbHNob3dzL3Nlcmllcy84Ny9zZWFzb24vMS8yMDI2ODYwLw==&clientTag=html5:v7.188')">1X8</button>
+    </div>
+    <div class="col">
+        <button onclick="goToChannel('')">2X1</button>
+        <button onclick="goToChannel('')">2X2</button>
+        <button onclick="goToChannel('')">2X3</button>
+        <button onclick="goToChannel('')">2X4</button>
+        <button onclick="goToChannel('')">2X5</button>
+        <button onclick="goToChannel('')">2X6</button>
+        <button onclick="goToChannel('')">2X7</button>
+        <button onclick="goToChannel('')">2X8</button>
+    </div>
+</div>
+
+<script>
+function goToChannel(url) {
+    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
+    window.location.href = '../../player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>
