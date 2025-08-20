@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>רדיו</title>
+    <style>
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, auto); /* 5 כפתורים בשורה */
+            gap: 5px; /* רווחים בין הכפתורים */
+            row-gap: 5px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: white;
+        }
+        button {
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        button:hover {
+            transform: scale(1.1);  /* הגדלה קטנה */
+        }
+    </style>
+</head>
+<body>
+
+<h1>רדיו</h1>
+
+<div class="buttons">
+    <button onclick="goToChannel('https://rgelive.akamaized.net/hls/live/2043150/radio5/playlistMain_Aud_.m3u8')">
+        <img src="https://radio.sport5.co.il/images/player_default_bg.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://glzicylv01.bynetcdn.com/glz_mp3')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="" width="300" height="300">
+    </button>
+</div>
+
+<script>
+function goToChannel(url) {
+    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
+    window.location.href = 'player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>

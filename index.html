@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מוגו שתרימ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>קול אשתרימימ סל מוגו!</h1>
+
+<button onclick="window.location.href='channels.html'">ארוסימ</button>
+<button onclick="window.location.href='VOD.html'">VOD</button>
+
+<script>
+function goToChannel(url) {
+    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
+    window.location.href = 'player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>
