@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ארוסימ</title>
+    <style>
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, auto); /* 5 כפתורים בשורה */
+            gap: 5px; /* רווחים בין הכפתורים */
+            row-gap: 5px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: white;
+        }
+        button {
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        button:hover {
+            transform: scale(1.1);  /* הגדלה קטנה */
+        }
+    </style>
+</head>
+<body>
+
+<h1>שיפרייט אארוסימ סל מוגו</h1>
+
+<div class="buttons">
+    <button onclick="goToChannel('https://kan11w.media.kan.org.il/hls/live/2105694/2105694/master.m3u8')">
+        <img src="https://yt3.ggpht.com/a/AATXAJwy3WripPSvGdMDw7doqBD5mZGi-_TzDseSlnGzcw=s900-c-k-c0xffffffff-no-rj-mo" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://tinyurl.com/mr2v8zr7')">
+        <img src="https://www.thefinance.co.il/wp-content/uploads/2022/08/27973411_10157270858098677_1532974360303982497_n.png" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://reshet.g-mana.live/media/6f10d1da-0803-48d9-9272-57a811958974/mainManifest.m3u8')">
+        <img src="https://yt3.googleusercontent.com/WxYpVo5s6MWZY2l2MBvAqO5fmQQGiI6nBlBxFrjWdReAz1cc1aefn6PYy6qsmW4w6Pgifk5Ckg=s900-c-k-c0x00ffffff-no-rj" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://n-121-4.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8?bitrate=1928000&audioId=1&videoId=8')">
+        <img src="https://tse2.mm.bing.net/th/id/OIP.64FKDixzzyBZY1vkp_oFLgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://r.il.cdn-redge.media/livehls/oil/calcala-live/live/channel10/live.livx/playlist.m3u8?renditions')" width="300" height="300">
+        <img src="https://jiss.org.il/wp-content/uploads/2025/05/%D7%9C%D7%95%D7%92%D7%95.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://kan23.media.kan.org.il/hls/live/2024691-b/2024691/source1_4k/chunklist.m3u8')">
+        <img src="https://www.ariel.ac.il/wp/communication/wp-content/uploads/sites/15/2020/01/%D7%9B%D7%90%D7%9F-%D7%97%D7%99%D7%A0%D7%95%D7%9B%D7%99%D7%AA.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://mako-streaming.akamaized.net/direct/hls/live/2035340/ch24live/hdntl=exp=1754394846~acl=%2f*~data=hdntl~hmac=e99b17a07fa9ebd7579a9b186c790c6e9a6ab345c2ccb0c05488a6ba38625823/video_7201280_p_1.m3u8')">
+        <img src="https://israel-now.co.il/wp-content/uploads/2020/12/x24-new.jpg.pagespeed.ic.q-V1KWGSf-.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://d3snfszc9pg25z.cloudfront.net/out/v1/11329fc2b33a4eca9a2d715c652aa167/playlist_2.m3u8?_uid=f0097be3-0d9e-4ead-96f0-a129b58c0d2b&rK=a7&_did=14c1bd24a1d405201a670183bd60c4aac007ea0b')">
+        <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/13952b55e055494d8866f8dc5241baf1/version/10/width/320/height/180/quality/70" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://bcovlive-a.akamaihd.net/d89ede8094c741b7924120b27764153c/eu-central-1/5377161796001/profile_0/chunklist.m3u8')">
+        <img src="https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/05/i24newsfrancais2-300x300.png" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://rgelive.akamaized.net/hls/live/2043095/live3/playlist.m3u8')">
+        <img src="https://play-lh.googleusercontent.com/dj9FOlzV78rIdJPj8S4AU1nqeU9E4ulReB4vfgx_gBnPnI4hBRVLU_-mo2eLhyiS0JM" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://makan.media.kan.org.il/hls/live/2024680/2024680/source1_4k/chunklist.m3u8')">
+        <img src=https://israel-now.co.il/wp-content/uploads/2020/12/33-makan.jpg"" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://amg01742-walla-wallanews-ono-btlna.amagi.tv/playlist/amg01742-walla-wallanews-ono/playlist.m3u8')">
+        <img src="https://play-lh.googleusercontent.com/mR-rY1UKWjzwK2jukGPJNMSYf8u54FpqGGKDXgSOHJZmiZPXASFTaPLrn8A_s1Ji4g" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://htv-live.cybercdn.live/HidabrootIL/Live97/HidabrootIL/Live97_high/chunks.m3u8')">
+        <img src="https://th.bing.com/th?id=OIF.g%2b68lq72Egf%2fW379GtruJg&rs=1&pid=ImgDetMain&o=7&rm=3" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://edge2.il.kab.tv/live/tv66-heb-high/playlist.m3u8')">
+        <img src="https://israeltv.online/wp-content/uploads/2022/07/xkabbalah-2.jpg.pagespeed.ic_.rX0OVF4k2M1-2.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://kneset.gostreaming.tv/p2-kneset/_definst_/myStream/chunklist.m3u8')">
+        <img src="https://yt3.googleusercontent.com/bGbnIaUVFJhFhTSaSjQk6O-ZZ3UoJpQU1T4CNdKfJ91lbzsJvXQ35x_OZ4RCK2ga8l1KP9--=s900-c-k-c0x00ffffff-no-rj" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.PBsNdiWHersw6fCWuyrluwAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/erets/hdntl=exp=1754679384~acl=%2f*~data=hdntl~hmac=b1aaca3008be6e630f043e3db814d7a5fe19edeb99ce68c0311b51ef21083759/video_5761024_p_0.m3u8')">
+        <img src="https://img.mako.co.il/2024/10/28/chanel_Eretz_i_NEW.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/savri/hdntl=exp=1754679480~acl=%2f*~data=hdntl~hmac=313236fb23cac84b7ba6e8cb6a1e685c67e0d0565f3afa16d19aeb1f23c00fa1/video_5761024_p_0.m3u8')">
+        <img src="https://img.mako.co.il/2024/10/28/chanel_savri_i_NEW.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/hatuna/hdntl=exp=1754679561~acl=%2f*~data=hdntl~hmac=c29830a311f223bf17b88992347511d2d886970a4a1a2802df9717e5ed80811f/video_5761024_p_0.m3u8')">
+        <img src="https://img.mako.co.il/2024/10/28/chanel_hatunami_i_NEW.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/ninja/hdntl=exp=1754686365~acl=%2f*~data=hdntl~hmac=10abe82b322f7c43b14a7a80e2a41c211484112eb589632ce457a883ae82515a/video_5761024_p_0.m3u8')">
+        <img src="https://img.mako.co.il/2024/10/28/chanel_ninja_i_NEW.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/kohav/hdntl=exp=1754740740~acl=%2f*~data=hdntl~hmac=5efb24fa89617bfba790b87354247e41118939622fd0486b8f87c7565c8db9a5/video_5761024_p_0.m3u8')">
+        <img src="https://img.mako.co.il/2024/10/28/chanel_kohav_i_NEW.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://d15ds134q59udk.cloudfront.net/media/3b45de9e-c944-4fdc-a344-7c3042b5b104/mainManifest.m3u')">
+        <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/fc0d8109a18a4db3b585f154d32bd5b1/version/41/width/320/height/180/quality/70" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://d2dffl3588mvfk.cloudfront.net/out/v1/d8e15050ca4148aab0ee387a5e2eb46b/index_1.m3u8')">
+        <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/8f1d7b6472ef4f679c12688c43829e44/version/4/width/320/height/180/quality/70" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index_2.m3u8')">
+        <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/f7f5a916948b4bd9a0db18be35ef3d3f/version/4/width/320/height/180/quality/70" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://fl5.moveonjoy.com/DISNEY/tracks-v1a1/mono.ts.m3u8')">
+        <img src="https://images.fastcompany.com/image/upload/f_auto,q_auto,c_fit/wp-cms/uploads/2024/03/p-1-91069815-disney-plus-brand-refresh.jpg" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://fl3.moveonjoy.com/National_Geographic/tracks-v1a1/mono.ts.m3u8')">
+        <img src="https://logos-world.net/wp-content/uploads/2020/09/National-Geographic-Logo.png" width="300" height="300">
+    </button>
+    <button onclick="goToChannel('https://live-hls-web-aje.getaj.net/AJE/01.m3u8')">
+        <img src="https://th.bing.com/th/id/R.1d983d658912806acd72b3af67e5f8b4?rik=jFBWxbYnyVvHWQ&riu=http%3a%2f%2fwww.livenewsmag.com%2fwp-content%2fuploads%2f2016%2f09%2fAljazera-Arabic-Live-Stream.png&ehk=gwonYvhYFaaDQuOZga%2fRfIAYQsBA3DoaB%2bruNat%2b7F4%3d&risl=&pid=ImgRaw&r=0" width="300" height="300">
+    </button>
+</div>
+
+<script>
+function goToChannel(url) {
+    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
+    window.location.href = 'player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>
