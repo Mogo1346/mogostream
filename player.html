@@ -12,7 +12,7 @@
     flex-direction: column;
     height: 100vh;
   }
-  .back-btn {
+  .btn {
     padding: 10px 15px;
     background: white;
     color: black;
@@ -21,6 +21,11 @@
     width: fit-content;
     margin: 10px;
     border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:hover {
+    background: #ddd;
   }
   video {
     flex-grow: 1;
@@ -28,19 +33,31 @@
     background: black;
     outline: none;
   }
+  .controls {
+    display: flex;
+    gap: 10px;
+  }
 </style>
 </head>
 <body>
 
-<a href="javascript:window.history.back()" class="back-btn">⬅ חזרה</a>
+<div class="controls">
+  <a href="javascript:window.history.back()" class="btn">⬅ חזרה</a>
+  <div id="toggleSubs" class="btn">כתוביות ✅</div>
+</div>
 
-<video id="video" autoplay playsinline controls></video>
+<video id="video" autoplay playsinline controls>
+  <!-- כאן שים את קובץ הכתוביות שלך -->
+  <track id="subTrack" kind="subtitles" src="subs.vtt" srclang="he" label="עברית" default>
+</video>
 
 <script>
   const video = document.getElementById('video');
+  const toggleBtn = document.getElementById('toggleSubs');
   const params = new URLSearchParams(window.location.search);
   const streamURL = params.get('src');
 
+  // טעינת הזרם
   if (!streamURL) {
     alert('לא נבחר ערוץ');
     window.location.href = 'home.html';

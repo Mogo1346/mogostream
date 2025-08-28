@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>אפודקשת סלי בנס - בגרוט עו למוט?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: auto;
+            gap: 10px 30px;
+            align-items: start;
+            direction: ltr;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>אפודקשת סלי בנס - בגרוט עו למוט?</h1>
+
+<div class="grid">
+    <div class="col">
+        <button onclick="goToChannel('https://israelipublicbroadcast.mc.tritondigital.com/OMNY_MYNEPHEWFROMHELL_P/media/d/clips/23f697a0-7e6a-4e96-a223-a82c00962b12/8887b5a0-134e-4cd6-b714-b2ce00d282e5/d7661f4a-5611-4239-9b05-b2cf00a37f7e/audio/direct/t1746068470/0.mp3?t=1746068470&DIST=KAN')">פרק 0: הסכת נוסף מבית הסכיתיונית</button>
+        <button onclick="goToChannel('')">פרק 1: חברים זה לנצח אהבה זה לתמיד</button>
+        <button onclick="goToChannel('')">פרק 2: אינגליש זה קל עם שיא-גל</button>
+        <button onclick="goToChannel('')">פרק 3: ספוגים בזמן</button>
+        <button onclick="goToChannel('')">פרק 4: גרי נקניקים בראי ההיסטוריה</button>
+        <button onclick="goToChannel('')">פרק 5: כשתומי פגש את פיוטר</button>
+        <button onclick="goToChannel('')">פרק 6: דוכן שערות הסבתא של קין והבל</button>
+        <button onclick="goToChannel('')">פרק 7: נס ציונה בוחרת - מהדורה מוקדמת</button>
+        <button onclick="goToChannel('')">פרק 8: על תפוזים ופינות</button>
+        <button onclick="goToChannel('')">פרק 9: באוטו של קוליש</button>
+        <button onclick="goToChannel('')">פרק 10: הליטקאסט הראשון בעולם</button>
+    </div>
+</div>
+
+<script>
+function goToChannel(url) {
+    window.location.href = '../../../player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>

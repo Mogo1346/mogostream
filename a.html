@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>רדיו</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        details {
+            width: 100%;
+            margin: 8px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        summary {
+            cursor: pointer;
+            padding: 25px 14px;
+            border-bottom: 1px solid #ddd;
+            user-select: none;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: bold;
+            font-size: 1.5em;
+            background: rgb(227, 237, 247);
+            transition: background 0.2s;
+        }
+        .summary-subtext {
+            font-size: 0.85em;
+            font-weight: normal;
+            color: #666;
+            margin-top: 4px;
+        }
+        summary:hover {
+            background: #f0f0f0;
+        }
+        summary::-webkit-details-marker,
+        summary::marker {
+            display: none;
+        }
+        .actions {
+            padding: 10px;
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(5, minmax(120px, 1fr));
+        }
+        .actions button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #f7f7f7;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .actions button:hover {
+            background: #e0e0e0;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>רדיו</h1>
+
+<details>
+    <summary>
+        25 המובילות
+        <div class="summary-subtext">25 תחנות רדיו</div>
+    </summary>
+    <div class="actions">
+        <button>גלגלצ</button>
+        <button>רשת ב</button>
+        <button>גלי ישראל</button>
+        <button>רשת ג</button>
+        <button>גלי צה"ל</button>
+        <button>88</button>
+        <button>103fm</button>
+        <button>אקו 99</button>
+        <button>רדיוס</button>
+        <button>רדיו תל אביב</button>
+        <button>מורשת</button>
+        <button>רשת א</button>
+        <button>רשת ד</button>
+        <button>רדיו חיפה</button>
+        <button>דרום</button>
+        <button>רדיו ירושלים</button>
+        <button>צפון 104.5fm</button>
+        <button>90fm אמצע הדרך</button>
+        <button>רדיו לב המדינה</button>
+        <button>קול המוסיקה</button>
+        <button>קול חי</button>
+        <button>חם אש</button>
+        <button>راديو الشمس</button>
+        <button>קול רגע</button>
+        <button>קול ברמה</button>
+    </div>
+</details>
+
+<details>
+    <summary>
+        חדשות
+        <div class="summary-subtext">31 תחנות רדיו</div>
+    </summary>
+  <div class="actions">
+    <button>גלגלצ</button>
+    <button>רשת ב</button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+  </div>
+</details>
+
+<details>
+    <summary>
+        
+        <div class="summary-subtext">31 תחנות רדיו</div>
+    </summary>
+  <div class="actions">
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+  </div>
+</details>
+
+<details>
+    <summary>
+        
+        <div class="summary-subtext">31 תחנות רדיו</div>
+    </summary>
+  <div class="actions">
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+  </div>
+</details>
+
+<details>
+    <summary>
+        
+        <div class="summary-subtext">31 תחנות רדיו</div>
+    </summary>
+  <div class="actions">
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+  </div>
+</details>
+
+<details>
+    <summary>
+        
+        <div class="summary-subtext">31 תחנות רדיו</div>
+    </summary>
+  <div class="actions">
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+  </div>
+</details>
+
+<details>
+    <summary>
+        
+        <div class="summary-subtext">31 תחנות רדיו</div>
+    </summary>
+  <div class="actions">
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+    <button></button>
+  </div>
+</details>
+
+<script>
+function goToChannel(url) {
+    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
+    window.location.href = 'player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>נגאנ</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .btn {
+    padding: 10px 15px;
+    background: white;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    width: fit-content;
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:hover {
+    background: #ddd;
+  }
+  video {
+    flex-grow: 1;
+    width: 100%;
+    background: black;
+    outline: none;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <a href="javascript:window.history.back()" class="btn">⬅ חזרה</a>
+  <div id="toggleSubs" class="btn">כתוביות ✅</div>
+</div>
+
+<video id="video" autoplay playsinline controls>
+  <!-- כאן שים את קובץ הכתוביות שלך -->
+  <track id="subTrack" kind="subtitles" src="subs.vtt" srclang="he" label="עברית" default>
+</video>
+
+<script>
+  const video = document.getElementById('video');
+  const toggleBtn = document.getElementById('toggleSubs');
+  const params = new URLSearchParams(window.location.search);
+  const streamURL = params.get('src');
+
+  // טעינת הזרם
+  if (!streamURL) {
+    alert('לא נבחר ערוץ');
+    window.location.href = 'home.html';
+  } else if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(streamURL);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      video.play();
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = streamURL;
+    video.play();
+  } else {
+    alert('הדפדפן שלך לא תומך בניגון M3U8');
+  }
+
+  // כפתור כתוביות
+  const subTrack = video.textTracks[0];
+  if (subTrack) {
+    subTrack.mode = "showing"; // ברירת מחדל דלוק
+    toggleBtn.addEventListener("click", () => {
+      if (subTrack.mode === "showing") {
+        subTrack.mode = "hidden";
+        toggleBtn.textContent = "כתוביות ❌";
+      } else {
+        subTrack.mode = "showing";
+        toggleBtn.textContent = "כתוביות ✅";
+      }
+    });
+  } else {
+    toggleBtn.style.display = "none"; // אין כתוביות? להסתיר כפתור
+  }
+</script>
+
+</body>
+</html>
