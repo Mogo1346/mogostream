@@ -4,16 +4,31 @@
     <meta charset="UTF-8">
     <title>VOD</title>
     <style>
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 5px;
+            row-gap: 5px;
+        }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
         }
         button {
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 18px;
+            border: none;
+            background: none;
+            padding: 0;
             cursor: pointer;
+            transition: transform 0.2s ease;
+            aspect-ratio: 1 / 1;
+        }
+        button:hover {
+            transform: scale(1.1);
+        }
+        button img {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -21,14 +36,32 @@
 
 <h1>שיפרייט א-VOD סל מוגו</h1>
 
-<button onclick="window.location.href='VOD/kan11.html'">קאנ 11 - VOD</button>
-<button onclick="window.location.href='VOD/keshet12.html'">קסת 12 - VOD</button>
-<button onclick="window.location.href='VOD/reshet13.html'">רסת 13 - VOD</button>
-<button onclick="window.location.href='VOD/kankids.html'">קאנ חינוחיט - VOD</button>
-<button onclick="window.location.href=''">ארוס אמוסיקא - VOD</button>
-<button onclick="window.location.href=''">שפורת 5 - VOD</button>
-<button onclick="window.location.href='VOD/netflix.html'">Netflix</button>
-<button onclick="window.location.href='VOD/youtube.html'">Youtube Premium</button>
+<div class="buttons">
+    <button onclick="window.location.href='VOD/kan11.html'">
+        <img src="https://yt3.ggpht.com/a/AATXAJwy3WripPSvGdMDw7doqBD5mZGi-_TzDseSlnGzcw=s900-c-k-c0xffffffff-no-rj-mo">
+    </button>
+    <button onclick="window.location.href='VOD/keshet12.html'">
+        <img src="https://www.thefinance.co.il/wp-content/uploads/2022/08/27973411_10157270858098677_1532974360303982497_n.png">
+    </button>
+    <button onclick="window.location.href='VOD/reshet13.html'">
+        <img src="https://yt3.googleusercontent.com/WxYpVo5s6MWZY2l2MBvAqO5fmQQGiI6nBlBxFrjWdReAz1cc1aefn6PYy6qsmW4w6Pgifk5Ckg=s900-c-k-c0x00ffffff-no-rj">
+    </button>
+    <button onclick="window.location.href='VOD/kankids.html'">
+        <img src="https://www.ariel.ac.il/wp/communication/wp-content/uploads/sites/15/2020/01/%D7%9B%D7%90%D7%9F-%D7%97%D7%99%D7%A0%D7%95%D7%9B%D7%99%D7%AA.jpg">
+    </button>
+    <button onclick="window.location.href='VOD/music_channel.html'">
+        <img src="https://israel-now.co.il/wp-content/uploads/2020/12/x24-new.jpg.pagespeed.ic.q-V1KWGSf-.jpg">
+    </button>
+    <button onclick="window.location.href='VOD/sport5.html'">
+        <img src="https://play-lh.googleusercontent.com/dj9FOlzV78rIdJPj8S4AU1nqeU9E4ulReB4vfgx_gBnPnI4hBRVLU_-mo2eLhyiS0JM">
+    </button>
+    <button onclick="window.location.href='VOD/netflix.html'">
+        <img src="https://logos-world.net/wp-content/uploads/2020/04/Netflix-Emblem.jpg">
+    </button>
+    <button onclick="window.location.href='VOD/youtube.html'">
+        <img src="https://robots.net/wp-content/uploads/2023/08/how-can-i-get-youtube-premium-for-free-forever-1693486309.jpg">
+    </button>
+</div>
 
 </body>
 </html>
