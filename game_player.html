@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מיסחק</title>
+    <link rel="icon" type="image/png" href="https://img.freepik.com/premium-photo/video-game-controller-with-black-background-blue-red-design_1117469-9870.jpg">
+  <style>
+    html, body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        height: 100%;
+    }
+    .wrap {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    iframe {
+      width: 75%;
+      height: 75%;
+      border: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="wrap">
+    <iframe id="gameFrame"
+      src="http://html5.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c/?gd_sdk_referrer_url=https://gamedistribution.com/games/Snail-Bob-1-html5/"
+      allow="fullscreen"
+      webkitallowfullscreen
+      mozallowfullscreen>
+    </iframe>
+  </div>
+
+  <button onclick="goFullscreen()">מסאח מלה</button>
+
+  <script>
+    function goFullscreen() {
+      const iframe = document.getElementById('gameFrame');
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.mozRequestFullScreen) {
+        iframe.mozRequestFullScreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen();
+      }
+    }
+  </script>
+
+<script>
+  // פונקציה לקרוא פרמטר מה-URL
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  // קבלת כתובת המשחק מהפרמטר
+  const gameURL = getQueryParam('url');
+  if (gameURL) {
+    document.getElementById('gameFrame').src = gameURL;
+  } else {
+    alert('לא נבחר משחק!');
+  }
+</script>
+</body>
+</html>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>נגאנ</title>
+<link rel="icon" type="image/png" href="https://th.bing.com/th/id/R.d0b5f377cb9c8f85186a781dc4ce617d?rik=kREhDltYbWa3aQ&riu=http%3a%2f%2flofrev.net%2fwp-content%2fphotos%2f2017%2f03%2fwindows_media_player_logo_12.png&ehk=Sw%2bgzsZ8s9TrxBRzQmxjSqN12ruADIYIffb7iHwRFi4%3d&risl=&pid=ImgRaw&r=0">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
   body {
@@ -56,7 +57,7 @@
   // טעינת הזרם
   if (!streamURL) {
     alert('לא נבחר ערוץ');
-    window.location.href = 'home.html';
+    window.location.href = 'index.html';
   } else if (Hls.isSupported()) {
     const hls = new Hls();
     hls.loadSource(streamURL);
