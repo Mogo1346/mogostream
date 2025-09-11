@@ -26,9 +26,10 @@
 </head>
 
 <body>
+
   <div class="wrap">
     <iframe id="gameFrame"
-      src= gameURL
+      src= gameurl
       allow="fullscreen"
       webkitallowfullscreen
       mozallowfullscreen>
@@ -53,14 +54,20 @@
   </script>
 
 <script>
-    // שולפים את הכתובת מה־localStorage
-    const gameURL = localStorage.getItem("gameUrl");
+  // פונקציה לקרוא פרמטר מה-URL
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
 
-    if (gameURL) {
-      document.getElementById("gameFrame").src = gameURL;
-    } else {
-      document.body.innerHTML = "<h2>לא נבחר משחק!</h2>";
-    }
+  // קבלת כתובת המשחק מהפרמטר
+  const gameURL = getQueryParam('url');
+  if (gameURL) {
+    document.getElementById('gameFrame').src = gameURL;
+  } else {
+    alert('לא נבחר משחק!');
+  }
+
 </script>
 </body>
 </html>
