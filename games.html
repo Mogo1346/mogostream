@@ -69,11 +69,19 @@
 <h1>מיסחקימ</h1>
 
 <div class="buttons">
-    <button onclick="location.href='game_player.html?url=https://html5.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c/?gd_sdk_referrer_url=https://gamedistribution.com/games/Snail-Bob-1-html5/'">
+    <button onclick="openGame('https://html5.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c/?gd_sdk_referrer_url=https://gamedistribution.com/games/Snail-Bob-1-html5/')">
         <img src="">
     </button>
 </div>
 
+<script>
+    function openGame(url) {
+      // שומרים את הכתובת ב־localStorage
+      localStorage.setItem("gameUrl", url);
+      // עוברים לדף הבא בלי פרמטרים ב־URL
+      window.location.href = "game_player.html";
+    }
+</script>
 
 </body>
 </html>
