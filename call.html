@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<title>סיחא</title>
+</head>
+<body>
+<h1>סיחא</h1>
+<audio id="audio" autoplay></audio>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const socket = io();
+let pc;
+let localStream;
+const audio = document.getElementById("audio");
+
+async function start() {
+  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  pc.ontrack = e => { audio.srcObject = e.streams[0]; };
+
+  pc.onicecandidate = e => {
+    if (e.candidate) return;
+    // כאן אפשר לשלוח ICE candidates אוטומטית, אבל Socket.IO פשוט שולח אותם אחרי offer/answer
+  };
+
+  socket.emit("join");
+}
+
+socket.on("new-user", async id => {
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  socket.emit("offer", { target: id, sdp: offer });
+});
+
+socket.on("offer", async data => {
+  const tempPc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+  localStream.getTracks().forEach(track => tempPc.addTrack(track, localStream));
+  tempPc.ontrack = e => { audio.srcObject = e.streams[0]; };
+  await tempPc.setRemoteDescription(data.sdp);
+  const answer = await tempPc.createAnswer();
+  await tempPc.setLocalDescription(answer);
+  socket.emit("answer", { target: data.from, sdp: answer });
+});
+
+socket.on("answer", async data => {
+  await pc.setRemoteDescription(data.sdp);
+});
+
+start();
+</script>
+</body>
+</html>
