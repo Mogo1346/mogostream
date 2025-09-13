@@ -135,3 +135,28 @@ document.getElementById('join-btn').addEventListener('click', joinStream)
 document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream)
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
 document.getElementById('camera-btn').addEventListener('click', toggleCamera)
+
+let messagesEl = document.getElementById("chat-messages")
+let inputEl = document.getElementById("chat-box")
+let sendBtn = document.getElementById("send-btn")
+
+// כרגע הצ'אט לוקאלי בלבד – כל הודעה מוצגת במסך של המשתמש
+// אפשר לחבר בהמשך ל-Agora RTM כדי שכל המשתמשים יראו
+let sendMessage = () => {
+    let text = inputEl.value.trim()
+    if (text !== "") {
+        let msgDiv = document.createElement("div")
+        msgDiv.className = "message self"
+        msgDiv.innerText = text
+        messagesEl.appendChild(msgDiv)
+        inputEl.value = ""
+        messagesEl.scrollTop = messagesEl.scrollHeight
+    }
+}
+
+sendBtn.addEventListener("click", sendMessage)
+inputEl.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        sendMessage()
+    }
+})
