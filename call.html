@@ -1,57 +1,221 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he">
 <head>
-<meta charset="UTF-8">
-<title>סיחא</title>
+  <meta charset="utf-8" />
+  <title>חדרי קול קבועים</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:20px; direction:rtl; }
+    button { margin:5px; padding:8px 12px; font-size:16px; }
+    #peers { margin-top:12px; }
+    audio { display:block; margin:8px 0; }
+    #log { background:#f5f5f5; padding:8px; max-height:180px; overflow:auto; white-space:pre-wrap; border-radius:6px; }
+    #roomsDiv { margin-bottom:12px; }
+    #controls { margin-top:12px; }
+  </style>
 </head>
 <body>
-<h1>סיחא</h1>
-<audio id="audio" autoplay></audio>
+  <h1>בחר חדר קול</h1>
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <div id="roomsDiv">
+    <button data-room="room1">חדר 1</button>
+    <button data-room="room2">חדר 2</button>
+    <button data-room="room3">חדר 3</button>
+    <button data-room="room4">חדר 4</button>
+    <button data-room="room5">חדר 5</button>
+  </div>
+
+  <div id="controls">
+    <button id="leaveBtn" disabled>עזוב חדר</button>
+    <button id="muteBtn" disabled>כבה מיקרופון</button>
+  </div>
+
+  <div>
+    <strong>האזנה לאנשים בחדר:</strong>
+    <div id="peers"></div>
+  </div>
+
+  <h3>רישום / סטטוס</h3>
+  <div id="log"></div>
+
 <script>
-const socket = io();
-let pc;
-let localStream;
-const audio = document.getElementById("audio");
+(function(){
+  const wsUrl = 'ws://localhost:3000'; // עדכן לפי השרת שלך
+  const leaveBtn = document.getElementById('leaveBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const peersDiv = document.getElementById('peers');
+  const logDiv = document.getElementById('log');
+  const roomButtons = document.querySelectorAll('#roomsDiv button');
 
-async function start() {
-  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+  function log(...args){ logDiv.textContent += args.join(' ') + '\n'; logDiv.scrollTop = logDiv.scrollHeight; }
 
-  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  let localStream = null;
+  let ws = null;
+  let clientId = crypto.randomUUID();
+  let currentRoom = null;
+  const pcs = {};
+  const audios = {};
 
-  pc.ontrack = e => { audio.srcObject = e.streams[0]; };
+  async function getLocalAudio(){
+    const s = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    localStream = s;
+    log('קיבלנו גישה למיקרופון.');
+    muteBtn.disabled = false;
+    muteBtn.textContent = 'כבה מיקרופון';
+  }
 
-  pc.onicecandidate = e => {
-    if (e.candidate) return;
-    // כאן אפשר לשלוח ICE candidates אוטומטית, אבל Socket.IO פשוט שולח אותם אחרי offer/answer
-  };
+  function connectWS(room){
+    ws = new WebSocket(wsUrl);
+    ws.onopen = () => {
+      log('מצטרף ל-' + room);
+      ws.send(JSON.stringify({ type: 'join', room, id: clientId }));
+    };
+    ws.onmessage = async (ev) => {
+      const msg = JSON.parse(ev.data);
+      if(msg.type === 'joined'){
+        const others = msg.participants || [];
+        log('מתאמנים בחדר:', others.join(', ') || '(אין)');
+        for(const otherId of others){
+          if(otherId === clientId) continue;
+          await createOfferFor(otherId);
+        }
+      } else if(msg.type === 'offer' && msg.target === clientId){
+        await handleOffer(msg);
+      } else if(msg.type === 'answer' && msg.target === clientId){
+        await handleAnswer(msg);
+      } else if(msg.type === 'ice' && msg.target === clientId){
+        handleRemoteIce(msg);
+      } else if(msg.type === 'new-peer'){
+        const otherId = msg.id;
+        if(otherId !== clientId){
+          log('חבר חדש נכנס:', otherId);
+          await createOfferFor(otherId);
+        }
+      } else if(msg.type === 'leave'){
+        const id = msg.id;
+        log('משתמש עזב:', id);
+        removePeer(id);
+      }
+    };
+    ws.onclose = () => log('WebSocket נסגר');
+    ws.onerror = (e) => log('WebSocket error', e);
+  }
 
-  socket.emit("join");
-}
+  function send(msg){
+    if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
+  }
 
-socket.on("new-user", async id => {
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  socket.emit("offer", { target: id, sdp: offer });
-});
+  function makePeerConnection(peerId){
+    if(pcs[peerId]) return pcs[peerId];
+    const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+    if(localStream) for(const t of localStream.getTracks()) pc.addTrack(t, localStream);
+    pc.onicecandidate = (e) => { if(e.candidate) send({ type:'ice', candidate:e.candidate, target:peerId, from:clientId }); };
+    pc.ontrack = (e) => {
+      const stream = e.streams && e.streams[0];
+      if(!stream) return;
+      if(!audios[peerId]){
+        const a = document.createElement('audio');
+        a.autoplay = true;
+        a.controls = true;
+        a.title = 'Peer: ' + peerId;
+        peersDiv.appendChild(a);
+        audios[peerId] = a;
+      }
+      audios[peerId].srcObject = stream;
+      log('קיבל מסלול קול מ־', peerId);
+    };
+    pc.onconnectionstatechange = () => {
+      if(pc.connectionState === 'failed' || pc.connectionState === 'closed' || pc.connectionState === 'disconnected'){
+        removePeer(peerId);
+      }
+    };
+    pcs[peerId] = pc;
+    return pc;
+  }
 
-socket.on("offer", async data => {
-  const tempPc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
-  localStream.getTracks().forEach(track => tempPc.addTrack(track, localStream));
-  tempPc.ontrack = e => { audio.srcObject = e.streams[0]; };
-  await tempPc.setRemoteDescription(data.sdp);
-  const answer = await tempPc.createAnswer();
-  await tempPc.setLocalDescription(answer);
-  socket.emit("answer", { target: data.from, sdp: answer });
-});
+  async function createOfferFor(peerId){
+    log('יוצר offer עבור', peerId);
+    const pc = makePeerConnection(peerId);
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    send({ type:'offer', sdp: pc.localDescription, target:peerId, from:clientId });
+  }
 
-socket.on("answer", async data => {
-  await pc.setRemoteDescription(data.sdp);
-});
+  async function handleOffer(msg){
+    const from = msg.from;
+    log('התקבל offer מ־', from);
+    const pc = makePeerConnection(from);
+    await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    send({ type:'answer', sdp: pc.localDescription, target:from, from:clientId });
+  }
 
-start();
+  async function handleAnswer(msg){
+    const from = msg.from;
+    log('התקבל answer מ־', from);
+    const pc = pcs[from];
+    if(!pc) return;
+    await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+  }
+
+  function handleRemoteIce(msg){
+    const from = msg.from;
+    const pc = pcs[from];
+    if(pc && msg.candidate) pc.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(e=>console.warn(e));
+  }
+
+  function removePeer(id){
+    if(pcs[id]) { try{ pcs[id].close(); }catch(e){} delete pcs[id]; }
+    if(audios[id]) { audios[id].srcObject=null; audios[id].remove(); delete audios[id]; }
+  }
+
+  async function joinRoom(room){
+    currentRoom = room;
+    for(const btn of roomButtons) btn.disabled = true;
+    leaveBtn.disabled = false;
+    try{
+      await getLocalAudio();
+    }catch(e){
+      log('שגיאה בגישה למיקרופון', e);
+      return;
+    }
+    connectWS(room);
+  }
+
+  function leaveRoom(){
+    if(!currentRoom) return;
+    send({ type:'leave', id: clientId });
+    if(ws) ws.close();
+    ws = null;
+    for(const id of Object.keys(pcs)) removePeer(id);
+    if(localStream) for(const t of localStream.getTracks()) t.stop();
+    localStream = null;
+    currentRoom = null;
+    for(const btn of roomButtons) btn.disabled = false;
+    leaveBtn.disabled = true;
+    muteBtn.disabled = true;
+    log('עזבת את החדר.');
+  }
+
+  leaveBtn.addEventListener('click', leaveRoom);
+  muteBtn.addEventListener('click', () => {
+    if(!localStream) return;
+    const track = localStream.getAudioTracks()[0];
+    track.enabled = !track.enabled;
+    muteBtn.textContent = track.enabled ? 'כבה מיקרופון' : 'הפעל מיקרופון';
+    log(track.enabled ? 'מיקרופון פעיל' : 'מיקרופון מושתק');
+  });
+
+  roomButtons.forEach(btn => {
+    btn.addEventListener('click', () => joinRoom(btn.dataset.room));
+  });
+
+  window.addEventListener('beforeunload', ()=> {
+    try{ if(ws && ws.readyState===WebSocket.OPEN) send({ type:'leave', id: clientId }); }catch(e){}
+  });
+
+})();
 </script>
 </body>
 </html>
