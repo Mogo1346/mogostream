@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חיפוס סירימ Spotify</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f0f0f0; }
+        input { padding: 10px; width: 300px; }
+        button { padding: 10px; }
+        .song { margin: 10px 0; padding: 10px; background: #fff; border-radius: 5px; }
+        audio { width: 100%; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<h1>חיפוס סירימ ב-Spotify</h1>
+<input type="text" id="searchInput" placeholder="חפס סיר...">
+<button onclick="searchSong()">חפס</button>
+
+<div id="results"></div>
+
+<script>
+    async function searchSong() {
+        const query = document.getElementById('searchInput').value;
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = 'תואנ..';
+
+        try {
+            // החלף ב-URL של ה-API שלך ב-nocodeapi
+            const apiUrl = `https://v1.nocodeapi.com/mogo1346/spotify/MyUbvOGIVSdqgvWy/search?type=track&q=${encodeURIComponent(query)}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (!data.tracks || data.tracks.items.length === 0) {
+                resultsDiv.innerHTML = 'לא נמצאו תוצאות';
+                return;
+            }
+
+            resultsDiv.innerHTML = '';
+            data.tracks.items.forEach(track => {
+                const songDiv = document.createElement('div');
+                songDiv.className = 'song';
+                songDiv.innerHTML = `
+                    <strong>${track.name}</strong> - ${track.artists.map(a => a.name).join(', ')}
+                    <br>
+                    <audio controls src="${track.preview_url}"></audio>
+                `;
+                resultsDiv.appendChild(songDiv);
+            });
+
+        } catch (err) {
+            console.error(err);
+            resultsDiv.innerHTML = 'אירעה שגיאה בחיפוש';
+        }
+    }
+</script>
+
+</body>
+</html>
