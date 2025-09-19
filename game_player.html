@@ -39,29 +39,50 @@
   <button onclick="goFullscreen()">מסאח מלה</button>
 
   <script>
-    function goFullscreen() {
-      const iframe = document.getElementById('gameFrame');
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      } else if (iframe.mozRequestFullScreen) {
-        iframe.mozRequestFullScreen();
-      } else if (iframe.webkitRequestFullscreen) {
-        iframe.webkitRequestFullscreen();
-      } else if (iframe.msRequestFullscreen) {
-        iframe.msRequestFullscreen();
+      function goFullscreen() {
+        const game = document.getElementById('gameFrame');
+        if (game.requestFullscreen) {
+          game.requestFullscreen();
+        } else if (game.mozRequestFullScreen) {
+          game.mozRequestFullScreen();
+        } else if (game.webkitRequestFullscreen) {
+          game.webkitRequestFullscreen();
+        } else if (game.msRequestFullscreen) {
+          game.msRequestFullscreen();
+        }
       }
-    }
+
   </script>
 
+<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 <script>
-    // שולפים את הכתובת מה־localStorage
-    const gameURL = localStorage.getItem("gameUrl");
+  const gameURL = localStorage.getItem("gameUrl");
 
-    if (gameURL) {
-      document.getElementById("gameFrame").src = gameURL;
+  if (gameURL) {
+    const frame = document.getElementById("gameFrame");
+
+    if (gameURL.endsWith(".swf")) {
+      // כאן אפשר לשים את הגודל המקורי של המשחק
+      const originalWidth = 800; // רוחב מקורי של המשחק
+      const originalHeight = 600; // גובה מקורי של המשחק
+
+      const embed = document.createElement("embed");
+      embed.src = gameURL;
+      embed.width = originalWidth;
+      embed.height = originalHeight;
+      embed.style.width = originalWidth + "px";
+      embed.style.height = originalHeight + "px";
+      embed.id = "gameFrame";
+
+      frame.replaceWith(embed);
     } else {
-      document.body.innerHTML = "<h2>לא נבחר משחק!</h2>";
+      // לא פלאש - פשוט שמים את ה-iframe
+      frame.src = gameURL;
     }
+  } else {
+    document.body.innerHTML = "<h2>לא נבחר משחק!</h2>";
+  }
 </script>
+
 </body>
 </html>
