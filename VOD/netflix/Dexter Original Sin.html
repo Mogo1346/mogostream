@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dexter: Original Sin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: auto; /* 5 עמודות */
+            gap: 10px 30px; /* רווחים בין הכפתורים */
+            align-items: start; /* שכל העמודות יתחילו מלמעלה */
+            direction: ltr; /* כדי שהעמודות יהיו משמאל לימין */
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Dexter: Original Sin</h1>
+
+<div class="grid">
+    <div class="col">
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/1?color=FFD600')">1X1</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/2?color=FFD600')">1X2</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/3?color=FFD600')">1X3</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/4?color=FFD600')">1X4</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/5?color=FFD600')">1X5</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/6?color=FFD600')">1X6</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/7?color=FFD600')">1X7</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/8?color=FFD600')">1X8</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/9?color=FFD600')">1X9</button>
+        <button onclick="openGame('https://player.videasy.net/tv/219937/1/10?color=FFD600')">1X10</button>
+    </div>
+</div>
+
+<script>
+    function openGame(url) {
+      // שומרים את הכתובת ב־localStorage
+      localStorage.setItem("gameUrl", url);
+      // עוברים לדף הבא בלי פרמטרים ב־URL
+      window.location.href = "../../game_player.html";
+    }
+</script>
+
+</body>
+</html>

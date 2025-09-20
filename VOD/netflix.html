@@ -4,16 +4,32 @@
     <meta charset="UTF-8">
     <title>Netflix</title>
     <style>
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 5px;
+            row-gap: 5px;
+            margin-top: 8px;
+        }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
         }
         button {
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 18px;
+            border: none;
+            background: none;
+            padding: 0;
             cursor: pointer;
+            transition: transform 0.2s ease;
+            aspect-ratio: 1 / 1;
+        }
+        button:hover {
+            transform: scale(1.1);
+        }
+        button img {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -21,9 +37,26 @@
 
 <h1>Netflix</h1>
 
-<button onclick="window.location.href='netflix/BetterCallSaul.html'">Better Call Saul (לו זמינ)</button>
-<button onclick="window.location.href='netflix/BreakingBad.html'">Breaking Bad (לו זמינ)</button>
-<button onclick="window.location.href='netflix/Dexter.html'">Dexter (לו זמינ)</button>
+<div class="buttons">
+    <button onclick="window.location.href='netflix/Better Call Saul.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/ztNCkSjCgu8I32quZAStRHjHgvs.jpg">
+    </button>
+    <button onclick="window.location.href='netflix/Breaking Bad.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/dY2FtSKXFCvutAHNgYax27oqwqX.jpg">
+    </button>
+    <button onclick="window.location.href='netflix/Dexter.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/3iXXcVvmUsaU8Eqn80XcK06EZMg.jpg">
+    </button>
+    <button onclick="window.location.href='netflix/Dexter New Blood.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/pv8YbmxFoj25katDYzcD8bdv2TA.jpg">
+    </button>
+    <button onclick="window.location.href='netflix/Dexter Original Sin.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/uHmvYsR45iXW2K5i57qdQ1UftOt.jpg">
+    </button>
+    <button onclick="window.location.href='netflix/Dexter Resurrection.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/oczDqE1smJqZglEKDe4KqH7sxPZ.jpg">
+    </button>
+</div>
 
 </body>
 </html>
