@@ -7,15 +7,15 @@
     <style>
         .buttons {
             display: grid;
-            grid-template-columns: repeat(5, auto); /* 5 כפתורים בשורה */
-            gap: 5px; /* רווחים בין הכפתורים */
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 5px;
             row-gap: 5px;
+            margin-top: 8px;
         }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
-            background-color: white;
         }
         button {
             border: none;
@@ -23,9 +23,14 @@
             padding: 0;
             cursor: pointer;
             transition: transform 0.2s ease;
+            aspect-ratio: 1 / 1;
         }
         button:hover {
             transform: scale(1.1);  /* הגדלה קטנה */
+        }
+        button img {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -34,56 +39,86 @@
 <h1>רדיו</h1>
 
 <div class="buttons">
+    <button onclick="goToChannel('http://live.geula.fm:8010/')">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmli2Rz1XQsS-bA4qPWxdpEe0uoX4gL5MW7g&s">
+    </button>
+    <button onclick="goToChannel('https://glzwizzlv.bynetcdn.com/glglz_mp3')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
+    </button>
     <button onclick="goToChannel('https://rgelive.akamaized.net/hls/live/2043150/radio5/playlistMain_Aud_.m3u8')">
-        <img src="https://radio.sport5.co.il/images/player_default_bg.jpg" width="300" height="300">
-    </button>
-    <button onclick="goToChannel('http://test.live.net.il/glz-a-zixief.m3u8')">
-        <img src="" width="300" height="300">
+        <img src="https://radio.sport5.co.il/images/player_default_bg.jpg">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
     </button>
     <button onclick="goToChannel('')">
-        <img src="" width="300" height="300">
+        <img src="">
+    </button>
+    <button onclick="goToChannel('')">
+        <img src="">
     </button>
 </div>
 

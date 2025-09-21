@@ -41,6 +41,9 @@
     <button onclick="window.location.href='netflix/Better Call Saul.html'">
         <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/ztNCkSjCgu8I32quZAStRHjHgvs.jpg">
     </button>
+    <button onclick="window.location.href='netflix/BoJack Horseman.html'">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/tJTgPVEYpbjFA4eSUMHP6pvanjV.jpg">
+    </button>
     <button onclick="window.location.href='netflix/Breaking Bad.html'">
         <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/dY2FtSKXFCvutAHNgYax27oqwqX.jpg">
     </button>
@@ -56,7 +59,19 @@
     <button onclick="window.location.href='netflix/Dexter Resurrection.html'">
         <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/oczDqE1smJqZglEKDe4KqH7sxPZ.jpg">
     </button>
+    <button onclick="openGame('https://player.videasy.net/movie/559969')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/n5AXJYkBwtGnSS2AmFZHKrUMrYw.jpg">
+    </button>
 </div>
+
+<script>
+    function openGame(url) {
+      // שומרים את הכתובת ב־localStorage
+      localStorage.setItem("gameUrl", url);
+      // עוברים לדף הבא בלי פרמטרים ב־URL
+      window.location.href = "../game_player.html";
+    }
+</script>
 
 </body>
 </html>

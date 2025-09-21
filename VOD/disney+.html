@@ -35,13 +35,46 @@
 </head>
 <body>
 
-<h1>Disney+</h1>
+<h1>+Disney</h1>
 
 <div class="buttons">
     <button onclick="window.location.href=''">
         <img src="">
     </button>
+    <button onclick="openGame('https://player.videasy.net/movie/557')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/aNn7yEBZHyfEtRGHNXOJYI7GZh4.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/558')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/828XJQaA6o7aS6ee7M0Sdml3ZE3.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/559')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/gvVfVxdErQ7mNEnWFUpzwJQ1I6Y.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/1930')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/aRjtfXClFl2dsFBS9bMwNsEBpOG.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/102382')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/3WZiytE8t83LWek4AQePqTVy4JO.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/315635')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/kD8nd6NJjsq2yLYJGybBKnsVYoU.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/429617')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/nE73qcR8kJEFbQRcsoDzwNoGHXF.jpg">
+    </button>
+    <button onclick="openGame('https://player.videasy.net/movie/634649')">
+        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/tbo9PgktGtGuavRW1jlp2XqSiqo.jpg">
+    </button>
 </div>
+
+<script>
+    function openGame(url) {
+      // שומרים את הכתובת ב־localStorage
+      localStorage.setItem("gameUrl", url);
+      // עוברים לדף הבא בלי פרמטרים ב־URL
+      window.location.href = "../game_player.html";
+    }
+</script>
 
 </body>
 </html>
