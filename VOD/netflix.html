@@ -1,76 +1,191 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>Netflix</title>
-    <style>
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 5px;
-            row-gap: 5px;
-            margin-top: 8px;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        button {
-            border: none;
-            background: none;
-            padding: 0;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            aspect-ratio: 1 / 1;
-        }
-        button:hover {
-            transform: scale(1.1);
-        }
-        button img {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>סרטים וסדרות</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+}
+input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.tabs button {
+    padding: 10px 20px;
+    cursor: pointer;
+}
+.tabs button.active {
+    font-weight: bold;
+    border-bottom: 2px solid #000;
+}
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+button.posterBtn {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    aspect-ratio: 2/3;
+    transition: transform 0.2s ease;
+}
+button.posterBtn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+}
+button.posterBtn:hover img {
+    transform: scale(1.05);
+}
+h2 { margin-top: 40px; }
+</style>
 </head>
 <body>
 
-<h1>Netflix</h1>
+<h1>סרטים וסדרות</h1>
+<input type="text" id="searchInput" placeholder="חפש סרט או סדרה...">
 
-<div class="buttons">
-    <button onclick="window.location.href='netflix/Better Call Saul.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/ztNCkSjCgu8I32quZAStRHjHgvs.jpg">
-    </button>
-    <button onclick="window.location.href='netflix/BoJack Horseman.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/tJTgPVEYpbjFA4eSUMHP6pvanjV.jpg">
-    </button>
-    <button onclick="window.location.href='netflix/Breaking Bad.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/dY2FtSKXFCvutAHNgYax27oqwqX.jpg">
-    </button>
-    <button onclick="window.location.href='netflix/Dexter.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/3iXXcVvmUsaU8Eqn80XcK06EZMg.jpg">
-    </button>
-    <button onclick="window.location.href='netflix/Dexter New Blood.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/pv8YbmxFoj25katDYzcD8bdv2TA.jpg">
-    </button>
-    <button onclick="window.location.href='netflix/Dexter Original Sin.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/uHmvYsR45iXW2K5i57qdQ1UftOt.jpg">
-    </button>
-    <button onclick="window.location.href='netflix/Dexter Resurrection.html'">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/oczDqE1smJqZglEKDe4KqH7sxPZ.jpg">
-    </button>
-    <button onclick="openGame('https://player.videasy.net/movie/559969')">
-        <img src="https://media.themoviedb.org/t/p/w600_and_h900_bestv2/n5AXJYkBwtGnSS2AmFZHKrUMrYw.jpg">
-    </button>
+<div class="tabs">
+    <button id="tabMovies" class="active">סרטים</button>
+    <button id="tabTV">סדרות</button>
 </div>
 
+<h2 id="searchTitle" style="display:none;">תוצאות חיפוש</h2>
+<div id="searchResults" class="buttons"></div>
+
+<h2>כל התוכן</h2>
+<div id="allContent" class="buttons"></div>
+
 <script>
-    function openGame(url) {
-      // שומרים את הכתובת ב־localStorage
-      localStorage.setItem("gameUrl", url);
-      // עוברים לדף הבא בלי פרמטרים ב־URL
-      window.location.href = "../game_player.html";
+const API_KEY = "72a08ef93943ef7f2719f4d0bfb1a7cf";
+const allContent = document.getElementById("allContent");
+const searchResults = document.getElementById("searchResults");
+const searchInput = document.getElementById("searchInput");
+const tabMovies = document.getElementById("tabMovies");
+const tabTV = document.getElementById("tabTV");
+const searchTitle = document.getElementById("searchTitle");
+
+let moviePage = 1, tvPage = 1, loading = false;
+let activeTab = "movies";
+
+// סרטים → נגן
+function openMovie(id) {
+    const url = "https://player.videasy.net/movie/" + id;
+    localStorage.setItem("gameUrl", url);
+    window.location.href = "../game_player.html";
+}
+
+// סדרות → דף חדש Series.html
+function openSeries(id) {
+    window.location.href = `Series.html?id=${id}`;
+}
+
+// יצירת כפתור פוסטר
+function createButton(item, containerDiv, type) {
+    if (!item.poster_path) return;
+    const btn = document.createElement("button");
+    btn.classList.add("posterBtn");
+    const img = document.createElement("img");
+    img.src = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${item.poster_path}`;
+    img.alt = item.title || item.name;
+    btn.appendChild(img);
+
+    if (type === "movie") {
+        btn.onclick = () => openMovie(item.id);
+    } else if (type === "tv") {
+        btn.onclick = () => openSeries(item.id);
     }
+
+    containerDiv.appendChild(btn);
+}
+
+// טעינת תוכן
+function loadContent(type) {
+    if (loading) return;
+    loading = true;
+    const url = type === "movies" ?
+        `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=${moviePage}&language=he-IL` :
+        `https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&page=${tvPage}&language=he-IL`;
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            data.results.forEach(item => createButton(item, allContent, type === "movies" ? "movie" : "tv"));
+            if (type === "movies") moviePage++; else tvPage++;
+            loading = false;
+        })
+        .catch(err => { console.error(err); loading = false; });
+}
+
+// טעינה ראשונית
+loadContent("movies");
+
+// טעינה אינסופית
+window.addEventListener('scroll', () => {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+        loadContent(activeTab);
+    }
+});
+
+// שינוי טאבים
+tabMovies.addEventListener("click", () => {
+    activeTab = "movies";
+    tabMovies.classList.add("active");
+    tabTV.classList.remove("active");
+    allContent.innerHTML = "";
+    moviePage = 1;
+    loadContent("movies");
+});
+tabTV.addEventListener("click", () => {
+    activeTab = "tv";
+    tabTV.classList.add("active");
+    tabMovies.classList.remove("active");
+    allContent.innerHTML = "";
+    tvPage = 1;
+    loadContent("tv");
+});
+
+// חיפוש
+function searchContent(query) {
+    searchResults.innerHTML = "";
+    if (!query) {
+        searchTitle.style.display = "none"; // מחביא את הכותרת
+        return;
+    }
+
+    searchTitle.style.display = "block"; // מציג כותרת
+
+    // סרטים
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=he-IL`)
+        .then(res => res.json())
+        .then(data => data.results.forEach(item => createButton(item, searchResults, "movie")))
+        .catch(err => console.error(err));
+
+    // סדרות
+    fetch(`https://api.themoviedb.org/3/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=he-IL`)
+        .then(res => res.json())
+        .then(data => data.results.forEach(item => createButton(item, searchResults, "tv")))
+        .catch(err => console.error(err));
+}
+
+searchInput.addEventListener("input", (e) => {
+    const query = e.target.value.trim();
+    searchContent(query);
+});
 </script>
 
 </body>

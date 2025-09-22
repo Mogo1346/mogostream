@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>סדרה</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2 { text-align: center; }
+    .season {
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    summary {
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    li:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<h1 id="seriesTitle">טוען...</h1>
+<div id="seasons"></div>
+
+<script>
+const API_KEY = "72a08ef93943ef7f2719f4d0bfb1a7cf";
+
+// קבלת ID מה-URL
+const urlParams = new URLSearchParams(window.location.search);
+const seriesId = urlParams.get("id");
+
+if (!seriesId) {
+  document.body.innerHTML = "<h2>לא נמצאה סדרה</h2>";
+} else {
+  // פרטי סדרה
+  fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${API_KEY}&language=he-IL`)
+    .then(res => res.json())
+    .then(series => {
+      document.getElementById("seriesTitle").innerText = series.name;
+      const container = document.getElementById("seasons");
+
+      series.seasons.forEach(season => {
+        if (season.season_number === 0) return; // מדלגים על Specials
+        const seasonDiv = document.createElement("div");
+        seasonDiv.classList.add("season");
+
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
+        summary.innerText = `עונה ${season.season_number} (${season.episode_count} פרקים)`;
+        details.appendChild(summary);
+
+        const ul = document.createElement("ul");
+
+        // פרקי העונה
+        fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${API_KEY}&language=he-IL`)
+          .then(res => res.json())
+          .then(seasonData => {
+            seasonData.episodes.forEach(ep => {
+              const li = document.createElement("li");
+              li.innerText = `פרק ${ep.episode_number}: ${ep.name}`;
+              li.onclick = () => {
+                const url = `https://player.videasy.net/tv/${seriesId}/${season.season_number}/${ep.episode_number}?color=FFD600`;
+                localStorage.setItem("gameUrl", url);
+                window.location.href = "../game_player.html";
+              };
+              ul.appendChild(li);
+            });
+          });
+
+        details.appendChild(ul);
+        seasonDiv.appendChild(details);
+        container.appendChild(seasonDiv);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      document.body.innerHTML = "<h2>שגיאה בטעינת הסדרה</h2>";
+    });
+}
+</script>
+
+</body>
+</html>
