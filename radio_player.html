@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>נגן רדיו</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background: #f2f3f7;
+    }
+    #logo {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    }
+    h2 {
+      margin: 10px 0 30px 0;
+      font-size: 22px;
+    }
+    #playBtn {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: none;
+      background: #007bff;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #playBtn:hover {
+      background: #0056b3;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+    audio, video {
+      display: none; /* הנגן מוסתר – משתמשים בכפתור מותאם */
+    }
+  </style>
+</head>
+<body>
+  <img id="logo" src="" alt="Station Logo">
+  <h2 id="stationName"></h2>
+
+  <button id="playBtn">▶️</button>
+  <div id="status">עצור</div>
+
+  <!-- נגן מוסתר -->
+  <video id="player" playsinline></video>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const streamUrl = params.get("url");
+    const name = params.get("name") || "תחנה לא ידועה";
+    const logo = params.get("logo");
+
+    document.getElementById("stationName").textContent = name;
+    document.getElementById("logo").src = logo || "https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg";
+
+    const player = document.getElementById("player");
+    const playBtn = document.getElementById("playBtn");
+    const status = document.getElementById("status");
+
+    let isPlaying = false;
+
+    function updateButton() {
+      playBtn.textContent = isPlaying ? "⏸" : "▶️";
+      status.textContent = isPlaying ? "מנגן..." : "עצור";
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (!isPlaying) {
+        // הפעלת הזרם
+        if (streamUrl.endsWith(".m3u8") && !player.canPlayType("application/vnd.apple.mpegurl")) {
+          const script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+          script.onload = () => {
+            if (Hls.isSupported()) {
+              const hls = new Hls();
+              hls.loadSource(streamUrl);
+              hls.attachMedia(player);
+              hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                player.play();
+              });
+            }
+          };
+          document.body.appendChild(script);
+        } else {
+          player.src = streamUrl;
+          player.play().catch(err => console.warn("play error:", err));
+        }
+        isPlaying = true;
+      } else {
+        player.pause();
+        isPlaying = false;
+      }
+      updateButton();
+    });
+
+    updateButton();
+  </script>
+</body>
+</html>
