@@ -408,20 +408,21 @@
     </div>
 
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.21.0.js"></script>
+    <script src="https://download.agora.io/sdk/release/AgoraRTM_1.5.1.js"></script>
     <script>
         const APP_ID = "f3858cfbbe204a14b316640bcb08ec55"
         const TOKEN = "007eJxTYPD9l5rAeFEyXPFkys8/9w30g934Ha+Em3Fa69xfZVC78agCQ5qxhalFclpSUqqRgUmioUmSsaGZmYlBUnKSgUVqsqnpmZQbGQ2BjAz3HxYwMEIhiM/KEJSfn2vIwAAAIOMfeA=="
         const CHANNEL = "Room1"
 
         const client = AgoraRTC.createClient({mode:'rtc', codec:'vp8'})
+        let rtmClient = null
+        let rtmChannel = null
 
         let localTracks = []
         let remoteUsers = {}
         let screenTrack = null
         let currentUserName = ""
         let participantsCount = 1
-        let rtmClient = null
-        let rtmChannel = null
 
         // UI elements
         const joinSection = document.getElementById('join-section');
@@ -433,6 +434,43 @@
         const participantsCountEl = document.getElementById('participants-count');
 
         // Chat functions
+        async function initializeRTM(userName) {
+            try {
+                // יצירת RTM client
+                rtmClient = AgoraRTM.createInstance(APP_ID);
+                
+                // התחברות RTM
+                await rtmClient.login({ uid: userName });
+                
+                // יצירת וכניסה לערוץ RTM
+                rtmChannel = rtmClient.createChannel(CHANNEL);
+                await rtmChannel.join();
+                
+                // האזנה להודעות חדשות
+                rtmChannel.on('ChannelMessage', (message, memberId) => {
+                    addMessage(memberId, message.text, false);
+                });
+                
+                // האזנה לכניסה/יציאה של חברים
+                rtmChannel.on('MemberJoined', (memberId) => {
+                    addMessage("מערכת", `${memberId} הצטרף לצ'אט`, false);
+                    updateParticipantsCount();
+                });
+                
+                rtmChannel.on('MemberLeft', (memberId) => {
+                    addMessage("מערכת", `${memberId} עזב את הצ'אט`, false);
+                    updateParticipantsCount();
+                });
+                
+                console.log('RTM initialized successfully');
+                addMessage("מערכת", "הצטרפת לצ'אט!", false);
+                
+            } catch (error) {
+                console.error('RTM initialization failed:', error);
+                addMessage("מערכת", "שגיאה בהתחברות לצ'אט", false);
+            }
+        }
+
         function addMessage(sender, message, isOwn = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
@@ -452,27 +490,22 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const message = chatInput.value.trim();
-            if (!message) return;
+            if (!message || !rtmChannel) return;
 
-            // Add message locally
-            addMessage(currentUserName, message, true);
-            
-            // Send system message (since we don't have RTM)
-            setTimeout(() => {
-                const responses = [
-                    "שמעתי אותך!",
-                    "מעניין מאוד",
-                    "אני מסכים",
-                    "תודה על השיתוף",
-                    "יופי!"
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage("מערכת", randomResponse, false);
-            }, 1000 + Math.random() * 2000);
-
-            chatInput.value = '';
+            try {
+                // שליחת הודעה לערוץ RTM
+                await rtmChannel.sendMessage({ text: message });
+                
+                // הוספת ההודעה לצ'אט המקומי
+                addMessage(currentUserName, message, true);
+                
+                chatInput.value = '';
+            } catch (error) {
+                console.error('Failed to send message:', error);
+                showStatus('שגיאה בשליחת ההודעה', 'error');
+            }
         }
 
         function updateParticipantsCount() {
@@ -557,12 +590,12 @@
                     await client.publish(localTracks)
                 }
 
+                // התחלת RTM לצ'אט
+                await initializeRTM(userName);
+
                 // Switch UI
                 joinSection.style.display = 'none';
                 streamWrapper.style.display = 'block';
-
-                // Add welcome message
-                addMessage("מערכת", `${userName} הצטרף לשיחה!`, false);
                 updateParticipantsCount();
 
                 showStatus('התחברת בהצלחה לחדר!', 'success');
@@ -601,7 +634,6 @@
             }
             
             updateParticipantsCount();
-            addMessage("מערכת", `משתמש חדש הצטרף לשיחה`, false);
         }
 
         let handleUserLeft = async (user) => {
@@ -611,7 +643,6 @@
                 userContainer.remove()
             }
             updateParticipantsCount();
-            addMessage("מערכת", `משתמש עזב את השיחה`, false);
         }
 
         let leaveAndRemoveLocalStream = async () => {
