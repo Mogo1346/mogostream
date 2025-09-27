@@ -26,9 +26,10 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             padding: 30px;
-            max-width: 800px;
-            width: 90%;
+            max-width: 1200px;
+            width: 95%;
             text-align: center;
+            min-height: 80vh;
         }
         
         h1 {
@@ -52,12 +53,14 @@
         
         input {
             width: 100%;
+            max-width: 300px;
             padding: 12px;
             border: 2px solid #e1e5e9;
             border-radius: 10px;
             font-size: 16px;
             transition: border-color 0.3s;
             text-align: right;
+            margin: 0 auto;
         }
         
         input:focus {
@@ -102,8 +105,145 @@
             background: linear-gradient(135deg, #feca57, #ff9ff3);
         }
         
+        #join-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+        }
+        
         #stream-wrapper {
             display: none;
+            width: 100%;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+        
+        .video-section {
+            flex: 2;
+        }
+        
+        .chat-section {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            max-height: 70vh;
+        }
+        
+        .chat-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e1e5e9;
+            max-height: 400px;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .message.own {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-right: auto;
+            text-align: right;
+        }
+        
+        .message.other {
+            background: #e9ecef;
+            color: #333;
+            margin-left: auto;
+            text-align: left;
+        }
+        
+        .message-sender {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            opacity: 0.8;
+        }
+        
+        .message-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 3px;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: right;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .chat-send-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 60px;
+        }
+        
+        .chat-send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        
+        .participants-count {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: #e3f2fd;
+            border-radius: 5px;
         }
         
         #video-streams {
@@ -111,14 +251,22 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
+            min-height: 60vh;
         }
         
-        .video-player {
+        .video-container {
             background: #000;
             border-radius: 15px;
             overflow: hidden;
             position: relative;
             aspect-ratio: 16/9;
+            border: 3px solid #667eea;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
         .video-player video {
@@ -143,6 +291,7 @@
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
+            padding: 20px 0;
         }
         
         .status {
@@ -167,13 +316,28 @@
             color: #2e7d32;
         }
         
-        @media (max-width: 600px) {
+        @media (max-width: 800px) {
             .container {
                 padding: 20px;
+                width: 98%;
             }
             
             h1 {
                 font-size: 2em;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .chat-section {
+                min-width: unset;
+                max-height: 300px;
+            }
+            
+            #video-streams {
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             #stream-controls {
@@ -182,8 +346,23 @@
             }
             
             .btn {
-                width: 100%;
+                width: 80%;
                 margin: 5px 0;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            #video-streams {
+                grid-template-columns: 1fr;
+                min-height: 30vh;
+            }
+            
+            .video-container {
+                aspect-ratio: 4/3;
+            }
+            
+            .chat-section {
+                max-height: 250px;
             }
         }
     </style>
@@ -202,13 +381,26 @@
         </div>
 
         <div id="stream-wrapper">
-            <div id="video-streams"></div>
-
-            <div id="stream-controls">
-                <button id="leave-btn" class="btn btn-danger">עזוב שיחה</button>
-                <button id="mic-btn" class="btn btn-success">מיקרופון פעיל</button>
-                <button id="camera-btn" class="btn btn-success">מצלמה פעילה</button>
-                <button id="screen-btn" class="btn btn-warning">שתף מסך</button>
+            <div class="main-content">
+                <div class="video-section">
+                    <div id="video-streams"></div>
+                    <div id="stream-controls">
+                        <button id="leave-btn" class="btn btn-danger">עזוב שיחה</button>
+                        <button id="mic-btn" class="btn">מיקרופון</button>
+                        <button id="camera-btn" class="btn">מצלמה</button>
+                        <button id="screen-btn" class="btn btn-warning">שתף מסך</button>
+                    </div>
+                </div>
+                
+                <div class="chat-section">
+                    <div class="chat-header">צ'אט</div>
+                    <div class="participants-count" id="participants-count">משתתפים: 1</div>
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <button class="chat-send-btn" id="send-message-btn">שלח</button>
+                        <input type="text" class="chat-input" id="chat-input" placeholder="הקלד הודעה..." maxlength="200">
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -217,25 +409,76 @@
 
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.21.0.js"></script>
     <script>
-        // Agora client setup
-        let client;
-        let localAudioTrack;
-        let localVideoTrack;
-        let remoteUsers = {};
-        let isAudioEnabled = true;
-        let isVideoEnabled = true;
-        let isScreenSharing = false;
+        const APP_ID = "f3858cfbbe204a14b316640bcb08ec55"
+        const TOKEN = "007eJxTYPD9l5rAeFEyXPFkys8/9w30g934Ha+Em3Fa69xfZVC78agCQ5qxhalFclpSUqqRgUmioUmSsaGZmYlBUnKSgUVqsqnpmZQbGQ2BjAz3HxYwMEIhiM/KEJSfn2vIwAAAIOMfeA=="
+        const CHANNEL = "Room1"
+
+        const client = AgoraRTC.createClient({mode:'rtc', codec:'vp8'})
+
+        let localTracks = []
+        let remoteUsers = {}
+        let screenTrack = null
+        let currentUserName = ""
+        let participantsCount = 1
+        let rtmClient = null
+        let rtmChannel = null
 
         // UI elements
         const joinSection = document.getElementById('join-section');
         const streamWrapper = document.getElementById('stream-wrapper');
-        const joinBtn = document.getElementById('join-btn');
-        const leaveBtn = document.getElementById('leave-btn');
-        const micBtn = document.getElementById('mic-btn');
-        const cameraBtn = document.getElementById('camera-btn');
-        const screenBtn = document.getElementById('screen-btn');
         const statusDiv = document.getElementById('status');
-        const videoContainer = document.getElementById('video-streams');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendMessageBtn = document.getElementById('send-message-btn');
+        const participantsCountEl = document.getElementById('participants-count');
+
+        // Chat functions
+        function addMessage(sender, message, isOwn = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            
+            const time = new Date().toLocaleTimeString('he-IL', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="message-sender">${sender}</div>
+                <div class="message-text">${message}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add message locally
+            addMessage(currentUserName, message, true);
+            
+            // Send system message (since we don't have RTM)
+            setTimeout(() => {
+                const responses = [
+                    "שמעתי אותך!",
+                    "מעניין מאוד",
+                    "אני מסכים",
+                    "תודה על השיתוף",
+                    "יופי!"
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addMessage("מערכת", randomResponse, false);
+            }, 1000 + Math.random() * 2000);
+
+            chatInput.value = '';
+        }
+
+        function updateParticipantsCount() {
+            participantsCount = 1 + Object.keys(remoteUsers).length;
+            participantsCountEl.textContent = `משתתפים: ${participantsCount}`;
+        }
 
         // Status functions
         function showStatus(message, type = 'info') {
@@ -245,178 +488,213 @@
             }, 5000);
         }
 
-        // Join channel function
-        async function joinChannel() {
+        let joinAndDisplayLocalStream = async () => {
             const userName = document.getElementById('user-name').value.trim();
-
+            
             if (!userName) {
                 showStatus('נא להזין את השם שלך', 'error');
                 return;
             }
 
+            currentUserName = userName;
+
             try {
                 showStatus('מתחבר...', 'info');
                 
-                // Fixed app settings - no need for user input
-                const appId = "f3858cfbbe204a14b316640bcb08ec55"; // Replace with actual demo app id or use Agora temp token service
-                const channelName = "Room1";
-                
-                // Create Agora client
-                client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+                client.on('user-published', handleUserJoined)
+                client.on('user-left', handleUserLeft)
 
-                // Add event listeners
-                client.on("user-published", handleUserPublished);
-                client.on("user-unpublished", handleUserUnpublished);
-                client.on("user-left", handleUserLeft);
+                let UID = await client.join(APP_ID, CHANNEL, TOKEN, null)
+                console.log('Joined with UID:', UID);
 
-                // Join the channel
-                await client.join(appId, channelName, null, userName);
+                showStatus('מקבל גישה למצלמה ומיקרופון...', 'info');
 
-                // Create local tracks
-                [localAudioTrack, localVideoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+                let micTrack, camTrack
+                try {
+                    micTrack = await AgoraRTC.createMicrophoneAudioTrack()
+                } catch (err) {
+                    console.warn("אין גישה למיקרופון", err)
+                    showStatus('אין גישה למיקרופון', 'error');
+                }
 
-                // Publish local tracks
-                await client.publish([localAudioTrack, localVideoTrack]);
+                try {
+                    camTrack = await AgoraRTC.createCameraVideoTrack()
+                } catch (err) {
+                    console.warn("אין גישה למצלמה", err)
+                    showStatus('אין גישה למצלמה', 'error');
+                }
 
-                // Display local video
-                const localPlayer = document.createElement('div');
-                localPlayer.id = 'local-player';
-                localPlayer.className = 'video-player';
-                localPlayer.innerHTML = `<div class="video-label">${userName}</div>`;
-                videoContainer.appendChild(localPlayer);
-                localVideoTrack.play(localPlayer);
+                localTracks = [micTrack, camTrack].filter(track => track)
+
+                // מצלמה
+                if (camTrack) {
+                    let player = `<div class="video-container" id="user-container-${UID}">
+                                      <div class="video-player" id="user-${UID}"></div>
+                                      <div class="video-label">${userName}</div>
+                                  </div>`
+                    document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
+                    camTrack.play(`user-${UID}`)
+
+                    document.getElementById('camera-btn').innerText = "מצלמה פעילה"
+                    document.getElementById('camera-btn').className = "btn btn-success"
+                } else {
+                    document.getElementById('camera-btn').innerText = "מצלמה כבויה"
+                    document.getElementById('camera-btn').className = "btn btn-danger"
+                    document.getElementById('camera-btn').disabled = true
+                }
+
+                // מיקרופון
+                if (micTrack) {
+                    document.getElementById('mic-btn').innerText = "מיקרופון פעיל"
+                    document.getElementById('mic-btn').className = "btn btn-success"
+                } else {
+                    document.getElementById('mic-btn').innerText = "מיקרופון כבוי"
+                    document.getElementById('mic-btn').className = "btn btn-danger"
+                    document.getElementById('mic-btn').disabled = true
+                }
+
+                if (localTracks.length > 0) {
+                    await client.publish(localTracks)
+                }
 
                 // Switch UI
                 joinSection.style.display = 'none';
                 streamWrapper.style.display = 'block';
 
-                showStatus('התחברת בהצלחה לחדר הראשי!', 'success');
+                // Add welcome message
+                addMessage("מערכת", `${userName} הצטרף לשיחה!`, false);
+                updateParticipantsCount();
+
+                showStatus('התחברת בהצלחה לחדר!', 'success');
 
             } catch (error) {
-                console.error('Error joining channel:', error);
-                showStatus('שגיאה בהתחברות - נא לבדוק את הגדרות האפליקציה', 'error');
+                console.error('Error joining:', error);
+                showStatus('שגיאה בהתחברות: ' + (error.message || error), 'error');
             }
         }
 
-        // Handle remote user published
-        async function handleUserPublished(user, mediaType) {
-            await client.subscribe(user, mediaType);
-            
-            if (mediaType === 'video') {
-                const remotePlayer = document.createElement('div');
-                remotePlayer.id = `player-${user.uid}`;
-                remotePlayer.className = 'video-player';
-                remotePlayer.innerHTML = `<div class="video-label">${user.uid}</div>`;
-                videoContainer.appendChild(remotePlayer);
-                user.videoTrack.play(remotePlayer);
-            }
-            
-            if (mediaType === 'audio') {
-                user.audioTrack.play();
-            }
-
-            remoteUsers[user.uid] = user;
+        let joinStream = async () => {
+            await joinAndDisplayLocalStream()
         }
 
-        // Handle remote user unpublished
-        function handleUserUnpublished(user, mediaType) {
-            if (mediaType === 'video') {
-                const remotePlayer = document.getElementById(`player-${user.uid}`);
-                if (remotePlayer) {
-                    remotePlayer.remove();
+        let handleUserJoined = async (user, mediaType) => {
+            remoteUsers[user.uid] = user 
+            await client.subscribe(user, mediaType)
+
+            if (mediaType === 'video'){
+                let player = document.getElementById(`user-container-${user.uid}`)
+                if (player != null){
+                    player.remove()
                 }
+
+                player = `<div class="video-container" id="user-container-${user.uid}">
+                                <div class="video-player" id="user-${user.uid}"></div>
+                                <div class="video-label">משתמש ${user.uid}</div>
+                         </div>`
+                document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
+
+                user.videoTrack.play(`user-${user.uid}`)
             }
+
+            if (mediaType === 'audio'){
+                user.audioTrack.play()
+            }
+            
+            updateParticipantsCount();
+            addMessage("מערכת", `משתמש חדש הצטרף לשיחה`, false);
         }
 
-        // Handle user left
-        function handleUserLeft(user) {
-            const remotePlayer = document.getElementById(`player-${user.uid}`);
-            if (remotePlayer) {
-                remotePlayer.remove();
+        let handleUserLeft = async (user) => {
+            delete remoteUsers[user.uid]
+            const userContainer = document.getElementById(`user-container-${user.uid}`)
+            if (userContainer) {
+                userContainer.remove()
             }
-            delete remoteUsers[user.uid];
+            updateParticipantsCount();
+            addMessage("מערכת", `משתמש עזב את השיחה`, false);
         }
 
-        // Leave channel function
-        async function leaveChannel() {
+        let leaveAndRemoveLocalStream = async () => {
             try {
-                // Close local tracks
-                if (localAudioTrack) {
-                    localAudioTrack.close();
-                    localAudioTrack = null;
-                }
-                if (localVideoTrack) {
-                    localVideoTrack.close();
-                    localVideoTrack = null;
+                for(let i = 0; localTracks.length > i; i++){
+                    localTracks[i].stop()
+                    localTracks[i].close()
                 }
 
-                // Leave the channel
-                if (client) {
-                    await client.leave();
+                if(screenTrack){
+                    await client.unpublish(screenTrack)
+                    screenTrack.close()
+                    screenTrack = null
                 }
 
-                // Clean up UI
-                videoContainer.innerHTML = '';
-                joinSection.style.display = 'block';
+                await client.leave()
+                
+                // Reset UI
+                joinSection.style.display = 'flex';
                 streamWrapper.style.display = 'none';
-
+                document.getElementById('video-streams').innerHTML = '';
+                chatMessages.innerHTML = '';
+                chatInput.value = '';
+                
                 // Reset button states
-                micBtn.textContent = 'מיקרופון פעיל';
-                micBtn.className = 'btn btn-success';
-                cameraBtn.textContent = 'מצלמה פעילה';
-                cameraBtn.className = 'btn btn-success';
-                screenBtn.textContent = 'שתף מסך';
-                screenBtn.className = 'btn btn-warning';
-
-                isAudioEnabled = true;
-                isVideoEnabled = true;
-                isScreenSharing = false;
-
+                document.getElementById('mic-btn').innerText = 'מיקרופון';
+                document.getElementById('mic-btn').className = 'btn';
+                document.getElementById('mic-btn').disabled = false;
+                document.getElementById('camera-btn').innerText = 'מצלמה';
+                document.getElementById('camera-btn').className = 'btn';
+                document.getElementById('camera-btn').disabled = false;
+                document.getElementById('screen-btn').innerText = 'שתף מסך';
+                document.getElementById('screen-btn').className = 'btn btn-warning';
+                
+                localTracks = [];
+                participantsCount = 1;
+                updateParticipantsCount();
+                
                 showStatus('עזבת את השיחה', 'info');
-
+                
             } catch (error) {
-                console.error('Error leaving channel:', error);
-                showStatus('שגיאה ביציאה: ' + error.message, 'error');
+                console.error('Error leaving:', error);
+                showStatus('שגיאה ביציאה', 'error');
             }
         }
 
-        // Toggle microphone
-        async function toggleMicrophone() {
-            if (!localAudioTrack) return;
+        let toggleMic = async (e) => {
+            if (!localTracks[0]) {
+                showStatus('אין מיקרופון זמין', 'error');
+                return;
+            }
 
             try {
-                if (isAudioEnabled) {
-                    await localAudioTrack.setEnabled(false);
-                    micBtn.textContent = 'מיקרופון כבוי';
-                    micBtn.className = 'btn btn-danger';
-                    isAudioEnabled = false;
+                if (localTracks[0].muted){
+                    await localTracks[0].setMuted(false)
+                    e.target.innerText = 'מיקרופון פעיל'
+                    e.target.className = 'btn btn-success'
                 } else {
-                    await localAudioTrack.setEnabled(true);
-                    micBtn.textContent = 'מיקרופון פעיל';
-                    micBtn.className = 'btn btn-success';
-                    isAudioEnabled = true;
+                    await localTracks[0].setMuted(true)
+                    e.target.innerText = 'מיקרופון כבוי'
+                    e.target.className = 'btn btn-danger'
                 }
             } catch (error) {
-                console.error('Error toggling microphone:', error);
+                console.error('Error toggling mic:', error);
                 showStatus('שגיאה בהפעלת/כיבוי מיקרופון', 'error');
             }
         }
 
-        // Toggle camera
-        async function toggleCamera() {
-            if (!localVideoTrack) return;
+        let toggleCamera = async (e) => {
+            if (!localTracks[1]) {
+                showStatus('אין מצלמה זמינה', 'error');
+                return;
+            }
 
             try {
-                if (isVideoEnabled) {
-                    await localVideoTrack.setEnabled(false);
-                    cameraBtn.textContent = 'מצלמה כבויה';
-                    cameraBtn.className = 'btn btn-danger';
-                    isVideoEnabled = false;
+                if(localTracks[1].muted){
+                    await localTracks[1].setMuted(false)
+                    e.target.innerText = 'מצלמה פעילה'
+                    e.target.className = 'btn btn-success'
                 } else {
-                    await localVideoTrack.setEnabled(true);
-                    cameraBtn.textContent = 'מצלמה פעילה';
-                    cameraBtn.className = 'btn btn-success';
-                    isVideoEnabled = true;
+                    await localTracks[1].setMuted(true)
+                    e.target.innerText = 'מצלמה כבויה'
+                    e.target.className = 'btn btn-danger'
                 }
             } catch (error) {
                 console.error('Error toggling camera:', error);
@@ -424,77 +702,70 @@
             }
         }
 
-        // Screen share function
-        async function toggleScreenShare() {
-            if (!client) return;
+        let toggleScreen = async (e) => {
+            if(!screenTrack){
+                try{
+                    screenTrack = await AgoraRTC.createScreenVideoTrack({}, "auto");
+                    let UID = "screen-user";
+                    let player = `<div class="video-container" id="user-container-${UID}">
+                                      <div class="video-player" id="user-${UID}"></div>
+                                      <div class="video-label">${currentUserName} - מסך</div>
+                                  </div>`;
+                    document.getElementById('video-streams').insertAdjacentHTML('beforeend', player);
+                    screenTrack.play(`user-${UID}`);
+                    await client.publish(screenTrack);
 
-            try {
-                if (!isScreenSharing) {
-                    // Stop camera and start screen share
-                    if (localVideoTrack) {
-                        await client.unpublish(localVideoTrack);
-                        localVideoTrack.close();
-                    }
+                    e.target.innerText = "הפסק שיתוף";
+                    e.target.className = "btn btn-danger";
 
-                    localVideoTrack = await AgoraRTC.createScreenVideoTrack();
-                    await client.publish(localVideoTrack);
-
-                    // Update local player
-                    const localPlayer = document.getElementById('local-player');
-                    if (localPlayer) {
-                        const currentLabel = localPlayer.querySelector('.video-label').textContent;
-                        localPlayer.innerHTML = `<div class="video-label">${currentLabel} - מסך</div>`;
-                        localVideoTrack.play(localPlayer);
-                    }
-
-                    screenBtn.textContent = 'הפסק שיתוף';
-                    screenBtn.className = 'btn btn-danger';
-                    isScreenSharing = true;
-
-                } else {
-                    // Stop screen share and start camera
-                    if (localVideoTrack) {
-                        await client.unpublish(localVideoTrack);
-                        localVideoTrack.close();
-                    }
-
-                    localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-                    await client.publish(localVideoTrack);
-
-                    // Update local player
-                    const localPlayer = document.getElementById('local-player');
-                    if (localPlayer) {
-                        const currentLabel = localPlayer.querySelector('.video-label').textContent.replace(' - מסך', '');
-                        localPlayer.innerHTML = `<div class="video-label">${currentLabel}</div>`;
-                        localVideoTrack.play(localPlayer);
-                    }
-
-                    screenBtn.textContent = 'שתף מסך';
-                    screenBtn.className = 'btn btn-warning';
-                    isScreenSharing = false;
+                    screenTrack.on("track-ended", () => stopScreenShare(e));
+                } catch(err){
+                    console.warn("שיתוף מסך נכשל:", err);
+                    showStatus('שיתוף מסך נכשל', 'error');
                 }
+            } else {
+                stopScreenShare(e);
+            }
+        }
+
+        let stopScreenShare = async (e) => {
+            if(!screenTrack) return;
+            
+            try {
+                await client.unpublish(screenTrack);
+                screenTrack.close();
+                screenTrack = null;
+
+                let screenContainer = document.getElementById("user-container-screen-user");
+                if(screenContainer) screenContainer.remove();
+
+                e.target.innerText = "שתף מסך";
+                e.target.className = "btn btn-warning";
             } catch (error) {
-                console.error('Error toggling screen share:', error);
-                showStatus('שגיאה בשיתוף מסך', 'error');
-                
-                // Reset screen share state
-                screenBtn.textContent = 'שתף מסך';
-                screenBtn.className = 'btn btn-warning';
-                isScreenSharing = false;
+                console.error('Error stopping screen share:', error);
+                showStatus('שגיאה בהפסקת שיתוף מסך', 'error');
             }
         }
 
         // Event listeners
-        joinBtn.addEventListener('click', joinChannel);
-        leaveBtn.addEventListener('click', leaveChannel);
-        micBtn.addEventListener('click', toggleMicrophone);
-        cameraBtn.addEventListener('click', toggleCamera);
-        screenBtn.addEventListener('click', toggleScreenShare);
+        document.getElementById('join-btn').addEventListener('click', joinStream)
+        document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream)
+        document.getElementById('mic-btn').addEventListener('click', toggleMic)
+        document.getElementById('camera-btn').addEventListener('click', toggleCamera)
+        document.getElementById('screen-btn').addEventListener('click', toggleScreen)
+        
+        // Chat event listeners
+        sendMessageBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
 
         // Enter key to join
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && joinSection.style.display !== 'none') {
-                joinChannel();
+                joinStream();
             }
         });
 
