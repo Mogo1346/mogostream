@@ -118,134 +118,6 @@
             width: 100%;
         }
         
-        .main-content {
-            display: flex;
-            gap: 20px;
-            align-items: stretch;
-        }
-        
-        .video-section {
-            flex: 2;
-        }
-        
-        .chat-section {
-            flex: 1;
-            min-width: 300px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            max-height: 70vh;
-        }
-        
-        .chat-header {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            text-align: center;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-        
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 10px;
-            border: 1px solid #e1e5e9;
-            max-height: 400px;
-        }
-        
-        .message {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 10px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        
-        .message.own {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            margin-right: auto;
-            text-align: right;
-        }
-        
-        .message.other {
-            background: #e9ecef;
-            color: #333;
-            margin-left: auto;
-            text-align: left;
-        }
-        
-        .message-sender {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 3px;
-            opacity: 0.8;
-        }
-        
-        .message-text {
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        
-        .message-time {
-            font-size: 11px;
-            opacity: 0.6;
-            margin-top: 3px;
-        }
-        
-        .chat-input-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: right;
-        }
-        
-        .chat-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .chat-send-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            min-width: 60px;
-        }
-        
-        .chat-send-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-        }
-        
-        .participants-count {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-bottom: 10px;
-            padding: 5px;
-            background: #e3f2fd;
-            border-radius: 5px;
-        }
-        
         #video-streams {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -326,15 +198,6 @@
                 font-size: 2em;
             }
             
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .chat-section {
-                min-width: unset;
-                max-height: 300px;
-            }
-            
             #video-streams {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -354,15 +217,11 @@
         @media (max-width: 600px) {
             #video-streams {
                 grid-template-columns: 1fr;
-                min-height: 30vh;
+                min-height: 40vh;
             }
             
             .video-container {
                 aspect-ratio: 4/3;
-            }
-            
-            .chat-section {
-                max-height: 250px;
             }
         }
     </style>
@@ -381,26 +240,13 @@
         </div>
 
         <div id="stream-wrapper">
-            <div class="main-content">
-                <div class="video-section">
-                    <div id="video-streams"></div>
-                    <div id="stream-controls">
-                        <button id="leave-btn" class="btn btn-danger">עזוב שיחה</button>
-                        <button id="mic-btn" class="btn">מיקרופון</button>
-                        <button id="camera-btn" class="btn">מצלמה</button>
-                        <button id="screen-btn" class="btn btn-warning">שתף מסך</button>
-                    </div>
-                </div>
-                
-                <div class="chat-section">
-                    <div class="chat-header">צ'אט</div>
-                    <div class="participants-count" id="participants-count">משתתפים: 1</div>
-                    <div class="chat-messages" id="chat-messages"></div>
-                    <div class="chat-input-container">
-                        <button class="chat-send-btn" id="send-message-btn">שלח</button>
-                        <input type="text" class="chat-input" id="chat-input" placeholder="הקלד הודעה..." maxlength="200">
-                    </div>
-                </div>
+            <div id="video-streams"></div>
+
+            <div id="stream-controls">
+                <button id="leave-btn" class="btn btn-danger">עזוב שיחה</button>
+                <button id="mic-btn" class="btn">מיקרופון</button>
+                <button id="camera-btn" class="btn">מצלמה</button>
+                <button id="screen-btn" class="btn btn-warning">שתף מסך</button>
             </div>
         </div>
         
@@ -408,110 +254,26 @@
     </div>
 
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.21.0.js"></script>
-    <script src="https://download.agora.io/sdk/release/AgoraRTM_1.5.1.js"></script>
     <script>
         const APP_ID = "f3858cfbbe204a14b316640bcb08ec55"
         const TOKEN = "007eJxTYPD9l5rAeFEyXPFkys8/9w30g934Ha+Em3Fa69xfZVC78agCQ5qxhalFclpSUqqRgUmioUmSsaGZmYlBUnKSgUVqsqnpmZQbGQ2BjAz3HxYwMEIhiM/KEJSfn2vIwAAAIOMfeA=="
         const CHANNEL = "Room1"
 
         const client = AgoraRTC.createClient({mode:'rtc', codec:'vp8'})
-        let rtmClient = null
-        let rtmChannel = null
 
         let localTracks = []
         let remoteUsers = {}
         let screenTrack = null
         let currentUserName = ""
-        let participantsCount = 1
+        
+        // שמירת רפרנסים לטרקים הספציפיים
+        let micTrack = null;
+        let camTrack = null;
 
         // UI elements
         const joinSection = document.getElementById('join-section');
         const streamWrapper = document.getElementById('stream-wrapper');
         const statusDiv = document.getElementById('status');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatInput = document.getElementById('chat-input');
-        const sendMessageBtn = document.getElementById('send-message-btn');
-        const participantsCountEl = document.getElementById('participants-count');
-
-        // Chat functions
-        async function initializeRTM(userName) {
-            try {
-                // יצירת RTM client
-                rtmClient = AgoraRTM.createInstance(APP_ID);
-                
-                // התחברות RTM
-                await rtmClient.login({ uid: userName });
-                
-                // יצירת וכניסה לערוץ RTM
-                rtmChannel = rtmClient.createChannel(CHANNEL);
-                await rtmChannel.join();
-                
-                // האזנה להודעות חדשות
-                rtmChannel.on('ChannelMessage', (message, memberId) => {
-                    addMessage(memberId, message.text, false);
-                });
-                
-                // האזנה לכניסה/יציאה של חברים
-                rtmChannel.on('MemberJoined', (memberId) => {
-                    addMessage("מערכת", `${memberId} הצטרף לצ'אט`, false);
-                    updateParticipantsCount();
-                });
-                
-                rtmChannel.on('MemberLeft', (memberId) => {
-                    addMessage("מערכת", `${memberId} עזב את הצ'אט`, false);
-                    updateParticipantsCount();
-                });
-                
-                console.log('RTM initialized successfully');
-                addMessage("מערכת", "הצטרפת לצ'אט!", false);
-                
-            } catch (error) {
-                console.error('RTM initialization failed:', error);
-                addMessage("מערכת", "שגיאה בהתחברות לצ'אט", false);
-            }
-        }
-
-        function addMessage(sender, message, isOwn = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
-            
-            const time = new Date().toLocaleTimeString('he-IL', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            messageDiv.innerHTML = `
-                <div class="message-sender">${sender}</div>
-                <div class="message-text">${message}</div>
-                <div class="message-time">${time}</div>
-            `;
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const message = chatInput.value.trim();
-            if (!message || !rtmChannel) return;
-
-            try {
-                // שליחת הודעה לערוץ RTM
-                await rtmChannel.sendMessage({ text: message });
-                
-                // הוספת ההודעה לצ'אט המקומי
-                addMessage(currentUserName, message, true);
-                
-                chatInput.value = '';
-            } catch (error) {
-                console.error('Failed to send message:', error);
-                showStatus('שגיאה בשליחת ההודעה', 'error');
-            }
-        }
-
-        function updateParticipantsCount() {
-            participantsCount = 1 + Object.keys(remoteUsers).length;
-            participantsCountEl.textContent = `משתתפים: ${participantsCount}`;
-        }
 
         // Status functions
         function showStatus(message, type = 'info') {
@@ -542,7 +304,7 @@
 
                 showStatus('מקבל גישה למצלמה ומיקרופון...', 'info');
 
-                let micTrack, camTrack
+                // יצירת טרקים נפרדים עם שמירת רפרנס ספציפי
                 try {
                     micTrack = await AgoraRTC.createMicrophoneAudioTrack()
                 } catch (err) {
@@ -557,9 +319,10 @@
                     showStatus('אין גישה למצלמה', 'error');
                 }
 
+                // הוספה למערך localTracks רק של הטרקים שקיימים
                 localTracks = [micTrack, camTrack].filter(track => track)
 
-                // מצלמה
+                // טיפול במצלמה
                 if (camTrack) {
                     let player = `<div class="video-container" id="user-container-${UID}">
                                       <div class="video-player" id="user-${UID}"></div>
@@ -576,7 +339,7 @@
                     document.getElementById('camera-btn').disabled = true
                 }
 
-                // מיקרופון
+                // טיפול במיקרופון
                 if (micTrack) {
                     document.getElementById('mic-btn').innerText = "מיקרופון פעיל"
                     document.getElementById('mic-btn').className = "btn btn-success"
@@ -590,13 +353,9 @@
                     await client.publish(localTracks)
                 }
 
-                // התחלת RTM לצ'אט
-                await initializeRTM(userName);
-
                 // Switch UI
                 joinSection.style.display = 'none';
                 streamWrapper.style.display = 'block';
-                updateParticipantsCount();
 
                 showStatus('התחברת בהצלחה לחדר!', 'success');
 
@@ -632,8 +391,6 @@
             if (mediaType === 'audio'){
                 user.audioTrack.play()
             }
-            
-            updateParticipantsCount();
         }
 
         let handleUserLeft = async (user) => {
@@ -642,7 +399,6 @@
             if (userContainer) {
                 userContainer.remove()
             }
-            updateParticipantsCount();
         }
 
         let leaveAndRemoveLocalStream = async () => {
@@ -664,8 +420,6 @@
                 joinSection.style.display = 'flex';
                 streamWrapper.style.display = 'none';
                 document.getElementById('video-streams').innerHTML = '';
-                chatMessages.innerHTML = '';
-                chatInput.value = '';
                 
                 // Reset button states
                 document.getElementById('mic-btn').innerText = 'מיקרופון';
@@ -677,9 +431,10 @@
                 document.getElementById('screen-btn').innerText = 'שתף מסך';
                 document.getElementById('screen-btn').className = 'btn btn-warning';
                 
+                // איפוס הרפרנסים
                 localTracks = [];
-                participantsCount = 1;
-                updateParticipantsCount();
+                micTrack = null;
+                camTrack = null;
                 
                 showStatus('עזבת את השיחה', 'info');
                 
@@ -690,18 +445,18 @@
         }
 
         let toggleMic = async (e) => {
-            if (!localTracks[0]) {
+            if (!micTrack) {
                 showStatus('אין מיקרופון זמין', 'error');
                 return;
             }
 
             try {
-                if (localTracks[0].muted){
-                    await localTracks[0].setMuted(false)
+                if (micTrack.muted){
+                    await micTrack.setMuted(false)
                     e.target.innerText = 'מיקרופון פעיל'
                     e.target.className = 'btn btn-success'
                 } else {
-                    await localTracks[0].setMuted(true)
+                    await micTrack.setMuted(true)
                     e.target.innerText = 'מיקרופון כבוי'
                     e.target.className = 'btn btn-danger'
                 }
@@ -712,18 +467,18 @@
         }
 
         let toggleCamera = async (e) => {
-            if (!localTracks[1]) {
+            if (!camTrack) {
                 showStatus('אין מצלמה זמינה', 'error');
                 return;
             }
 
             try {
-                if(localTracks[1].muted){
-                    await localTracks[1].setMuted(false)
+                if(camTrack.muted){
+                    await camTrack.setMuted(false)
                     e.target.innerText = 'מצלמה פעילה'
                     e.target.className = 'btn btn-success'
                 } else {
-                    await localTracks[1].setMuted(true)
+                    await camTrack.setMuted(true)
                     e.target.innerText = 'מצלמה כבויה'
                     e.target.className = 'btn btn-danger'
                 }
@@ -784,14 +539,6 @@
         document.getElementById('mic-btn').addEventListener('click', toggleMic)
         document.getElementById('camera-btn').addEventListener('click', toggleCamera)
         document.getElementById('screen-btn').addEventListener('click', toggleScreen)
-        
-        // Chat event listeners
-        sendMessageBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
 
         // Enter key to join
         document.addEventListener('keypress', function(e) {
