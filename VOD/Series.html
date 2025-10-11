@@ -28,6 +28,11 @@
     li:hover {
       text-decoration: underline;
     }
+    .rating {
+      color: #FFD600;
+      font-weight: bold;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -70,7 +75,12 @@ if (!seriesId) {
           .then(seasonData => {
             seasonData.episodes.forEach(ep => {
               const li = document.createElement("li");
-              li.innerText = `פרק ${ep.episode_number}: ${ep.name}`;
+
+              // שימוש בדירוג TMDB של הפרק
+              const rating = ep.vote_average ? ep.vote_average.toFixed(1) : "N/A";
+
+              li.innerHTML = `<span class="rating">⭐ ${rating}</span> פרק ${ep.episode_number}: ${ep.name}`;
+              
               li.onclick = () => {
                 const url = `https://player.videasy.net/tv/${seriesId}/${season.season_number}/${ep.episode_number}?color=FFD600`;
                 localStorage.setItem("gameUrl", url);
