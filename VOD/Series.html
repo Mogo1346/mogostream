@@ -2,103 +2,489 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>סדרה</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1, h2 { text-align: center; }
-    .season {
-      margin: 20px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-    }
-    summary {
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 18px;
-    }
-    ul {
-      list-style: none;
+    * {
+      margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
-    li {
-      margin: 5px 0;
-      cursor: pointer;
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
     }
-    li:hover {
-      text-decoration: underline;
+
+    .header {
+      position: relative;
+      height: 500px;
+      overflow: hidden;
     }
+
+    .backdrop {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.4);
+    }
+
+    .header-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(26, 26, 46, 0.9), #1a1a2e);
+      padding: 40px;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 30px;
+      align-items: flex-end;
+    }
+
+    .poster {
+      width: 200px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      flex-shrink: 0;
+    }
+
+    .header-info h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .meta-info {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
     .rating {
-      color: #FFD600;
+      background: #ffd600;
+      color: #000;
+      padding: 5px 12px;
+      border-radius: 6px;
       font-weight: bold;
-      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .rating svg {
+      width: 18px;
+      height: 18px;
+      fill: #000;
+    }
+
+    .year, .status {
+      opacity: 0.8;
+    }
+
+    .genres {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .genre {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .section {
+      margin-bottom: 50px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      margin-bottom: 20px;
+      border-right: 4px solid #ffd600;
+      padding-right: 15px;
+    }
+
+    .overview {
+      line-height: 1.8;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .cast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 20px;
+    }
+
+    .cast-member {
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .cast-member:hover {
+      transform: translateY(-5px);
+    }
+
+    .cast-photo {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cast-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .cast-character {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .season {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .season-header {
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      transition: background 0.3s;
+    }
+
+    .season-header:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .season-title {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .season-meta {
+      opacity: 0.7;
+      font-size: 14px;
+    }
+
+    .arrow {
+      transition: transform 0.3s;
+      font-size: 24px;
+    }
+
+    .season.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .episodes {
+      display: none;
+      padding: 0 20px 20px 20px;
+    }
+
+    .season.open .episodes {
+      display: block;
+    }
+
+    .episode {
+      display: flex;
+      gap: 20px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+    }
+
+    .episode:hover {
+      background: rgba(255, 214, 0, 0.1);
+      border-color: #ffd600;
+      transform: translateX(-5px);
+    }
+
+    .episode-still {
+      width: 200px;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .episode-info {
+      flex: 1;
+    }
+
+    .episode-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .episode-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .episode-number {
+      color: #ffd600;
+      font-weight: bold;
+    }
+
+    .episode-rating {
+      background: rgba(255, 214, 0, 0.2);
+      color: #ffd600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .episode-overview {
+      opacity: 0.8;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      font-size: 24px;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid #ffd600;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      text-align: center;
+      padding: 60px;
+      font-size: 24px;
+      color: #ff6b6b;
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .poster {
+        width: 150px;
+      }
+
+      .header-info h1 {
+        font-size: 28px;
+      }
+
+      .episode {
+        flex-direction: column;
+      }
+
+      .episode-still {
+        width: 100%;
+      }
+
+      .cast-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
     }
   </style>
 </head>
 <body>
 
-<h1 id="seriesTitle">טוען...</h1>
-<div id="seasons"></div>
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    טוען...
+  </div>
+</div>
 
 <script>
 const API_KEY = "72a08ef93943ef7f2719f4d0bfb1a7cf";
+const IMAGE_BASE = "https://image.tmdb.org/t/p/";
 
-// קבלת ID מה-URL
 const urlParams = new URLSearchParams(window.location.search);
 const seriesId = urlParams.get("id");
 
 if (!seriesId) {
-  document.body.innerHTML = "<h2>לא נמצאה סדרה</h2>";
+  document.getElementById("app").innerHTML = '<div class="error">לא נמצאה סדרה</div>';
 } else {
-  // פרטי סדרה
-  fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${API_KEY}&language=he-IL`)
-    .then(res => res.json())
-    .then(series => {
-      document.getElementById("seriesTitle").innerText = series.name;
-      const container = document.getElementById("seasons");
+  loadSeries();
+}
 
-      series.seasons.forEach(season => {
-        if (season.season_number === 0) return; // מדלגים על Specials
-        const seasonDiv = document.createElement("div");
-        seasonDiv.classList.add("season");
+async function loadSeries() {
+  try {
+    const [series, credits] = await Promise.all([
+      fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${API_KEY}&language=he-IL`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/tv/${seriesId}/credits?api_key=${API_KEY}&language=he-IL`).then(r => r.json())
+    ]);
 
-        const details = document.createElement("details");
-        const summary = document.createElement("summary");
-        summary.innerText = `עונה ${season.season_number} (${season.episode_count} פרקים)`;
-        details.appendChild(summary);
+    const app = document.getElementById("app");
+    app.innerHTML = `
+      <div class="header">
+        <img src="${IMAGE_BASE}original${series.backdrop_path}" alt="${series.name}" class="backdrop" onerror="this.style.display='none'">
+        <div class="header-overlay">
+          <div class="header-content">
+            <img src="${IMAGE_BASE}w500${series.poster_path}" alt="${series.name}" class="poster" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'300\'%3E%3Crect fill=\'%23333\' width=\'200\' height=\'300\'/%3E%3C/svg%3E'">
+            <div class="header-info">
+              <h1>${series.name}</h1>
+              <div class="meta-info">
+                <div class="rating">
+                  <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  ${series.vote_average.toFixed(1)}
+                </div>
+                <span class="year">${series.first_air_date ? series.first_air_date.split('-')[0] : ''}</span>
+                <span class="status">${series.status === 'Returning Series' ? 'מתחדש' : series.status === 'Ended' ? 'הסתיים' : series.status}</span>
+              </div>
+              <div class="genres">
+                ${series.genres.map(g => `<span class="genre">${g.name}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        const ul = document.createElement("ul");
+      <div class="container">
+        ${series.overview ? `
+          <div class="section">
+            <h2 class="section-title">תקציר</h2>
+            <p class="overview">${series.overview}</p>
+          </div>
+        ` : ''}
 
-        // פרקי העונה
-        fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${API_KEY}&language=he-IL`)
-          .then(res => res.json())
-          .then(seasonData => {
-            seasonData.episodes.forEach(ep => {
-              const li = document.createElement("li");
+        ${credits.cast && credits.cast.length > 0 ? `
+          <div class="section">
+            <h2 class="section-title">שחקנים</h2>
+            <div class="cast-grid">
+              ${credits.cast.slice(0, 12).map(actor => `
+                <div class="cast-member">
+                  <img src="${actor.profile_path ? IMAGE_BASE + 'w185' + actor.profile_path : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'225\'%3E%3Crect fill=\'%23333\' width=\'150\' height=\'225\'/%3E%3C/svg%3E'}" alt="${actor.name}" class="cast-photo">
+                  <div class="cast-name">${actor.name}</div>
+                  <div class="cast-character">${actor.character}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
 
-              // שימוש בדירוג TMDB של הפרק
-              const rating = ep.vote_average ? ep.vote_average.toFixed(1) : "N/A";
+        <div class="section">
+          <h2 class="section-title">עונות</h2>
+          <div id="seasons"></div>
+        </div>
+      </div>
+    `;
 
-              li.innerHTML = `<span class="rating">⭐ ${rating}</span> פרק ${ep.episode_number}: ${ep.name}`;
-              
-              li.onclick = () => {
-                const url = `https://player.videasy.net/tv/${seriesId}/${season.season_number}/${ep.episode_number}?color=FFD600`;
-                localStorage.setItem("gameUrl", url);
-                window.location.href = "../game_player.html";
-              };
-              ul.appendChild(li);
+    const seasonsContainer = document.getElementById("seasons");
+    for (const season of series.seasons) {
+      if (season.season_number === 0) continue;
+      
+      const seasonDiv = document.createElement("div");
+      seasonDiv.classList.add("season");
+      seasonDiv.innerHTML = `
+        <div class="season-header">
+          <div>
+            <div class="season-title">עונה ${season.season_number}</div>
+            <div class="season-meta">${season.episode_count} פרקים • ${season.air_date ? new Date(season.air_date).getFullYear() : ''}</div>
+          </div>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="episodes"></div>
+      `;
+
+      seasonDiv.querySelector('.season-header').addEventListener('click', async () => {
+        seasonDiv.classList.toggle('open');
+        const episodesDiv = seasonDiv.querySelector('.episodes');
+        
+        if (seasonDiv.classList.contains('open') && !episodesDiv.dataset.loaded) {
+          episodesDiv.innerHTML = '<div style="text-align:center;padding:20px;">טוען פרקים...</div>';
+          
+          const seasonData = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${API_KEY}&language=he-IL`).then(r => r.json());
+          
+          episodesDiv.innerHTML = seasonData.episodes.map(ep => `
+            <div class="episode" data-season="${season.season_number}" data-episode="${ep.episode_number}">
+              <img src="${ep.still_path ? IMAGE_BASE + 'w300' + ep.still_path : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'112\'%3E%3Crect fill=\'%23333\' width=\'200\' height=\'112\'/%3E%3C/svg%3E'}" alt="${ep.name}" class="episode-still">
+              <div class="episode-info">
+                <div class="episode-header">
+                  <div>
+                    <div class="episode-number">פרק ${ep.episode_number}</div>
+                    <div class="episode-title">${ep.name}</div>
+                  </div>
+                  ${ep.vote_average > 0 ? `
+                    <div class="episode-rating">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                      ${ep.vote_average.toFixed(1)}
+                    </div>
+                  ` : ''}
+                </div>
+                ${ep.overview ? `<div class="episode-overview">${ep.overview}</div>` : ''}
+              </div>
+            </div>
+          `).join('');
+          
+          episodesDiv.querySelectorAll('.episode').forEach(epEl => {
+            epEl.addEventListener('click', () => {
+              const s = epEl.dataset.season;
+              const e = epEl.dataset.episode;
+              const url = `https://player.videasy.net/tv/${seriesId}/${s}/${e}?color=FFD600`;
+              localStorage.setItem("gameUrl", url);
+              window.location.href = "../game_player.html";
             });
           });
-
-        details.appendChild(ul);
-        seasonDiv.appendChild(details);
-        container.appendChild(seasonDiv);
+          
+          episodesDiv.dataset.loaded = 'true';
+        }
       });
-    })
-    .catch(err => {
-      console.error(err);
-      document.body.innerHTML = "<h2>שגיאה בטעינת הסדרה</h2>";
-    });
+
+      seasonsContainer.appendChild(seasonDiv);
+    }
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("app").innerHTML = '<div class="error">שגיאה בטעינת הסדרה</div>';
+  }
 }
 </script>
 
