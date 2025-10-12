@@ -1,134 +1,395 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>סרטים וסדרות</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-}
-input[type="text"] {
-    width: 80%;
-    padding: 10px;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-.tabs {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-.tabs button {
-    padding: 10px 20px;
-    cursor: pointer;
-}
-.tabs button.active {
-    font-weight: bold;
-    border-bottom: 2px solid #000;
-}
-.buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-}
-button.posterBtn {
-    border: none;
-    background: none;
-    padding: 0;
-    cursor: pointer;
-    aspect-ratio: 2/3;
-    transition: transform 0.2s ease;
-}
-button.posterBtn img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s ease;
-}
-button.posterBtn:hover img {
-    transform: scale(1.05);
-}
-h2 { margin-top: 40px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>סרטים וסדרות</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #141414;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+      backdrop-filter: blur(10px);
+      padding: 20px 4%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      color: #e50914;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      flex-shrink: 0;
+    }
+
+    .search-container {
+      flex: 1;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 50px 12px 20px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      transition: all 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #e50914;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 10px 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .tab-btn.active {
+      background: #e50914;
+      border-color: #e50914;
+    }
+
+    .container {
+      padding: 40px 4%;
+    }
+
+    .section {
+      margin-bottom: 50px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-right: 5px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .content-card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      aspect-ratio: 2/3;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .content-card:hover {
+      transform: scale(1.05) translateY(-8px);
+      z-index: 10;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .content-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s;
+    }
+
+    .content-card:hover img {
+      opacity: 0.8;
+    }
+
+    .card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      padding: 20px 12px 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .content-card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #ffd700;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      opacity: 0.7;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid #e50914;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      opacity: 0.6;
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-wrap: wrap;
+        padding: 15px 4%;
+      }
+
+      .logo {
+        font-size: 24px;
+      }
+
+      .search-container {
+        order: 3;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .tabs {
+        gap: 5px;
+      }
+
+      .tab-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+
+      .content-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+      }
+
+      .section-title {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .content-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<h1>סרטים וסדרות</h1>
-<input type="text" id="searchInput" placeholder="חפש סרט או סדרה...">
-
-<div class="tabs">
-    <button id="tabMovies" class="active">סרטים</button>
-    <button id="tabTV">סדרות</button>
+<div class="navbar">
+  <div class="logo">🎬 MogoStream</div>
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-input" placeholder="חפש סרט או סדרה...">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+    </svg>
+  </div>
+  <div class="tabs">
+    <button id="tabMovies" class="tab-btn active">סרטים</button>
+    <button id="tabTV" class="tab-btn">סדרות</button>
+  </div>
 </div>
 
-<h2 id="searchTitle" style="display:none;">תוצאות חיפוש</h2>
-<div id="searchResults" class="buttons"></div>
+<div class="container">
+  <div id="searchSection" class="section" style="display:none;">
+    <h2 class="section-title">תוצאות חיפוש</h2>
+    <div id="searchResults" class="content-grid"></div>
+  </div>
 
-<h2>כל התוכן</h2>
-<div id="allContent" class="buttons"></div>
+  <div class="section">
+    <h2 class="section-title" id="mainTitle">סרטים פופולריים</h2>
+    <div id="allContent" class="content-grid"></div>
+    <div id="loadingIndicator" class="loading-spinner" style="display:none;">
+      <div class="spinner"></div>
+      טוען עוד תוכן...
+    </div>
+  </div>
+</div>
 
 <script>
 const API_KEY = "72a08ef93943ef7f2719f4d0bfb1a7cf";
+const IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+
 const allContent = document.getElementById("allContent");
 const searchResults = document.getElementById("searchResults");
+const searchSection = document.getElementById("searchSection");
 const searchInput = document.getElementById("searchInput");
 const tabMovies = document.getElementById("tabMovies");
 const tabTV = document.getElementById("tabTV");
-const searchTitle = document.getElementById("searchTitle");
+const mainTitle = document.getElementById("mainTitle");
+const loadingIndicator = document.getElementById("loadingIndicator");
 
 let moviePage = 1, tvPage = 1, loading = false;
 let activeTab = "movies";
+let searchTimeout = null;
 
 // סרטים → נגן
 function openMovie(id) {
-    const url = "https://player.videasy.net/movie/" + id;
-    localStorage.setItem("gameUrl", url);
-    window.location.href = "../game_player.html";
+  const url = "https://player.videasy.net/movie/" + id;
+  localStorage.setItem("gameUrl", url);
+  window.location.href = "../game_player.html";
 }
 
-// סדרות → דף חדש Series.html
+// סדרות → דף Series.html
 function openSeries(id) {
-    window.location.href = `Series.html?id=${id}`;
+  window.location.href = `Series.html?id=${id}`;
 }
 
-// יצירת כפתור פוסטר
-function createButton(item, containerDiv, type) {
-    if (!item.poster_path) return;
-    const btn = document.createElement("button");
-    btn.classList.add("posterBtn");
-    const img = document.createElement("img");
-    img.src = `https://image.tmdb.org/t/p/w600_and_h900_bestv2${item.poster_path}`;
-    img.alt = item.title || item.name;
-    btn.appendChild(img);
-
+// יצירת כרטיס תוכן
+function createCard(item, container, type) {
+  if (!item.poster_path) return;
+  
+  const card = document.createElement("div");
+  card.className = "content-card";
+  
+  const img = document.createElement("img");
+  img.src = `${IMAGE_BASE}${item.poster_path}`;
+  img.alt = item.title || item.name;
+  img.loading = "lazy";
+  
+  const overlay = document.createElement("div");
+  overlay.className = "card-overlay";
+  
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.textContent = item.title || item.name;
+  
+  const rating = document.createElement("div");
+  rating.className = "card-rating";
+  if (item.vote_average > 0) {
+    rating.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      ${item.vote_average.toFixed(1)}
+    `;
+  }
+  
+  overlay.appendChild(title);
+  overlay.appendChild(rating);
+  card.appendChild(img);
+  card.appendChild(overlay);
+  
+  card.onclick = () => {
     if (type === "movie") {
-        btn.onclick = () => openMovie(item.id);
+      openMovie(item.id);
     } else if (type === "tv") {
-        btn.onclick = () => openSeries(item.id);
+      openSeries(item.id);
     }
-
-    containerDiv.appendChild(btn);
+  };
+  
+  container.appendChild(card);
 }
 
 // טעינת תוכן
 function loadContent(type) {
-    if (loading) return;
-    loading = true;
-    const url = type === "movies" ?
-        `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=${moviePage}&language=he-IL` :
-        `https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&page=${tvPage}&language=he-IL`;
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            data.results.forEach(item => createButton(item, allContent, type === "movies" ? "movie" : "tv"));
-            if (type === "movies") moviePage++; else tvPage++;
-            loading = false;
-        })
-        .catch(err => { console.error(err); loading = false; });
+  if (loading) return;
+  loading = true;
+  loadingIndicator.style.display = "block";
+  
+  const page = type === "movies" ? moviePage : tvPage;
+  const endpoint = type === "movies" ? "movie/popular" : "tv/popular";
+  const url = `https://api.themoviedb.org/3/${endpoint}?api_key=${API_KEY}&page=${page}&language=he-IL`;
+  
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      data.results.forEach(item => {
+        createCard(item, allContent, type === "movies" ? "movie" : "tv");
+      });
+      
+      if (type === "movies") moviePage++;
+      else tvPage++;
+      
+      loading = false;
+      loadingIndicator.style.display = "none";
+    })
+    .catch(err => {
+      console.error(err);
+      loading = false;
+      loadingIndicator.style.display = "none";
+    });
 }
 
 // טעינה ראשונית
@@ -136,55 +397,88 @@ loadContent("movies");
 
 // טעינה אינסופית
 window.addEventListener('scroll', () => {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-        loadContent(activeTab);
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+    if (!searchInput.value.trim()) {
+      loadContent(activeTab);
     }
+  }
 });
 
 // שינוי טאבים
 tabMovies.addEventListener("click", () => {
-    activeTab = "movies";
-    tabMovies.classList.add("active");
-    tabTV.classList.remove("active");
-    allContent.innerHTML = "";
-    moviePage = 1;
-    loadContent("movies");
+  if (activeTab === "movies") return;
+  
+  activeTab = "movies";
+  tabMovies.classList.add("active");
+  tabTV.classList.remove("active");
+  mainTitle.textContent = "סרטים פופולריים";
+  allContent.innerHTML = "";
+  moviePage = 1;
+  searchInput.value = "";
+  searchSection.style.display = "none";
+  loadContent("movies");
 });
+
 tabTV.addEventListener("click", () => {
-    activeTab = "tv";
-    tabTV.classList.add("active");
-    tabMovies.classList.remove("active");
-    allContent.innerHTML = "";
-    tvPage = 1;
-    loadContent("tv");
+  if (activeTab === "tv") return;
+  
+  activeTab = "tv";
+  tabTV.classList.add("active");
+  tabMovies.classList.remove("active");
+  mainTitle.textContent = "סדרות פופולריות";
+  allContent.innerHTML = "";
+  tvPage = 1;
+  searchInput.value = "";
+  searchSection.style.display = "none";
+  loadContent("tv");
 });
 
 // חיפוש
 function searchContent(query) {
+  searchResults.innerHTML = "";
+  
+  if (!query) {
+    searchSection.style.display = "none";
+    return;
+  }
+  
+  searchSection.style.display = "block";
+  searchResults.innerHTML = '<div class="loading-spinner"><div class="spinner"></div>מחפש...</div>';
+  
+  Promise.all([
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=he-IL`).then(r => r.json()),
+    fetch(`https://api.themoviedb.org/3/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=he-IL`).then(r => r.json())
+  ])
+  .then(([movies, tvShows]) => {
     searchResults.innerHTML = "";
-    if (!query) {
-        searchTitle.style.display = "none"; // מחביא את הכותרת
-        return;
+    
+    const allResults = [
+      ...movies.results.map(item => ({ ...item, type: 'movie' })),
+      ...tvShows.results.map(item => ({ ...item, type: 'tv' }))
+    ].sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+    
+    if (allResults.length === 0) {
+      searchResults.innerHTML = '<div class="no-results">לא נמצאו תוצאות</div>';
+      return;
     }
-
-    searchTitle.style.display = "block"; // מציג כותרת
-
-    // סרטים
-    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=he-IL`)
-        .then(res => res.json())
-        .then(data => data.results.forEach(item => createButton(item, searchResults, "movie")))
-        .catch(err => console.error(err));
-
-    // סדרות
-    fetch(`https://api.themoviedb.org/3/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=he-IL`)
-        .then(res => res.json())
-        .then(data => data.results.forEach(item => createButton(item, searchResults, "tv")))
-        .catch(err => console.error(err));
+    
+    allResults.forEach(item => {
+      createCard(item, searchResults, item.type);
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    searchResults.innerHTML = '<div class="no-results">שגיאה בחיפוש</div>';
+  });
 }
 
 searchInput.addEventListener("input", (e) => {
-    const query = e.target.value.trim();
+  clearTimeout(searchTimeout);
+  const query = e.target.value.trim();
+  
+  searchTimeout = setTimeout(() => {
     searchContent(query);
+  }, 300);
 });
 </script>
 
