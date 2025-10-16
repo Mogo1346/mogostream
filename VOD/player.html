@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>נגן וידאו</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .player-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .controls-overlay {
+      display: none;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(rgba(0, 0, 0, 0.8), transparent);
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .top-bar.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .title-info {
+      flex: 1;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .video-title {
+      font-size: 24px;
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .loading-screen.hidden {
+      display: none;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid #e50914;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      opacity: 0.8;
+    }
+
+    .error-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .error-screen.visible {
+      display: flex;
+    }
+
+    .error-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .error-message {
+      font-size: 20px;
+      margin-bottom: 30px;
+      opacity: 0.8;
+    }
+
+    .retry-btn {
+      background: #e50914;
+      border: none;
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .retry-btn:hover {
+      background: #f40612;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .video-title {
+        font-size: 18px;
+      }
+
+      .top-bar {
+        padding: 15px;
+      }
+
+      .back-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="player-container">
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-text">טוען נגן...</div>
+  </div>
+
+  <div class="error-screen" id="errorScreen">
+    <div class="error-icon">⚠️</div>
+    <div class="error-message">אירעה שגיאה בטעינת הנגן</div>
+    <button class="retry-btn" onclick="location.reload()">נסה שוב</button>
+    <button class="retry-btn" onclick="history.back()" style="background: rgba(255,255,255,0.2); margin-top: 10px;">חזור אחורה</button>
+  </div>
+
+  <iframe id="videoPlayer" allowfullscreen></iframe>
+
+  <div class="top-bar" id="topBar">
+    <button class="back-btn" onclick="history.back()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      חזור
+    </button>
+    <div class="title-info">
+      <div class="video-title" id="videoTitle">טוען...</div>
+    </div>
+    <div style="width: 100px;"></div>
+  </div>
+
+  <div class="controls-overlay" id="controlsOverlay"></div>
+</div>
+
+<script>
+const videoPlayer = document.getElementById('videoPlayer');
+const loadingScreen = document.getElementById('loadingScreen');
+const errorScreen = document.getElementById('errorScreen');
+const videoTitle = document.getElementById('videoTitle');
+const topBar = document.getElementById('topBar');
+
+let hideTimeout;
+
+// קבלת URL מ-localStorage
+function getVideoUrl() {
+  const url = localStorage.getItem('gameUrl');
+  if (!url) {
+    showError();
+    return null;
+  }
+  return url;
+}
+
+// הסתרת אלמנטים
+function hideControls() {
+  topBar.classList.add('hidden');
+}
+
+// הצגת אלמנטים
+function showControls() {
+  topBar.classList.remove('hidden');
+  
+  // איפוס טיימר
+  clearTimeout(hideTimeout);
+  
+  // הסתרה אחרי 3 שניות
+  hideTimeout = setTimeout(() => {
+    hideControls();
+  }, 3000);
+}
+
+// מאזינים לתנועת עכבר
+document.addEventListener('mousemove', showControls);
+document.addEventListener('touchstart', showControls);
+document.addEventListener('click', showControls);
+
+// הצג בהתחלה ואז הסתר
+showControls();
+
+// טעינת הנגן
+function loadPlayer() {
+  const videoUrl = getVideoUrl();
+  
+  if (!videoUrl) {
+    return;
+  }
+
+  // הגדרת כותרת
+  try {
+    if (videoUrl.includes('/movie/')) {
+      videoTitle.textContent = 'מנגן סרט';
+    } else if (videoUrl.includes('/tv/')) {
+      const parts = videoUrl.match(/\/tv\/(\d+)\/(\d+)\/(\d+)/);
+      if (parts) {
+        videoTitle.textContent = `עונה ${parts[2]} • פרק ${parts[3]}`;
+      } else {
+        videoTitle.textContent = 'מנגן סדרה';
+      }
+    } else {
+      videoTitle.textContent = 'מנגן וידאו';
+    }
+  } catch (e) {
+    videoTitle.textContent = 'מנגן וידאו';
+  }
+
+  // טעינת ה-iframe
+  videoPlayer.src = videoUrl;
+
+  // מאזין לטעינת ה-iframe
+  videoPlayer.onload = () => {
+    setTimeout(() => {
+      loadingScreen.classList.add('hidden');
+    }, 1000);
+  };
+
+  videoPlayer.onerror = () => {
+    showError();
+  };
+}
+
+// הצגת שגיאה
+function showError() {
+  loadingScreen.classList.add('hidden');
+  errorScreen.classList.add('visible');
+}
+
+// טעינה ראשונית
+loadPlayer();
+</script>
+
+</body>
+</html>
