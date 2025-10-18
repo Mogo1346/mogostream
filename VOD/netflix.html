@@ -306,9 +306,7 @@ let searchTimeout = null;
 
 // סרטים → נגן
 function openMovie(id) {
-  const url = "https://player.videasy.net/movie/" + id;
-  localStorage.setItem("gameUrl", url);
-  window.location.href = "../game_player.html";
+  window.location.href = `Movies.html?id=${id}`;
 }
 
 // סדרות → דף Series.html

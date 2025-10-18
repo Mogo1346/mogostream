@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>סרט</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; }
+    .header { position: relative; height: 500px; overflow: hidden; }
+    .backdrop { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); }
+    .header-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(26, 26, 46, 0.9), #1a1a2e); padding: 40px; }
+    .header-content { max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; align-items: flex-end; }
+    .poster { width: 200px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); flex-shrink: 0; }
+    .header-info h1 { font-size: 42px; margin-bottom: 10px; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8); }
+    .meta-info { display: flex; gap: 20px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+    .rating { background: #ffd600; color: #000; padding: 5px 12px; border-radius: 6px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+    .rating svg { width: 18px; height: 18px; fill: #000; }
+    .year, .runtime { opacity: 0.8; }
+    .genres { display: flex; gap: 10px; flex-wrap: wrap; }
+    .genre { background: rgba(255, 255, 255, 0.1); padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+    .watch-button { background: #ffd600; color: #000; border: none; padding: 15px 40px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s; margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; }
+    .watch-button:hover { background: #ffed4e; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 214, 0, 0.4); }
+    .watch-button svg { width: 24px; height: 24px; fill: #000; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .section { margin-bottom: 50px; }
+    .section-title { font-size: 28px; margin-bottom: 20px; border-right: 4px solid #ffd600; padding-right: 15px; }
+    .overview { line-height: 1.8; font-size: 16px; opacity: 0.9; }
+    .cast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+    .cast-member { text-align: center; transition: transform 0.3s; }
+    .cast-member:hover { transform: translateY(-5px); }
+    .cast-photo { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: rgba(255, 255, 255, 0.05); }
+    .cast-name { font-weight: bold; margin-bottom: 5px; }
+    .cast-character { font-size: 14px; opacity: 0.7; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .info-item { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .info-label { color: #ffd600; font-size: 14px; margin-bottom: 8px; font-weight: bold; }
+    .info-value { font-size: 18px; }
+    .loading { text-align: center; padding: 60px; font-size: 24px; }
+    .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid #ffd600; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .error { text-align: center; padding: 60px; font-size: 24px; color: #ff6b6b; }
+    @media (max-width: 768px) {
+      .header-content { flex-direction: column; align-items: center; text-align: center; }
+      .poster { width: 150px; }
+      .header-info h1 { font-size: 28px; }
+      .cast-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    טוען...
+  </div>
+</div>
+
+<script>
+const API_KEY = "72a08ef93943ef7f2719f4d0bfb1a7cf";
+const OMDB_KEY = "fff1ca8";
+const IMAGE_BASE = "https://image.tmdb.org/t/p/";
+
+const urlParams = new URLSearchParams(window.location.search);
+const movieId = urlParams.get("id");
+
+if (!movieId) {
+  document.getElementById("app").innerHTML = '<div class="error">לא נמצא סרט</div>';
+} else {
+  loadMovie();
+}
+
+async function fetchIMDBRating(imdbId) {
+  try {
+    const res = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_KEY}&r=json`);
+    const data = await res.json();
+    return data.imdbRating !== "N/A" ? data.imdbRating : '';
+  } catch {
+    return '';
+  }
+}
+
+function formatRuntime(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return hours > 0 ? `${hours}ש ${mins}ד` : `${mins}ד`;
+}
+
+function formatMoney(amount) {
+  if (!amount) return 'לא זמין';
+  return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount);
+}
+
+async function loadMovie() {
+  try {
+    const [movie, credits, externalIds] = await Promise.all([
+      fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&language=he-IL`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${API_KEY}&language=he-IL`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/movie/${movieId}/external_ids?api_key=${API_KEY}`).then(r => r.json())
+    ]);
+
+    const imdbRating = externalIds.imdb_id ? await fetchIMDBRating(externalIds.imdb_id) : '';
+
+    const app = document.getElementById("app");
+    app.innerHTML = `
+      <div class="header">
+        <img src="${IMAGE_BASE}original${movie.backdrop_path}" alt="${movie.title}" class="backdrop" onerror="this.style.display='none'">
+        <div class="header-overlay">
+          <div class="header-content">
+            <img src="${IMAGE_BASE}w500${movie.poster_path}" alt="${movie.title}" class="poster" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'300\'%3E%3Crect fill=\'%23333\' width=\'200\' height=\'300\'/%3E%3C/svg%3E'">
+            <div class="header-info">
+              <h1>${movie.title}</h1>
+              <div class="meta-info">
+                <div class="rating">
+                  <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  ${imdbRating || movie.vote_average.toFixed(1)}
+                </div>
+                <span class="year">${movie.release_date ? movie.release_date.split('-')[0] : ''}</span>
+                ${movie.runtime ? `<span class="runtime">${formatRuntime(movie.runtime)}</span>` : ''}
+              </div>
+              <div class="genres">
+                ${movie.genres.map(g => `<span class="genre">${g.name}</span>`).join('')}
+              </div>
+              <button class="watch-button" id="watchBtn">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                צפה בסרט
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        ${movie.overview ? `
+          <div class="section">
+            <h2 class="section-title">תקציר</h2>
+            <p class="overview">${movie.overview}</p>
+          </div>
+        ` : ''}
+
+        <div class="section">
+          <h2 class="section-title">מידע נוסף</h2>
+          <div class="info-grid">
+            ${movie.budget ? `
+              <div class="info-item">
+                <div class="info-label">תקציב</div>
+                <div class="info-value">${formatMoney(movie.budget)}</div>
+              </div>
+            ` : ''}
+            ${movie.revenue ? `
+              <div class="info-item">
+                <div class="info-label">הכנסות</div>
+                <div class="info-value">${formatMoney(movie.revenue)}</div>
+              </div>
+            ` : ''}
+            ${movie.status ? `
+              <div class="info-item">
+                <div class="info-label">סטטוס</div>
+                <div class="info-value">${movie.status === 'Released' ? 'יצא לאקרנים' : movie.status}</div>
+              </div>
+            ` : ''}
+            ${movie.production_countries && movie.production_countries.length > 0 ? `
+              <div class="info-item">
+                <div class="info-label">מדינת ייצור</div>
+                <div class="info-value">${movie.production_countries.map(c => c.name).join(', ')}</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        ${credits.cast && credits.cast.length > 0 ? `
+          <div class="section">
+            <h2 class="section-title">שחקנים</h2>
+            <div class="cast-grid">
+              ${credits.cast.slice(0, 12).map(actor => `
+                <div class="cast-member">
+                  <img src="${actor.profile_path ? IMAGE_BASE + 'w185' + actor.profile_path : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'225\'%3E%3Crect fill=\'%23333\' width=\'150\' height=\'225\'/%3E%3C/svg%3E'}" alt="${actor.name}" class="cast-photo">
+                  <div class="cast-name">${actor.name}</div>
+                  <div class="cast-character">${actor.character}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // כפתור צפייה
+    document.getElementById('watchBtn').addEventListener('click', () => {
+      const url = `https://player.videasy.net/movie/${movieId}?color=FFD600`;
+      const gameData = { url: url, type: 'movie', id: movieId };
+      sessionStorage.setItem("gameUrl", JSON.stringify(gameData));
+      window.location.href = "player.html";
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("app").innerHTML = '<div class="error">שגיאה בטעינת הסרט</div>';
+  }
+}
+</script>
+
+</body>
+</html>
