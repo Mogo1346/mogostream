@@ -115,7 +115,16 @@
 
         function playStream(url) {
             if (Hls.isSupported()) {
+                
+                const WORKER_URL = 'https://iptv-proxy.mogoprism0.workers.dev/';
+
+                // ערוצי HTTP עוברים דרך ה-Worker
+                if (url.startsWith('http://')) {
+                   url = WORKER_URL + '?url=' + encodeURIComponent(url);
+                }
+
                 const hls = new Hls();
+                
                 hls.loadSource(url);
                 hls.attachMedia(videoElement);
                 

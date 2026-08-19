@@ -144,7 +144,7 @@
 
                         currentChannel = { country, name, logo };
                     } else if (line !== '' && !line.startsWith('#')) {
-                        currentChannel.url = line.replace(/^http:\/\//i, 'https://');
+                        currentChannel.url = line;
 
                         if (!groupedByCountry[currentChannel.country]) {
                             groupedByCountry[currentChannel.country] = [];
