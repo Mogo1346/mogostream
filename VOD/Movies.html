@@ -40,6 +40,11 @@
     .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid #ffd600; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .error { text-align: center; padding: 60px; font-size: 24px; color: #ff6b6b; }
+
+    /* טריילר */
+    .trailer { width: 100%; max-width: 900px; aspect-ratio: 16/9; margin: 0 auto; border-radius: 12px; overflow: hidden; background: #000; }
+    .trailer iframe { width: 100%; height: 100%; border: 0; }
+
     @media (max-width: 768px) {
       .header-content { flex-direction: column; align-items: center; text-align: center; }
       .poster { width: 150px; }
@@ -90,7 +95,11 @@ function formatRuntime(minutes) {
 
 function formatMoney(amount) {
   if (!amount) return 'לא זמין';
-  return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat('he-IL', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0
+  }).format(amount);
 }
 
 async function loadMovie() {
@@ -104,35 +113,52 @@ async function loadMovie() {
     const imdbRating = externalIds.imdb_id ? await fetchIMDBRating(externalIds.imdb_id) : '';
 
     const app = document.getElementById("app");
+
     app.innerHTML = `
       <div class="header">
         <img src="${IMAGE_BASE}original${movie.backdrop_path}" alt="${movie.title}" class="backdrop" onerror="this.style.display='none'">
+
         <div class="header-overlay">
           <div class="header-content">
-            <img src="${IMAGE_BASE}w500${movie.poster_path}" alt="${movie.title}" class="poster" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'300\'%3E%3Crect fill=\'%23333\' width=\'200\' height=\'300\'/%3E%3C/svg%3E'">
+
+            <img src="${IMAGE_BASE}w500${movie.poster_path}" alt="${movie.title}" class="poster">
+
             <div class="header-info">
               <h1>${movie.title}</h1>
+
               <div class="meta-info">
                 <div class="rating">
-                  <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
                   ${imdbRating || movie.vote_average.toFixed(1)}
                 </div>
-                <span class="year">${movie.release_date ? movie.release_date.split('-')[0] : ''}</span>
+
+                <span class="year">
+                  ${movie.release_date ? movie.release_date.split('-')[0] : ''}
+                </span>
+
                 ${movie.runtime ? `<span class="runtime">${formatRuntime(movie.runtime)}</span>` : ''}
               </div>
+
               <div class="genres">
                 ${movie.genres.map(g => `<span class="genre">${g.name}</span>`).join('')}
               </div>
+
               <button class="watch-button" id="watchBtn">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
                 צפה בסרט
               </button>
             </div>
+
           </div>
         </div>
       </div>
 
       <div class="container">
+
         ${movie.overview ? `
           <div class="section">
             <h2 class="section-title">תקציר</h2>
@@ -140,64 +166,154 @@ async function loadMovie() {
           </div>
         ` : ''}
 
+        <!-- הטריילר נטען בנפרד -->
+        <div class="section" id="trailerSection">
+          <h2 class="section-title">טריילר</h2>
+          <div id="trailerBox" class="trailer">
+            <div style="height:100%;display:flex;align-items:center;justify-content:center;opacity:.6;">
+              טוען טריילר...
+            </div>
+          </div>
+        </div>
+
         <div class="section">
           <h2 class="section-title">מידע נוסף</h2>
+
           <div class="info-grid">
+
             ${movie.budget ? `
               <div class="info-item">
                 <div class="info-label">תקציב</div>
                 <div class="info-value">${formatMoney(movie.budget)}</div>
               </div>
             ` : ''}
+
             ${movie.revenue ? `
               <div class="info-item">
                 <div class="info-label">הכנסות</div>
                 <div class="info-value">${formatMoney(movie.revenue)}</div>
               </div>
             ` : ''}
+
             ${movie.status ? `
               <div class="info-item">
                 <div class="info-label">סטטוס</div>
-                <div class="info-value">${movie.status === 'Released' ? 'יצא לאקרנים' : movie.status}</div>
+                <div class="info-value">
+                  ${movie.status === 'Released' ? 'יצא לאקרנים' : movie.status}
+                </div>
               </div>
             ` : ''}
-            ${movie.production_countries && movie.production_countries.length > 0 ? `
+
+            ${movie.production_countries?.length ? `
               <div class="info-item">
                 <div class="info-label">מדינת ייצור</div>
-                <div class="info-value">${movie.production_countries.map(c => c.name).join(', ')}</div>
+                <div class="info-value">
+                  ${movie.production_countries.map(c => c.name).join(', ')}
+                </div>
               </div>
             ` : ''}
+
           </div>
         </div>
 
-        ${credits.cast && credits.cast.length > 0 ? `
+        ${credits.cast?.length ? `
           <div class="section">
             <h2 class="section-title">שחקנים</h2>
+
             <div class="cast-grid">
               ${credits.cast.slice(0, 12).map(actor => `
                 <div class="cast-member">
-                  <img src="${actor.profile_path ? IMAGE_BASE + 'w185' + actor.profile_path : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'225\'%3E%3Crect fill=\'%23333\' width=\'150\' height=\'225\'/%3E%3C/svg%3E'}" alt="${actor.name}" class="cast-photo">
+
+                  <img
+                    src="${actor.profile_path
+                      ? IMAGE_BASE + 'w185' + actor.profile_path
+                      : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'225\'%3E%3Crect fill=\'%23333\' width=\'150\' height=\'225\'/%3E%3C/svg%3E'}"
+                    alt="${actor.name}"
+                    class="cast-photo"
+                  >
+
                   <div class="cast-name">${actor.name}</div>
                   <div class="cast-character">${actor.character}</div>
+
                 </div>
               `).join('')}
             </div>
           </div>
         ` : ''}
+
       </div>
     `;
 
     // כפתור צפייה
     document.getElementById('watchBtn').addEventListener('click', () => {
       const url = `https://player.videasy.net/movie/${movieId}?color=FFD600`;
-      const gameData = { url: url, type: 'movie', id: movieId };
+
+      const gameData = {
+        url: url,
+        type: 'movie',
+        id: movieId
+      };
+
       sessionStorage.setItem("gameUrl", JSON.stringify(gameData));
       window.location.href = "player.html";
     });
 
+    // הטריילר נטען רק אחרי שהעמוד כבר הוצג
+    loadTrailer();
+
   } catch (err) {
     console.error(err);
-    document.getElementById("app").innerHTML = '<div class="error">שגיאה בטעינת הסרט</div>';
+    document.getElementById("app").innerHTML =
+      '<div class="error">שגיאה בטעינת הסרט</div>';
+  }
+}
+
+
+// ===============================
+// טעינת טריילר בנפרד
+// ===============================
+
+async function loadTrailer() {
+  const box = document.getElementById("trailerBox");
+
+  if (!box) return;
+
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}&language=en-US`
+    );
+
+    const data = await res.json();
+
+    const trailer =
+      data.results?.find(v =>
+        v.site === "YouTube" &&
+        v.type === "Trailer" &&
+        v.official === true
+      ) ||
+      data.results?.find(v =>
+        v.site === "YouTube" &&
+        v.type === "Trailer"
+      );
+
+    if (!trailer) {
+      document.getElementById("trailerSection").style.display = "none";
+      return;
+    }
+
+    box.innerHTML = `
+      <iframe
+        src="https://www.youtube.com/embed/${trailer.key}"
+        title="טריילר - ${movieId}"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    `;
+
+  } catch (err) {
+    console.warn("לא נמצא טריילר:", err);
+    document.getElementById("trailerSection").style.display = "none";
   }
 }
 </script>

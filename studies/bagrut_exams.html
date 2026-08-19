@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מוגו סטרים</title>
+    <style>
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 5px;
+            row-gap: 5px;
+            margin-top: 8px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            position: relative; /* מאפשר למקם את הטקסט בתוך הכפתור */
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+        }
+        button:hover {
+            transform: scale(1.1);
+        }
+        button img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .button-label {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            color: white;       /* אפשר לשנות ל־black אם התמונה בהירה */
+            font-size: 1.5em;     /* תגדיל לפי הצורך: 1.2em או 1.5em */
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6); /* כדי שייראה גם על רקעים בהירים */
+            pointer-events: none; /* שלא יתפוס קליקים */
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 25px 14px;
+            border-bottom: 1px solid #ddd;
+            user-select: none;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: bold;
+            font-size: 1.5em;
+            background: rgb(227, 237, 247);
+            transition: background 0.2s;
+            text-align: right;
+        }
+        summary:hover {
+            background: #f0f0f0;
+        }
+        .summary-subtext {
+            font-size: 0.85em;
+            font-weight: normal;
+            color: #666;
+            margin-top: 4px;
+        }
+        details {
+            width: 100%;
+            margin: 8px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<h1>כל הסטרימים של מוגו!</h1>
+
+<div class="buttons">
+    <button onclick="window.location.href='studies/bagrut_exams/citizenship.html'">
+        <img src="">
+        <span class="button-label">אזרחות</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/english.html'">
+        <img src="">
+        <span class="button-label">אנגלית</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/biology.html'">
+        <img src="">
+        <span class="button-label">ביולוגיה</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/geography.html'">
+        <img src="">
+        <span class="button-label">גאוגרפיה</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/history.html'">
+        <img src="">
+        <span class="button-label">היסטוריה</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/chemistry.html'">
+        <img src="">
+        <span class="button-label">כימיה</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/computer_science.html'">
+        <img src="">
+        <span class="button-label">מדעי המחשב</span>
+    </button>
+    <button onclick="window.location.href='studies/math.html'">
+        <img src="https://cdn-icons-png.flaticon.com/128/12056/12056894.png">
+        <span class="button-label">מתמטיקה</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/literature.html'">
+        <img src="">
+        <span class="button-label">ספרות</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/hebrew.html'">
+        <img src="">
+        <span class="button-label">עברית</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/arabic.html'">
+        <img src="">
+        <span class="button-label">ערבית</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/physics.html'">
+        <img src="">
+        <span class="button-label">פיזיקה</span>
+    </button>
+    <button onclick="window.location.href='studies/bagrut_exams/psychology.html'">
+        <img src="">
+        <span class="button-label">פסיכולוגיה</span>
+    </button>
+    <button onclick="window.location.href='studies/bible.html'">
+        <img src="https://cdn-icons-png.flaticon.com/128/9936/9936573.png">
+        <span class="button-label">תנך</span>
+    </button>
+</div>
+
+<script>
+function goToChannel(url) {
+    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
+    window.location.href = 'player.html?src=' + encodeURIComponent(url);
+}
+</script>
+
+</body>
+</html>

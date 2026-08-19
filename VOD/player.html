@@ -236,12 +236,27 @@ let hideTimeout;
 
 // קבלת URL מ-localStorage
 function getVideoUrl() {
-  const url = localStorage.getItem('gameUrl');
-  if (!url) {
+  const stored = sessionStorage.getItem('gameUrl');
+
+  if (!stored) {
     showError();
     return null;
   }
-  return url;
+
+  try {
+    const gameData = JSON.parse(stored);
+
+    if (!gameData.url) {
+      showError();
+      return null;
+    }
+
+    return gameData.url;
+  } catch (e) {
+    console.error('שגיאה בקריאת gameUrl:', e);
+    showError();
+    return null;
+  }
 }
 
 // הסתרת אלמנטים

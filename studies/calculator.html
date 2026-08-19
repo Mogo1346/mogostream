@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מחשבון מדעי</title>
+<style>
+:root{--bg:#0b1020;--panel:#151c33;--key:#202a49;--op:#29365d;--accent:#6ee7ff;--text:#f5f7ff;--muted:#8e9bbd;--danger:#ff6b8a}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 20% 0%,#1a2c55 0,#0b1020 42%,#070b15 100%);color:var(--text);display:grid;place-items:center;padding:22px}
+.calc{width:min(430px,100%);background:rgba(21,28,51,.92);border:1px solid #2b375d;border-radius:28px;box-shadow:0 25px 70px #0008;overflow:hidden;backdrop-filter:blur(14px)}
+.top{padding:20px 20px 10px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:800;letter-spacing:.4px}.mode{font-size:12px;color:var(--muted);padding:7px 10px;border:1px solid #334064;border-radius:999px}
+.display{padding:12px 22px 18px;text-align:left;direction:ltr}.expr{height:28px;color:var(--muted);font-size:16px;overflow:hidden;white-space:nowrap}.result{font-size:42px;font-weight:750;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.keys{padding:16px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;background:#0f162a}
+button{border:0;color:var(--text);background:var(--key);min-height:55px;border-radius:15px;font-size:17px;font-weight:650;cursor:pointer;transition:.12s transform,.12s filter;box-shadow:inset 0 1px #ffffff0b}
+button:hover{filter:brightness(1.15)}button:active{transform:scale(.95)}.op{background:var(--op);color:var(--accent)}.eq{background:linear-gradient(135deg,#4dd8ff,#7c7cff);color:#06101c}.danger{color:#ff91a7}.wide{grid-column:span 2}
+@media(max-width:370px){button{min-height:49px;font-size:15px}.result{font-size:34px}.keys{gap:7px;padding:11px}}
+</style>
+</head>
+<body>
+<main class="calc">
+  <div class="top"><div class="brand">מחשבון מדעי</div><div class="mode" id="angleMode">DEG</div></div>
+  <section class="display">
+    <div class="expr" id="expr">0</div><div class="result" id="result">0</div>
+  </section>
+  <section class="keys">
+    <button class="danger" data-action="clear">AC</button><button data-action="back">⌫</button>
+    <button class="op" data-action="angle">DEG</button><button class="op" data-value="(">(</button><button class="op" data-value=")">)</button>
+
+    <button class="op" data-fn="sin">sin</button><button class="op" data-fn="cos">cos</button><button class="op" data-fn="tan">tan</button><button class="op" data-fn="sqrt">√</button><button class="op" data-value="^">xʸ</button>
+    <button class="op" data-fn="log">log</button><button class="op" data-fn="ln">ln</button><button class="op" data-fn="abs">abs</button><button class="op" data-value="π">π</button><button class="op" data-value="e">e</button>
+
+    <button data-value="7">7</button><button data-value="8">8</button><button data-value="9">9</button><button class="op" data-value="÷">÷</button><button class="op" data-value="%">%</button>
+    <button data-value="4">4</button><button data-value="5">5</button><button data-value="6">6</button><button class="op" data-value="×">×</button><button class="op" data-value="!">n!</button>
+    <button data-value="1">1</button><button data-value="2">2</button><button data-value="3">3</button><button class="op" data-value="−">−</button><button class="op" data-value="+">+</button>
+    <button class="wide" data-value="0">0</button><button data-value=".">.</button><button class="eq wide" data-action="equals">=</button>
+  </section>
+</main>
+<script>
+const exprEl=document.getElementById('expr'), resultEl=document.getElementById('result'), modeEl=document.getElementById('angleMode');
+let input='', degree=true;
+
+function render(){exprEl.textContent=input||'0';}
+function add(v){input+=v;render();}
+function factorial(n){if(!Number.isFinite(n)||n<0||n>170||Math.floor(n)!==n)throw Error();let r=1;for(let i=2;i<=n;i++)r*=i;return r}
+function transform(s){
+  s=s.replaceAll('×','*').replaceAll('÷','/').replaceAll('−','-').replaceAll('π','Math.PI').replaceAll('^','**');
+  s=s.replace(/(\d+(?:\.\d+)?)%/g,'($1/100)');
+  s=s.replace(/(\d+(?:\.\d+)?)!/g,'factorial($1)');
+  s=s.replace(/√\s*\(/g,'Math.sqrt(').replace(/√\s*([0-9.]+)/g,'Math.sqrt($1)');
+  s=s.replace(/\bsin\(/g,'SIN(').replace(/\bcos\(/g,'COS(').replace(/\btan\(/g,'TAN(');
+  s=s.replace(/\blog\(/g,'Math.log10(').replace(/\bln\(/g,'Math.log(').replace(/\babs\(/g,'Math.abs(');
+  s=s.replace(/\be\b/g,'Math.E');
+  return s;
+}
+function calc(){
+  try{
+    const t=transform(input);
+    const SIN=x=>Math.sin(degree?x*Math.PI/180:x), COS=x=>Math.cos(degree?x*Math.PI/180:x), TAN=x=>Math.tan(degree?x*Math.PI/180:x);
+    const value=Function('factorial','SIN','COS','TAN','return '+t)(factorial,SIN,COS,TAN);
+    if(!Number.isFinite(value)) throw Error();
+    resultEl.textContent=Number(value.toPrecision(12)).toString();
+  }catch{resultEl.textContent='שגיאה';}
+}
+document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  const v=b.dataset.value, fn=b.dataset.fn, action=b.dataset.action;
+  if(action==='clear'){input='';resultEl.textContent='0';render();return}
+  if(action==='back'){input=input.slice(0,-1);render();return}
+  if(action==='angle'){degree=!degree;modeEl.textContent=degree?'DEG':'RAD';b.textContent=degree?'DEG':'RAD';return}
+  if(action==='equals'){calc();return}
+  if(fn){add(fn+'(');return}
+  add(v);
+}));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key==='='){calc();return}
+  if(e.key==='Escape'){input='';resultEl.textContent='0';render();return}
+  if(e.key==='Backspace'){input=input.slice(0,-1);render();return}
+  const map={'*':'×','/':'÷','-':'−'};
+  if(/[0-9.+\-*/()%]/.test(e.key))add(map[e.key]||e.key);
+});
+</script>
+</body>
+</html>

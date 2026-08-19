@@ -1,81 +1,144 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<title>נגאנ</title>
-<link rel="icon" type="image/png" href="https://th.bing.com/th/id/R.d0b5f377cb9c8f85186a781dc4ce617d?rik=kREhDltYbWa3aQ&riu=http%3a%2f%2flofrev.net%2fwp-content%2fphotos%2f2017%2f03%2fwindows_media_player_logo_12.png&ehk=Sw%2bgzsZ8s9TrxBRzQmxjSqN12ruADIYIffb7iHwRFi4%3d&risl=&pid=ImgRaw&r=0">
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<style>
-  body {
-    margin: 0;
-    background: black;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  .btn {
-    padding: 10px 15px;
-    background: white;
-    color: black;
-    font-weight: bold;
-    text-decoration: none;
-    width: fit-content;
-    margin: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .btn:hover {
-    background: #ddd;
-  }
-  video {
-    flex-grow: 1;
-    width: 100%;
-    background: black;
-    outline: none;
-  }
-  .controls {
-    display: flex;
-    gap: 10px;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>נגן וידאו IPTV</title>
+    <!-- ספריית hls.js לניגון שידורי m3u8 -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: #334155;
+            color: #f8fafc;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #475569;
+        }
+
+        .channel-title {
+            font-size: 1.3rem;
+            color: #3b82f6;
+            margin: 0;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            border: 1px solid #1e293b;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #error-message {
+            color: #ef4444;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-<div class="controls">
-  <a href="javascript:window.history.back()" class="btn">⬅ חזרה</a>
-</div>
+    <div class="container">
+        <div class="header">
+            <h1 class="channel-title" id="channel-name">טוען ערוץ...</h1>
+            <a href="channels.html" class="back-btn">➜ חזור לרשימת הערוצים</a>
+        </div>
 
-<video id="video" autoplay playsinline controls></video>
+        <div class="video-wrapper">
+            <video id="video-player" controls autoplay></video>
+        </div>
 
-<script>
-  const video = document.getElementById('video');
-  const params = new URLSearchParams(window.location.search);
-  const streamURL = params.get('src');
+        <div id="error-message">לא ניתן לטעון ערוץ זה. הקישור עשוי להיות שבור או חסום לצפייה ישירה בדפדפן.</div>
+    </div>
 
-  // טעינת הזרם
-  if (!streamURL) {
-    alert('לא נבחר ערוץ');
-    window.location.href = 'index.html';
-  } else if (streamURL.endsWith(".mp4")) {
-    // אם זה MP4 – טוען ישירות
-    video.src = streamURL;
-    video.play();
-  } else if (Hls.isSupported()) {
-    // אם זה M3U8 – משתמש ב-HLS.js
-    const hls = new Hls();
-    hls.loadSource(streamURL);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play();
-    });
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = streamURL;
-    video.play();
-  } else {
-    alert('הדפדפן שלך לא תומך בניגון');
-  }
-</script>
+    <script>
+        // שליפת פרמטרי ה-URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('url');
+        const channelName = urlParams.get('name');
 
+        const videoElement = document.getElementById('video-player');
+        const channelNameElement = document.getElementById('channel-name');
+        const errorMessage = document.getElementById('error-message');
+
+        if (channelName) {
+            channelNameElement.innerText = decodeURIComponent(channelName);
+            document.title = `${decodeURIComponent(channelName)} - נגן IPTV`;
+        }
+
+        if (streamUrl) {
+            playStream(decodeURIComponent(streamUrl));
+        } else {
+            channelNameElement.innerText = 'שגיאה: לא נבחר ערוץ לצפייה';
+        }
+
+        function playStream(url) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(videoElement);
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    videoElement.play().catch(() => {});
+                });
+
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        errorMessage.style.display = 'block';
+                    }
+                });
+            } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                // תמיכה ב-Safari
+                videoElement.src = url;
+                videoElement.addEventListener('loadedmetadata', function () {
+                    videoElement.play();
+                });
+            } else {
+                errorMessage.style.display = 'block';
+                errorMessage.innerText = 'הדפדפן שלך אינו תומך בניגון HLS.';
+            }
+        }
+    </script>
 </body>
 </html>

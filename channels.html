@@ -2,1351 +2,342 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ארוסימ</title>
-    <link rel="icon" type="image/png" href="https://copilot.microsoft.com/th/id/BCO.94db3caf-1f50-4160-b866-7c6e9f78d81c.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ערוצים</title>
     <style>
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 5px;
-            row-gap: 5px;
-            margin-top: 8px;
-        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
             text-align: center;
+            color: #3b82f6;
+            margin-bottom: 30px;
+        }
+        #loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #f59e0b;
             margin-top: 50px;
-            background-color: #E0E0E0;
-        }
-        button {
-            border: none;
-            background: none;
-            padding: 0;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            aspect-ratio: 1 / 1;
-        }
-        button:hover {
-            transform: scale(1.1);
-        }
-        button img {
-            width: 100%;
-            height: 100%;
-        }
-        summary {
-            cursor: pointer;
-            padding: 25px 14px;
-            border-bottom: 1px solid #ddd;
-            user-select: none;
-            width: 100%;
-            box-sizing: border-box;
-            font-weight: bold;
-            font-size: 1.5em;
-            background: rgb(227, 237, 247);
-            transition: background 0.2s;
-            text-align: right;
-        }
-        summary:hover {
-            background: #f0f0f0;
-        }
-        .summary-subtext {
-            font-size: 0.85em;
-            font-weight: normal;
-            color: #666;
-            margin-top: 4px;
         }
         details {
-            width: 100%;
-            margin: 8px auto;
-            background: #fff;
+            background: #1e293b;
+            margin-bottom: 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             overflow: hidden;
+            border: 1px solid #334155;
+        }
+        summary {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        summary:hover {
+            background: #334155;
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
+        summary::after {
+            content: "+";
+            font-size: 1.4rem;
+        }
+        details[open] summary::after {
+            content: "-";
+        }
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #0f172a;
+        }
+        .channel-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .channel-card:hover {
+            transform: translateY(-3px);
+            border-color: #3b82f6;
+        }
+        .channel-card img {
+            max-width: 90px;
+            height: 50px;
+            object-fit: contain;
+        }
+        .channel-card strong {
+            font-size: 0.9rem;
+            color: #f8fafc;
+            line-height: 1.2;
+        }
+        .play-link {
+            display: block;
+            width: 100%;
+            padding: 8px 0;
+            background: #3b82f6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .play-link:hover {
+            background: #2563eb;
         }
     </style>
 </head>
-
 <body>
-<h1>שיפרייט אארוסימ סל מוגו</h1>
-
-<!-- <details>
-    <summary>
-        Albania
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Andorra
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('https://dn721800.ca.archive.org/0/items/breaking-bad-season-05/Breaking%20Bad%20Season%2005/Breaking%20Bad%20-%20S05E07%20-%20Say%20My%20Name.mp4')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Logo_Andorra_Televisi%C3%B3.png">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Argentina
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Armenia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Australia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Austria
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Azerbaijan
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Belarus
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Belgium
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Bosnia And Herzegovina
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Brazil
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Bulgaria
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Canada
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Chad
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Chile
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        China
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Costa Rica
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Croatia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Cyprus
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Czech Republic
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Denmark
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Dominican Republic
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Egypt
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Estonia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Faroe Islands
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Finland
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        France
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Georgia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Germany
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Greece
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Greenland
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Hong Kong
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Hungary
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Iceland
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        india
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Indonesia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Iran
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Iraq
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Ireland
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Israel
-        <div class="summary-subtext">24 ארוסימ</div>
-    </summary> -->
-    <div class="buttons">
-        <button onclick="goToChannel('https://s.xittv.net/185/index.m3u8?k=1759587109p081i01i721i77S8927ad37dde0fb1a4d28914cf04f1a73')">
-            <img src="https://tse1.mm.bing.net/th/id/OIP.PBsNdiWHersw6fCWuyrluwAAAA?rs=1&pid=ImgDetMain&o=7&rm=3">
-        </button> <!--9-->
-        <button onclick="goToChannel('https://r.il.cdn-redge.media/livehls/oil/calcala-live/live/channel10/live.livx/playlist.m3u8?renditions')">
-            <img src="https://jiss.org.il/wp-content/uploads/2025/05/%D7%9C%D7%95%D7%92%D7%95.jpg">
-        </button> <!--10-->
-        <button onclick="goToChannel('https://kan11w.media.kan.org.il/hls/live/2105694/2105694/master.m3u8')">
-            <img src="https://yt3.ggpht.com/a/AATXAJwy3WripPSvGdMDw7doqBD5mZGi-_TzDseSlnGzcw=s900-c-k-c0xffffffff-no-rj-mo">
-        </button> <!--11-->
-        <button onclick="goToChannel('https://tinyurl.com/mr2v8zr7')">
-            <img src="https://www.thefinance.co.il/wp-content/uploads/2022/08/27973411_10157270858098677_1532974360303982497_n.png">
-        </button> <!--12-->
-        <button onclick="goToChannel('https://reshet.g-mana.live/media/6f10d1da-0803-48d9-9272-57a811958974/mainManifest.m3u8')">
-            <img src="https://yt3.googleusercontent.com/WxYpVo5s6MWZY2l2MBvAqO5fmQQGiI6nBlBxFrjWdReAz1cc1aefn6PYy6qsmW4w6Pgifk5Ckg=s900-c-k-c0x00ffffff-no-rj">
-        </button> <!--13-->
-        <button onclick="goToChannel('https://n-121-4.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8?bitrate=1928000&audioId=1&videoId=8')">
-            <img src="https://tse2.mm.bing.net/th/id/OIP.64FKDixzzyBZY1vkp_oFLgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3">
-        </button> <!--14-->
-        <button onclick="goToChannel('https://bcovlive-a.akamaihd.net/d89ede8094c741b7924120b27764153c/eu-central-1/5377161796001/profile_0/chunklist.m3u8')">
-            <img src="https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/05/i24newsfrancais2-300x300.png">
-        </button> <!--15-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/551_xxxhdpi.png">
-        </button> <!--16-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/615_xxxhdpi.png">
-        </button> <!--17-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/655_xxxhdpi.png">
-        </button> <!--21-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/543_xxxhdpi.png">
-        </button> <!--22-->
-        <button onclick="goToChannel('https://mako-streaming.akamaized.net/direct/hls/live/2035340/ch24live/hdntl=exp=1754394846~acl=%2f*~data=hdntl~hmac=e99b17a07fa9ebd7579a9b186c790c6e9a6ab345c2ccb0c05488a6ba38625823/video_7201280_p_1.m3u8')">
-            <img src="https://israel-now.co.il/wp-content/uploads/2020/12/x24-new.jpg.pagespeed.ic.q-V1KWGSf-.jpg">
-        </button> <!--24-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/553_xxxhdpi.png">
-        </button> <!--25-->
-        <button onclick="goToChannel('https://d3snfszc9pg25z.cloudfront.net/out/v1/11329fc2b33a4eca9a2d715c652aa167/playlist_2.m3u8?_uid=f0097be3-0d9e-4ead-96f0-a129b58c0d2b&rK=a7&_did=14c1bd24a1d405201a670183bd60c4aac007ea0b')">
-            <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/13952b55e055494d8866f8dc5241baf1/version/10/width/320/height/180/quality/70">
-        </button> <!--26-->
-        <button onclick="goToChannel('https://d2dffl3588mvfk.cloudfront.net/out/v1/d8e15050ca4148aab0ee387a5e2eb46b/index_1.m3u8')">
-            <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/8f1d7b6472ef4f679c12688c43829e44/version/4/width/320/height/180/quality/70">
-        </button> <!--27-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--28-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/700_xxxhdpi.png">
-        </button> <!--29-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--30-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/E_ENTERTAINMENT_TELEVISION/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/59_xxxhdpi.png">
-        </button> <!--31-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/616_xxxhdpi.png">
-        </button> <!--32-->
-        <button onclick="goToChannel('https://makan.media.kan.org.il/hls/live/2024680/2024680/source1_4k/chunklist.m3u8')">
-            <img src="https://israel-now.co.il/wp-content/uploads/2020/12/33-makan.jpg">
-        </button> <!--33-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/639_xxxhdpi.png">
-        </button> <!--34-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/38_xxxhdpi.png">
-        </button> <!--35-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/333_xxxhdpi.png">
-        </button> <!--36-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/584_xxxhdpi.png">
-        </button> <!--37-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/674_xxxhdpi.png">
-        </button> <!--38-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/673_xxxhdpi.png">
-        </button> <!--39-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/730_xxxhdpi.png">
-        </button> <!--40-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/National_Geographic/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/6_xxxhdpi.png">
-        </button> <!--41-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--42-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/Nat_Geo_Wild/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/728_xxxhdpi.png">
-        </button> <!--43-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/history_channel/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/61_xxxhdpi.png">
-        </button> <!--44-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--45-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/697_xxxhdpi.png">
-        </button> <!--47-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/184_xxxhdpi.png">
-        </button> <!--48-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/640_xxxhdpi.png">
-        </button> <!--49-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/153_xxxhdpi.png">
-        </button> <!--50-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/608_xxxhdpi.png">
-        </button> <!--51-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/236_xxxhdpi.png">
-        </button> <!--52-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/278_xxxhdpi.png">
-        </button> <!--53-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/280_xxxhdpi.png">
-        </button> <!--54-->
-        <button onclick="goToChannel('https://rgelive.akamaized.net/hls/live/2043095/live3/playlist.m3u8')">
-            <img src="https://play-lh.googleusercontent.com/dj9FOlzV78rIdJPj8S4AU1nqeU9E4ulReB4vfgx_gBnPnI4hBRVLU_-mo2eLhyiS0JM">
-        </button> <!--55-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/500_xxxhdpi.png">
-        </button> <!--56-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/71_xxxhdpi.png">
-        </button> <!--57-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/125_xxxhdpi.png">
-        </button> <!--58-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/196_xxxhdpi.png">
-        </button> <!--59-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/512_xxxhdpi.png">
-        </button> <!--60-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/424_xxxhdpi.png">
-        </button> <!--61-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/719_xxxhdpi.png">
-        </button> <!--62-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/154_xxxhdpi.png">
-        </button> <!--63-->
-        <button onclick="goToChannel('https://amg01742-walla-wallanews-ono-btlna.amagi.tv/playlist/amg01742-walla-wallanews-ono/playlist.m3u8')">
-            <img src="https://play-lh.googleusercontent.com/mR-rY1UKWjzwK2jukGPJNMSYf8u54FpqGGKDXgSOHJZmiZPXASFTaPLrn8A_s1Ji4g">
-        </button> <!--64-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/150_xxxhdpi.png">
-        </button> <!--65-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/457_xxxhdpi.png">
-        </button> <!--66-->
-        <button onclick="goToChannel('https://edge2.il.kab.tv/live/tv66-heb-high/playlist.m3u8')">
-            <img src="https://israeltv.online/wp-content/uploads/2022/07/xkabbalah-2.jpg.pagespeed.ic_.rX0OVF4k2M1-2.jpg">
-        </button> <!--?-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--67-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--68-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--68-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/458_xxxhdpi.png">
-        </button> <!--69-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/642_xxxhdpi.png">
-        </button> <!--70-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/628_xxxhdpi.png">
-        </button> <!--71-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/465_xxxhdpi.png">
-        </button> <!--72-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/166_xxxhdpi.png">
-        </button> <!--73-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/62_xxxhdpi.png">
-        </button> <!--74-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--75-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/348_xxxhdpi.png">
-        </button> <!--76-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/678_xxxhdpi.png">
-        </button> <!--78-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/760_xxxhdpi.png">
-        </button> <!--79-->
-        <button onclick="goToChannel('https://kan23.media.kan.org.il/hls/live/2024691-b/2024691/source1_4k/chunklist.m3u8')">
-            <img src="https://www.ariel.ac.il/wp/communication/wp-content/uploads/sites/15/2020/01/%D7%9B%D7%90%D7%9F-%D7%97%D7%99%D7%A0%D7%95%D7%9B%D7%99%D7%AA.jpg">
-        </button> <!--80-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/41_xxxhdpi.png">
-        </button> <!--81-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/39_xxxhdpi.png">
-        </button> <!--82-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/140_xxxhdpi.png">
-        </button> <!--83-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/DISNEY_JR/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/141_xxxhdpi.png">
-        </button> <!--84-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/NICK_JR/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/142_xxxhdpi.png">
-        </button> <!--85-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/600_xxxhdpi.png">
-        </button> <!--86-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--87-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/665_xxxhdpi.png">
-        </button> <!--88-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/DISNEY/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/42_xxxhdpi.png">
-        </button> <!--89-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/48_xxxhdpi.png">
-        </button> <!--90-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/NICKELODEON/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/144_xxxhdpi.png">
-        </button> <!--91-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--92-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/163_xxxhdpi.png">
-        </button> <!--93-->
-        <button onclick="goToChannel('https://fl25.moveonjoy.com/Teen_Nick/index.m3u8')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/318_xxxhdpi.png">
-        </button> <!--94-->
-        <button onclick="goToChannel('')">
-            <img src="https://playapplication.hot.net.il/_media/ChannelLogo/100_xxxhdpi.png">
-        </button> <!--95-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--96-->
-        <button onclick="goToChannel('https://htv-live.cybercdn.live/HidabrootIL/Live97/HidabrootIL/Live97_720p/chunks.m3u8')">
-            <img src="https://gurutv.online/wp-content/uploads/hidabroot.jpg">
-        </button> <!--97-->
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button> <!--98-->
-        <button onclick="goToChannel('https://kneset.gostreaming.tv/p2-kneset/_definst_/myStream/chunklist.m3u8')">
-            <img src="https://yt3.googleusercontent.com/bGbnIaUVFJhFhTSaSjQk6O-ZZ3UoJpQU1T4CNdKfJ91lbzsJvXQ35x_OZ4RCK2ga8l1KP9--=s900-c-k-c0x00ffffff-no-rj">
-        </button> <!--99-->
-        <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/erets/hdntl=exp=1754679384~acl=%2f*~data=hdntl~hmac=b1aaca3008be6e630f043e3db814d7a5fe19edeb99ce68c0311b51ef21083759/video_5761024_p_0.m3u8')">
-            <img src="https://img.mako.co.il/2024/10/28/chanel_Eretz_i_NEW.jpg">
-        </button>
-        <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/savri/hdntl=exp=1754679480~acl=%2f*~data=hdntl~hmac=313236fb23cac84b7ba6e8cb6a1e685c67e0d0565f3afa16d19aeb1f23c00fa1/video_5761024_p_0.m3u8')">
-            <img src="https://img.mako.co.il/2024/10/28/chanel_savri_i_NEW.jpg">
-        </button>
-        <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/hatuna/hdntl=exp=1754679561~acl=%2f*~data=hdntl~hmac=c29830a311f223bf17b88992347511d2d886970a4a1a2802df9717e5ed80811f/video_5761024_p_0.m3u8')">
-            <img src="https://img.mako.co.il/2024/10/28/chanel_hatunami_i_NEW.jpg">
-        </button>
-        <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/ninja/hdntl=exp=1754686365~acl=%2f*~data=hdntl~hmac=10abe82b322f7c43b14a7a80e2a41c211484112eb589632ce457a883ae82515a/video_5761024_p_0.m3u8')">
-            <img src="https://img.mako.co.il/2024/10/28/chanel_ninja_i_NEW.jpg">
-        </button>
-        <button onclick="goToChannel('https://mako-streaming.akamaized.net/free/hls/live/2111419/kohav/hdntl=exp=1754740740~acl=%2f*~data=hdntl~hmac=5efb24fa89617bfba790b87354247e41118939622fd0486b8f87c7565c8db9a5/video_5761024_p_0.m3u8')">
-            <img src="https://img.mako.co.il/2024/10/28/chanel_kohav_i_NEW.jpg">
-        </button>
-        <button onclick="goToChannel('https://d15ds134q59udk.cloudfront.net/media/3b45de9e-c944-4fdc-a344-7c3042b5b104/mainManifest.m3u')">
-            <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/fc0d8109a18a4db3b585f154d32bd5b1/version/41/width/320/height/180/quality/70">
-        </button>
-        <button onclick="goToChannel('https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index_2.m3u8')">
-            <img src="https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/f7f5a916948b4bd9a0db18be35ef3d3f/version/4/width/320/height/180/quality/70">
-        </button>
-    </div> <!--
-</details>
-
-<details>
-    <summary>
-        Italy
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Japan
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Kosovo
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Latvia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Lithuania
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Luxembourg
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Macau
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Malta
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Mexico
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Moldova
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Monaco
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Montenegro
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Netherlands
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        North Korea
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        North Macedonia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Norway
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Paraguay
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Peru
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Poland
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Portugal
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Qatar
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('https://live-hls-apps-ajm2-fa.getaj.net/AJM2/index.m3u8')"> https://live-hls-web-aje.getaj.net/AJE/01.m3u8
-            <img src="https://th.bing.com/th/id/R.1d983d658912806acd72b3af67e5f8b4?rik=jFBWxbYnyVvHWQ&riu=http%3a%2f%2fwww.livenewsmag.com%2fwp-content%2fuploads%2f2016%2f09%2fAljazera-Arabic-Live-Stream.png&ehk=gwonYvhYFaaDQuOZga%2fRfIAYQsBA3DoaB%2bruNat%2b7F4%3d&risl=&pid=ImgRaw&r=0">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Romania
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Russia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        San Marino
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Saudi Arabia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Serbia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Slovakia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Slovenia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Somalia
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        South Korea
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Spain
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Sweden
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Switzerland
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Taiwan
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Trinidad And Tobago
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Turkey
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Ukraine
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        United Arab Emirates
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        United Kingdom
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details>
-
-<details>
-     <summary>
-        United States
-        <div class="summary-subtext">7 ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('https://fl7.moveonjoy.com/DISNEY/index.m3u8')">
-            <img src="https://images.fastcompany.com/image/upload/f_auto,q_auto,c_fit/wp-cms/uploads/2024/03/p-1-91069815-disney-plus-brand-refresh.jpg">
-        </button>
-        <button onclick="goToChannel('https://fl7.moveonjoy.com/NICKELODEON/index.m3u8')">
-            <img src="https://cdn.mos.cms.futurecdn.net/u3xQKM9WfmqKc8FPXbcqyY.jpg">
-        </button>
-        <button onclick="goToChannel('https://fl7.moveonjoy.com/Teen_Nick/index.m3u8')">
-            <img src="https://cdn.mos.cms.futurecdn.net/u3xQKM9WfmqKc8FPXbcqyY.jpg">
-        </button>
-        <button onclick="goToChannel('https://fl7.moveonjoy.com/National_Geographic/index.m3u8')">
-            <img src="https://logos-world.net/wp-content/uploads/2020/09/National-Geographic-Logo.png">
-        </button>
-        <button onclick="goToChannel('https://d1vnr7amzbx49s.cloudfront.net/index.m3u8')">
-            <img src="https://pluspng.com/img-png/cnn-logo-png-cnn-logos-brands-and-logotypes-4390x4390.png">
-        </button>
-        <button onclick="goToChannel('https://d3tlzddkbbpp5n.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-9uzjfw11uj9nn/LiveNOW_from_FOX.m3u8')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/2048px-Fox_News_Channel_logo.svg.png">
-        </button>
-        <button onclick="goToChannel('http://stitcher-ipv4.pluto.tv/v1/stitch/embed/hls/channel/5df97894467dfa00091c873clivestitch/master.m3u8?deviceDNT=%7BTARGETOPT%7D&deviceModel=samsung&deviceVersion=unknown&appVersion=unknown&deviceType=samsung-tvplus&deviceMake=samsung')">
-            <img src="https://logos-world.net/wp-content/uploads/2024/01/NBC-News-Logo-1986.png">
-        </button>
-        <button onclick="goToChannel('http://iptv-line.com:7899/live/thomasdj19821/vODCWh1y/49294.m3u8')">
-            <img src="https://pluspng.com/img-png/cnn-logo-png-cnn-logos-brands-and-logotypes-4390x4390.png">
-        </button>
-    </div>
-</details>
-
-<details>
-    <summary>
-        Venezuela
-        <div class="summary-subtext"> ארוסימ</div>
-    </summary>
-    <div class="buttons">
-        <button onclick="goToChannel('')">
-            <img src="">
-        </button>
-    </div>
-</details> -->
-
-<script>
-function goToChannel(url) {
-    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
-    window.location.href = 'player.html?src=' + encodeURIComponent(url);
-}
-</script>
 
+    <h1>ערוצים</h1>
+    <div id="loading">טוען ערוצים...</div>
+    <div id="countries-container"></div>
+
+    <script>
+        const M3U_URL = 'https://iptv-org.github.io/iptv/index.country.m3u';
+        const DEFAULT_LOGO = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="60"><rect width="100" height="60" fill="%23334155" rx="4"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="16" fill="%2394a3b8">TV</text></svg>`;
+
+        async function fetchAndRenderData() {
+            try {
+                const response = await fetch(M3U_URL);
+                if (!response.ok) throw new Error('שגיאה בטעינת קובץ הערוצים');
+
+                const data = await response.text();
+                const lines = data.split('\n');
+
+                const groupedByCountry = {};
+                let currentChannel = {};
+
+                lines.forEach(line => {
+                    line = line.trim();
+
+                    if (line.startsWith('#EXTINF:')) {
+                        const groupMatch = line.match(/group-title="([^"]+)"/);
+                        const country = groupMatch ? groupMatch[1] : 'אחר / לא ידוע';
+
+                        const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                        const logo = logoMatch ? logoMatch[1] : '';
+
+                        const commaIndex = line.lastIndexOf(',');
+                        const name = commaIndex !== -1 ? line.substring(commaIndex + 1).trim() : 'ערוץ ללא שם';
+
+                        currentChannel = { country, name, logo };
+                    } else if (line !== '' && !line.startsWith('#')) {
+                        currentChannel.url = line;
+
+                        if (!groupedByCountry[currentChannel.country]) {
+                            groupedByCountry[currentChannel.country] = [];
+                        }
+
+                        groupedByCountry[currentChannel.country].push(currentChannel);
+                        currentChannel = {};
+                    }
+                });
+
+                // הוספת ערוצים ידנית לישראל
+                if (!groupedByCountry['Israel']) {
+                    groupedByCountry['Israel'] = [];
+                }
+
+                groupedByCountry['Israel'].splice(2, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Big Brother (1080p) [Not 24/7]',
+                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/8f1d7b6472ef4f679c12688c43829e44/version/4/width/320/height/180/quality/70',
+                        url: ''
+                    }
+                );
+                
+                groupedByCountry['Israel'].splice(5, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Comedy Channel (1080p)',
+                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Comedy_e.jpg',
+                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_comedy/hdntl=exp=1787170656~acl=%2f*~data=hdntl~hmac=0353d34da70200d13d53d2e2e7fff2c947c4511a03e74c3ad68fc999e6f461b9/video_5761024_p_0.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(6, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Comedy Channel (1080p)',
+                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/fc0d8109a18a4db3b585f154d32bd5b1/version/41/width/320/height/180/quality/70',
+                        url: 'https://d15ds134q59udk.cloudfront.net/media/3b45de9e-c944-4fdc-a344-7c3042b5b104/mainManifest.m3u'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(7, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Drama Channel (1080p)',
+                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Drama_e.jpg',
+                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_drama/hdntl=exp=1787171130~acl=%2f*~data=hdntl~hmac=2623ed9cab7a97eb192bb7f9edcb13b07b81ee62b6787cdf57ec209c8ea7a1b8/video_5761024_p_0.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(8, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Economy Channel (1080p)',
+                        logo: 'https://jiss.org.il/wp-content/uploads/2025/05/%D7%9C%D7%95%D7%92%D7%95.jpg',
+                        url: 'https://r.il.cdn-redge.media/livehls/oil/calcala-live/live/channel10/live.livx/playlist.m3u8?renditions'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(9, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Eretz Nehederet Channel (1080p)',
+                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Eretz_e.jpg',
+                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/erets/hdntl=exp=1787171547~acl=%2f*~data=hdntl~hmac=70eddb9f0bbf8cc94cfc2c685f49c71ee7a0b42bd270bce665b44b7a9a5b5281/video_5761024_p_0.m3u8'
+                    }
+                );
+                
+                groupedByCountry['Israel'].splice(10, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Food Channel (1080p)',
+                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_food_e.jpg',
+                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_food/hdntl=exp=1787171372~acl=%2f*~data=hdntl~hmac=d90ed560bad41f87632adc533f22f058aae1120d31435255a366678cd893a360/video_5761024_p_0.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(19, 0,
+                    {
+                        country: 'Israel',
+                        name: 'i24NEWS English (1080p)',
+                        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/LOGO_i24NEWS.png/960px-LOGO_i24NEWS.png',
+                        url: 'https://i24newsenglish-cdn.encoders.immergo.tv/2/streamPlaylist.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(24, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Music Channel (1080p)',
+                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Music_e.jpg',
+                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_music/hdntl=exp=1787171225~acl=%2f*~data=hdntl~hmac=16fff2d42b0dadc0881aae8b232080e3159feb498c0237c60474ae87ef213dd0/video_5761024_p_0.m3u8',
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(28, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Savri Maranan Channel (1080p)',
+                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Savri_e.jpg',
+                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/savri/hdntl=exp=1787171632~acl=%2f*~data=hdntl~hmac=5f90522f63f916803999e1243e4948aa938bf1f28cb59a2c3567bed457e2acf8/video_5761024_p_0.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(29, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Reality Channel (1080p)',
+                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/8f1d7b6472ef4f679c12688c43829e44/version/4/width/320/height/180/quality/70',
+                        url: 'https://d2dffl3588mvfk.cloudfront.net/out/v1/d8e15050ca4148aab0ee387a5e2eb46b/index_1.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(34, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Vacation Channel (1080p)',
+                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/f7f5a916948b4bd9a0db18be35ef3d3f/version/4/width/320/height/180/quality/70',
+                        url: 'https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index_2.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].splice(37, 0,
+                    {
+                        country: 'Israel',
+                        name: 'Walla (1080p)',
+                        logo: 'https://play-lh.googleusercontent.com/mR-rY1UKWjzwK2jukGPJNMSYf8u54FpqGGKDXgSOHJZmiZPXASFTaPLrn8A_s1Ji4g',
+                        url: 'https://live.wcdn.co.il/ulpan/prog_index.m3u8'
+                    }
+                );
+
+                renderDOM(groupedByCountry);
+
+            } catch (error) {
+                document.getElementById('loading').innerText = 'אירעה שגיאה: ' + error.message;
+            }
+        }
+
+        function renderDOM(groupedByCountry) {
+            const container = document.getElementById('countries-container');
+            const sortedCountries = Object.keys(groupedByCountry).sort();
+
+            sortedCountries.forEach(countryName => {
+                const channels = groupedByCountry[countryName];
+
+                const details = document.createElement('details');
+                const summary = document.createElement('summary');
+                summary.innerText = `${countryName} (${channels.length} ערוצים)`;
+
+                const grid = document.createElement('div');
+                grid.className = 'channels-grid';
+
+                channels.forEach(channel => {
+                    const card = document.createElement('div');
+                    card.className = 'channel-card';
+
+                    const img = document.createElement('img');
+                    img.loading = 'lazy';
+                    img.alt = channel.name;
+                    img.referrerPolicy = 'no-referrer';
+
+                    img.addEventListener('error', function() {
+                        this.onerror = null;
+                        this.src = DEFAULT_LOGO;
+                    });
+
+                    img.src = channel.logo ? channel.logo : DEFAULT_LOGO;
+
+                    const strongName = document.createElement('strong');
+                    strongName.innerText = channel.name;
+
+                    // הקישור מוביל לקובץ player.html ומעביר את שם הערוץ והכתובת
+                    const playLink = document.createElement('a');
+                    playLink.className = 'play-link';
+                    playLink.innerText = '▶ נגן ערוץ';
+                    playLink.href = `player.html?url=${encodeURIComponent(channel.url)}&name=${encodeURIComponent(channel.name)}`;
+
+                    card.appendChild(img);
+                    card.appendChild(strongName);
+                    card.appendChild(playLink);
+                    grid.appendChild(card);
+                });
+
+                details.appendChild(summary);
+                details.appendChild(grid);
+                container.appendChild(details);
+            });
+
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        fetchAndRenderData();
+    </script>
 </body>
 </html>
