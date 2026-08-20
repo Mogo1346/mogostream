@@ -1,0 +1,136 @@
+﻿Module.controller('Controller', function ($scope, $window, $location, state, $http, $q, orderByFilter) {
+    $scope.miktzoa = [];    
+    $scope.miktzoachosen = '';
+    $scope.safa = [];
+    $scope.safachosen = '';
+    $scope.sheelon = '';
+    $scope.tempsheelon = '';
+    $scope.items = [];
+    $scope.total = null;
+    $scope.pageSize = 20;
+    $scope.page = 0;
+    $scope.noMore = false;
+    $scope.searched = false;
+    $scope.waiting = true;
+    $scope.searched = false;
+    $scope.isMobile = false;
+    function init() {
+        $scope.isMobile = isMobile;
+        showAjax();
+        var mi = $http({
+            method: 'POST',
+            url: 'Ajax.ashx?miktzoa=1',
+            headers: { 'Content-Type': 'application/json' }
+        }), sa = $http({
+            method: 'POST',
+            url: 'Ajax.ashx?safa=1',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        $q.all([mi, sa]).then(function (response) {
+            $scope.miktzoa = response[0].data;
+            $scope.safa = response[1].data;
+            $scope.safachosen = '1';
+            $scope.waiting = false;
+            $scope.search();
+        });
+    }
+    $scope.search = function () {
+        $scope.page = 1;
+        $scope.noMore = false;
+        $scope.items = [];
+        $scope.itur();
+    }
+    $scope.itur = function () {
+        $scope.searched = true;
+        if (!$scope.noMore) {
+            showAjax();
+            $scope.waiting = true;
+            $http({
+                method: 'GET',
+                url: 'Ajax.ashx?search=1&sheelon=' + $scope.sheelon + '&miktzoa=' + $scope.miktzoachosen + '&safa=' + $scope.safachosen + '&pagesize=' + $scope.pageSize + '&page=' + $scope.page,
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(function (response) {
+                if (!$scope.noMore) {
+                    var items = response.data;
+                    if (items.length < 1) {
+                        $scope.noMore = true;
+                        if ($scope.page == 1) {
+                            $scope.total = 0;
+                        }
+                    }
+                    else {
+                        if ($scope.page == 1) {
+                            $scope.total = items[0].total;
+                        }
+                        for (var i = 0; i < items.length; i++) {
+                            $scope.items.push(items[i]);
+                        }
+                    }
+                    $scope.waiting = false;
+                }
+            });
+        }
+    };
+
+    $scope.getMore = function () {
+        if ($scope.searched) {
+            $scope.page++;
+            $scope.itur();
+        }
+        else {
+            $scope.searched = true;
+        }
+    }
+
+    $scope.getMoed = function (r) {
+        return r.moed
+    }
+
+    $scope.getTotal = function () {
+        var t = $scope.total == null ? '' : ($scope.total < 1 ? 'לא נמצאו תוצאות' : 'נמצאו ' + $scope.total + ' תוצאות');
+        return t;
+    }
+
+    $scope.keyup = function (e) {
+        if (event.currentTarget.value != $scope.tempsheelon && $scope.sheelon != '') {
+            $scope.tempsheelon = '';
+            $scope.sheelon = '';
+            event.currentTarget.value = '';
+        }
+    }
+
+    var search = function (request, response) {
+        var callback = function (data) {
+            response(data);
+        };
+        $http.get("Ajax.ashx?autocomplete=1&term=" + $scope.term)
+            .success(callback);
+    }
+
+    var select = function (event, ui) {
+        if (ui.item) {
+            $scope.tempsheelon = event.currentTarget.value;
+            $scope.sheelon = ui.item.id;
+        }
+    }
+
+    var change = function (event, ui) {
+        //if ($scope.sheelon == '') {
+        if ($('#sheelon').val() == '') {
+            event.currentTarget.value = '';
+            $scope.tempsheelon = '';
+            $scope.sheelon = '';
+        }
+    }
+
+    $scope.autocompleteOptions = {
+        minLength: 3,
+        source: search,
+        select: select,
+        change: change,
+        position: { my: "right top", at: "right bottom" }
+    }
+
+    init();
+});
