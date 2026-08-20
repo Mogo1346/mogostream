@@ -1,0 +1,285 @@
+﻿body {
+    font-family: 'Assistant', Arial;
+    font-size: 14px;
+}
+#wrapper{
+    max-width: 1200px;
+    margin:0 auto;
+}
+* {
+    font-family: 'Assistant', Arial;
+}
+#header{
+    position: relative;
+}
+#divForm
+{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    opacity: .9;
+}
+input, select, label{
+    vertical-align:middle;
+    font-size: 1.6em;
+}
+input[type="button"]
+{
+    cursor: pointer;
+}
+.label{
+    font-weight: bold;
+}
+    #ajaxLoader
+    {
+        width: 32px;
+        height:32px;
+        position: absolute;
+    }
+    h1{
+        margin: 0;
+        padding: 0;
+    }
+    h1 img{
+        width: 100%;
+        display: block;
+    }
+    #search-div
+    {
+        background-color: #fbb22c;
+        min-height:81px;
+        position: relative;
+        overflow: auto;
+    }
+    .field{
+        float: right;
+        padding: 0;
+        margin: 0 1%;
+        line-height: 81px;
+        width: 19%;
+    }
+    .field input, .field select{
+        width: 100%;
+        height: 46px;
+        border: 0;
+        padding: 0;
+    }
+        .field input[type="text"] {
+            padding-right: 5px;
+        }
+    div.miktzoa{
+        width: 33%;
+        margin-right: 2%;
+    }
+    div.sheelon{
+        width: 23%;
+    }
+.safa {
+    width: 15%;
+}
+    div.search{
+        margin-left: 2%;
+    }
+    .search input{
+        background-color: #0781c3;
+        color: #ffffff;
+    }
+    .items{
+        display: table;
+        width: 100%;
+    }
+    .resultbox
+    {
+        background-color: #F1F6FA;
+        display: table-row;        
+    }
+    .labelbox
+    {        
+        display: table-cell;
+        border-top: 10px solid #ffffff;
+        padding: 20px; 
+        line-height: 35px;
+        font-size: 1.4em;
+    }
+    .buttonbox{
+        border-top: 10px solid #ffffff;
+        background-color: #F1F6FA;
+        display: table-cell;
+        padding: 20px; 
+        white-space: nowrap;
+        text-align: left;
+    }
+    .buttonbox img{
+        vertical-align: middle;
+        margin-left: 10px;
+    }
+    .buttonbox a{        
+        padding: 5px 5px 5px 35px;
+        display: inline-block;
+        font-weight: bold;
+        font-size: 1.3em;
+        text-decoration: none;
+    }
+    .sheelonbox {
+        color: #ffffff;
+        background: url(images/arrow1.png) no-repeat 5px center;
+        background-color: #1D5982;  
+        margin-left: 2%;      
+    }
+    .pitronbox {
+        background: url(images/arrow2.png) no-repeat 5px center;
+        background-color: #F6C567;
+        color: #465752;
+    }
+    .pitronhide
+    {
+        display: inline-block;
+        padding: 5px 5px 5px 35px;
+        width: 135px;
+    }
+
+    .total{
+        color: #023855;
+        font-size: 1.4em;
+    }
+    .total p{
+        margin-bottom: 0;
+    }
+
+   
+
+@media screen and (max-width: 1070px) {
+    input, select{
+    font-size: 1.4em;
+}
+    .resultbox{
+        display: block;
+        border-top: 10px solid #ffffff;
+        padding: 0 10px 0 0;
+        overflow: auto;  
+    }
+    .labelbox{
+        display: block;
+        float: right;
+        width: 50%;
+        padding: 4px 0;
+        border-top: 0;
+    }
+    .buttonbox
+    {
+        display: block;
+        width: 50%;
+        float: right;
+        border-top: 0;
+        padding: 10px 0;
+        text-align: right;
+    }
+    .buttonbox a {
+        width: auto;
+    }
+}  
+
+@media screen and (max-width: 990px) {
+    input, select{
+    font-size: 1.2em;
+}
+}  
+
+@media screen and (max-width: 760px) {
+    body {
+    font-size: 11px;
+}
+    input, select{
+    font-size: 1.6em;
+}
+    .field input[type="text"] {
+            padding-right: 1%;
+            width: 99%;
+        }
+    #divForm{
+        position: static;
+    }   
+   
+   .pitronhide{
+       width: 47%;
+       padding: 1%;
+   }
+   div.field{
+       float: none;
+       width: 96%;
+       margin: 0 auto;
+       line-height: 60px;
+   }
+   div.search {
+        width: 50%;
+    }
+   .items{
+        display: block;
+        font-size: 1.2em;
+    }
+    .resultbox
+    {
+        display: block;
+        padding: 5px 0;          
+        border-bottom: solid 10px #ffffff;    
+    }
+    .labelbox
+    {        
+        display: block;
+        float: none;
+         white-space: normal;
+       border: none;
+        width: auto;
+        padding: 0;
+        line-height: normal;
+        margin: 0 0 5px 0;
+    }
+    .buttonbox
+   {
+       border: none;
+       display: block;
+       position: relative;
+       padding:0;
+       float: none;
+       width: auto;
+       margin: 5px 0 0 0;
+       line-height: normal;
+       text-align: right;
+   }
+   .buttonbox a{
+       width: 46%;
+       max-width: 150px;
+       padding: 1%;
+       float: right;
+       font-size: 1em;
+       margin-bottom: 5px;
+   }
+   .buttonbox a.sheelonbox{
+      
+   }
+    .pitronhide {
+    display: none;
+    }
+}
+
+ ::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: #000000;
+  text-align: right; 
+  padding: 0 5px;
+}
+
+::-moz-placeholder { /* Firefox 19+ */
+  color: #000000;
+  text-align: right; 
+  padding: 0 5px;
+}
+:-ms-input-placeholder { /* IE 10+ */
+  color: #000000;
+  text-align: right; 
+  padding: 0 5px;
+}
+:-moz-placeholder { /* Firefox 18- */
+  color: #000000;
+  text-align: right; 
+  padding: 0 5px;
+}

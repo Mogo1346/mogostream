@@ -1,0 +1,70 @@
+﻿var Module = angular.module('Module', ['ngRoute', 'angular.filter', 'infinite-scroll'])
+.directive('changeHeightDirective', ['$timeout', function (timer) {
+    return function (scope, element, attrs) {
+        if (scope.$last) {
+            timer(sendMessage, 0);
+        }
+    };
+}]);
+Module.config(function ($routeProvider) {
+    isMobile = (function () {
+        result = $(window).width() < 481;
+        return result;
+    })();
+    $routeProvider
+    .when('/',
+    {
+        controller: 'Controller',
+        templateUrl: 'html.html'
+    })
+    .otherwise({ redirectTo: '/' });
+});
+Module.factory('state', function () {
+    var data = {};
+    return data;
+});
+Module.filter('orderby', function () {
+    return function (input, attribute) {
+        if (!angular.isObject(input)) return input;
+        var array = [];
+        for (var objectKey in input) {
+            array.push(input[objectKey]);
+        }
+        array.sort(function (a, b) {
+            a = parseInt(a[attribute]);
+            b = parseInt(b[attribute]);
+            return a - b;
+        });
+        return array;
+    }
+});
+
+Module.factory('autoCompleteDataService', [function () {
+    return {
+        getSource: function () {
+            //this is where you'd set up your source... could be an external source, I suppose. 'something.php'
+            return ['apples', 'oranges', 'bananas'];
+        }
+    }
+}]);
+
+var uiAutocomplete = function () {
+    return {
+        require: '?ngModel',
+        link: function (scope, element, attrs, controller) {
+            var getOptions = function () {
+                return angular.extend({}, scope.$eval(attrs.uiAutocomplete));
+            };
+            var initAutocompleteWidget = function () {
+                var opts = getOptions();
+                element.autocomplete(opts);
+                if (opts._renderItem) {
+                    element.data("autocomplete")._renderItem = opts._renderItem;
+                }
+            };
+            // Watch for changes to the directives options
+            scope.$watch(getOptions, initAutocompleteWidget, true);
+        }
+    };
+};
+Module.directive('uiAutocomplete', [uiAutocomplete]);
