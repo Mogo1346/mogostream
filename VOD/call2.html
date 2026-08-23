@@ -3,2916 +3,800 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>My Discord</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
     margin: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-
     font-family: Arial, sans-serif;
-
     background: #313338;
     color: #f2f3f5;
 }
 
 .app {
     display: grid;
-
-    grid-template-columns:
-        72px
-        240px
-        1fr;
-
+    grid-template-columns: 72px 240px 1fr;
     height: 100vh;
 }
 
-
-/* =========================
-   SERVERS
-========================= */
-
+/* SERVERS */
 .servers {
     background: #1e1f22;
-
     padding: 12px;
-
     display: flex;
     flex-direction: column;
-
     align-items: center;
-
     gap: 10px;
 }
 
 .server {
-    width: 48px;
-    height: 48px;
-
+    width: 48px; height: 48px;
     border-radius: 16px;
-
     background: #313338;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-weight: bold;
-
     cursor: pointer;
-
     transition: .15s;
 }
+.server:hover, .server.active { background: #5865f2; border-radius: 14px; }
 
-.server:hover,
-.server.active {
-    background: #5865f2;
-    border-radius: 14px;
-}
-
-
-/* =========================
-   SIDEBAR
-========================= */
-
+/* SIDEBAR */
 .sidebar {
     background: #2b2d31;
-
     display: flex;
     flex-direction: column;
-
     min-width: 0;
 }
 
 .server-name {
     height: 48px;
-
     padding: 0 16px;
-
     display: flex;
     align-items: center;
-
     font-weight: bold;
-
-    border-bottom:
-        1px solid #202225;
+    border-bottom: 1px solid #202225;
 }
 
-.channels {
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 12px 8px;
-}
-
-.category {
-    color: #949ba4;
-
-    font-size: 11px;
-    font-weight: bold;
-
-    padding: 10px 8px 5px;
-}
+.channels { flex: 1; overflow-y: auto; padding: 12px 8px; }
+.category { color: #949ba4; font-size: 11px; font-weight: bold; padding: 10px 8px 5px; }
 
 .channel {
     height: 38px;
-
     border-radius: 5px;
-
     display: flex;
     align-items: center;
-
     gap: 8px;
-
     padding: 0 10px;
-
     color: #b5bac1;
-
     cursor: pointer;
 }
+.channel:hover { background: #35373c; color: white; }
+.channel.active { background: #404249; color: white; }
+.hash { color: #949ba4; font-size: 22px; }
 
-.channel:hover {
-    background: #35373c;
-    color: white;
-}
-
-.channel.active {
-    background: #404249;
-    color: white;
-}
-
-.hash {
-    color: #949ba4;
-
-    font-size: 22px;
-}
-
-
-/* =========================
-   USER
-========================= */
-
+/* USER */
 .user {
     height: 55px;
-
     background: #232428;
-
     display: flex;
     align-items: center;
-
     padding: 7px 10px;
-
     gap: 9px;
 }
 
 .avatar {
-    width: 36px;
-    height: 36px;
-
+    width: 36px; height: 36px;
     border-radius: 50%;
-
     background: #5865f2;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-weight: bold;
 }
 
-.user-info {
-    display: flex;
-    flex-direction: column;
-}
+.user-info { display: flex; flex-direction: column; }
+.user-info strong { font-size: 13px; }
+.user-info span { color: #23a55a; font-size: 11px; }
 
-.user-info strong {
-    font-size: 13px;
-}
-
-.user-info span {
-    color: #23a55a;
-
-    font-size: 11px;
-}
-
-
-/* =========================
-   MAIN
-========================= */
-
-.main {
-    min-width: 0;
-
-    display: flex;
-    flex-direction: column;
-}
+/* MAIN */
+.main { min-width: 0; display: flex; flex-direction: column; }
 
 .topbar {
     height: 48px;
-
     display: flex;
     align-items: center;
-
     padding: 0 18px;
-
-    border-bottom:
-        1px solid #26272b;
-
+    border-bottom: 1px solid #26272b;
     justify-content: space-between;
 }
 
-.room-title {
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-}
-
-
-/* =========================
-   CALL BUTTON
-========================= */
+.room-title { display: flex; align-items: center; gap: 7px; }
 
 .call-button {
-    width: 38px;
-    height: 34px;
-
+    width: 38px; height: 34px;
     border: 0;
-
     border-radius: 7px;
-
     background: transparent;
-
     color: #b5bac1;
-
     font-size: 20px;
-
     cursor: pointer;
 }
+.call-button:hover { background: #3f4147; color: #23a55a; }
 
-.call-button:hover {
-    background: #3f4147;
+/* MESSAGES */
+.messages { flex: 1; overflow-y: auto; padding: 20px 0; }
+.welcome { padding: 20px; }
+.welcome h1 { margin-bottom: 5px; }
+.welcome p { color: #949ba4; }
 
-    color: #23a55a;
-}
-
-
-/* =========================
-   MESSAGES
-========================= */
-
-.messages {
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 20px 0;
-}
-
-.welcome {
-    padding: 20px;
-}
-
-.welcome h1 {
-    margin-bottom: 5px;
-}
-
-.welcome p {
-    color: #949ba4;
-}
-
-.message {
-    display: flex;
-
-    direction: rtl;
-
-    gap: 12px;
-
-    padding: 7px 20px;
-}
-
-.message:hover {
-    background: #2e3035;
-}
+.message { display: flex; direction: rtl; gap: 12px; padding: 7px 20px; }
+.message:hover { background: #2e3035; }
 
 .message-avatar {
-    width: 40px;
-    height: 40px;
-
+    width: 40px; height: 40px;
     flex-shrink: 0;
-
     border-radius: 50%;
-
     background: #5865f2;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-weight: bold;
 }
 
-.message-body {
-    min-width: 0;
+.message-body { min-width: 0; text-align: right; }
+.message-header { display: flex; align-items: baseline; gap: 8px; }
+.message-header small { color: #949ba4; font-size: 10px; }
+.message-content { margin-top: 3px; color: #dbdee1; white-space: pre-wrap; overflow-wrap: anywhere; }
 
-    text-align: right;
-}
-
-.message-header {
-    display: flex;
-
-    align-items: baseline;
-
-    gap: 8px;
-}
-
-.message-header small {
-    color: #949ba4;
-
-    font-size: 10px;
-}
-
-.message-content {
-    margin-top: 3px;
-
-    color: #dbdee1;
-
-    white-space: pre-wrap;
-
-    overflow-wrap: anywhere;
-}
-
-
-/* =========================
-   COMPOSER
-========================= */
-
-.composer {
-    padding: 0 20px 20px;
-
-    display: flex;
-
-    direction: rtl;
-
-    gap: 8px;
-}
+/* COMPOSER */
+.composer { padding: 0 20px 20px; display: flex; direction: rtl; gap: 8px; }
 
 .composer input {
-    flex: 1;
-
-    height: 44px;
-
-    border: 0;
-
-    outline: 0;
-
+    flex: 1; height: 44px;
+    border: 0; outline: 0;
     border-radius: 8px;
-
     background: #383a40;
-
     color: white;
-
     padding: 0 14px;
-
     font-size: 14px;
 }
 
 .composer button {
     border: 0;
-
     border-radius: 7px;
-
     padding: 0 20px;
-
     background: #5865f2;
-
     color: white;
-
     font-weight: bold;
-
     cursor: pointer;
 }
 
-
-/* =========================
-   VOICE PANEL
-========================= */
-
+/* VOICE PANEL */
 .voice-panel {
     position: fixed;
-
-    left: 50%;
-    top: 50%;
-
+    left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-
     width: min(430px, calc(100vw - 30px));
-
     background: #2b2d31;
-
     border-radius: 12px;
-
-    box-shadow:
-        0 15px 50px rgba(0,0,0,.5);
-
+    box-shadow: 0 15px 50px rgba(0,0,0,.5);
     z-index: 100;
-
     display: none;
-
     overflow: hidden;
 }
-
-.voice-panel.open {
-    display: block;
-}
+.voice-panel.open { display: block; }
 
 .voice-header {
     padding: 18px;
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
-    border-bottom:
-        1px solid #202225;
+    border-bottom: 1px solid #202225;
 }
+.voice-header strong { font-size: 16px; }
 
-.voice-header strong {
-    font-size: 16px;
-}
+.voice-close { border: 0; background: transparent; color: #b5bac1; font-size: 22px; cursor: pointer; }
 
-.voice-close {
-    border: 0;
+.voice-content { padding: 20px; }
+.call-status { text-align: center; color: #b5bac1; margin-bottom: 20px; }
 
-    background: transparent;
+.participants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-    color: #b5bac1;
-
-    font-size: 22px;
-
-    cursor: pointer;
-}
-
-.voice-content {
-    padding: 20px;
-}
-
-.call-status {
-    text-align: center;
-
-    color: #b5bac1;
-
-    margin-bottom: 20px;
-}
-
-.participants {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 10px;
-}
-
-.participant {
-    background: #1e1f22;
-
-    border-radius: 8px;
-
-    padding: 14px 5px;
-
-    text-align: center;
-}
+.participant { background: #1e1f22; border-radius: 8px; padding: 14px 5px; text-align: center; }
 
 .participant-avatar {
-    width: 48px;
-    height: 48px;
-
+    width: 48px; height: 48px;
     margin: auto auto 8px;
-
     border-radius: 50%;
-
     background: #5865f2;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-weight: bold;
 }
+.participant-name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
 
-.participant-name {
-    font-size: 12px;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-}
-
-.voice-controls {
-    margin-top: 22px;
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 10px;
-}
+.voice-controls { margin-top: 22px; display: flex; justify-content: center; gap: 10px; }
 
 .voice-control {
-    width: 48px;
-    height: 48px;
-
+    width: 48px; height: 48px;
     border: 0;
-
     border-radius: 50%;
-
     background: #404249;
-
     color: white;
-
     font-size: 20px;
-
     cursor: pointer;
 }
+.voice-control:hover { background: #4e5058; }
+.voice-control.muted { background: #ed4245; }
+.voice-control.hangup { background: #ed4245; }
 
-.voice-control:hover {
-    background: #4e5058;
-}
-
-.voice-control.muted {
-    background: #ed4245;
-}
-
-.voice-control.hangup {
-    background: #ed4245;
-}
-
-
-/* =========================
-   CALLING INDICATOR
-========================= */
-
-.calling {
-    color: #23a55a;
-
-    font-size: 12px;
-
-    margin-top: 8px;
-
-    text-align: center;
-}
-
-
-/* =========================
-   RESPONSIVE
-========================= */
+.calling { color: #23a55a; font-size: 12px; margin-top: 8px; text-align: center; }
 
 @media(max-width:700px) {
-
-    .app {
-        grid-template-columns:
-            60px
-            190px
-            1fr;
-    }
-
+    .app { grid-template-columns: 60px 190px 1fr; }
 }
-
 @media(max-width:550px) {
-
-    .app {
-        grid-template-columns:
-            60px
-            1fr;
-    }
-
-    .sidebar {
-        display: none;
-    }
-
+    .app { grid-template-columns: 60px 1fr; }
+    .sidebar { display: none; }
 }
 
 </style>
 </head>
 
-
 <body>
-
 
 <div class="app">
 
-
-    <!-- SERVERS -->
-
     <aside class="servers">
-
-        <div class="server active">
-            D
-        </div>
-
-        <div class="server">
-            G
-        </div>
-
-        <div class="server">
-            N
-        </div>
-
+        <div class="server active">D</div>
+        <div class="server">G</div>
+        <div class="server">N</div>
     </aside>
-
-
-    <!-- SIDEBAR -->
 
     <aside class="sidebar">
-
-        <div class="server-name">
-            My Discord
-        </div>
-
+        <div class="server-name">My Discord</div>
 
         <div class="channels">
-
-            <div class="category">
-                TEXT CHANNELS
-            </div>
-
-
-            <div
-                class="channel active"
-                data-room="general"
-            >
-                <span class="hash">#</span>
-
-                general
-            </div>
-
-
-            <div
-                class="channel"
-                data-room="chat"
-            >
-                <span class="hash">#</span>
-
-                chat
-            </div>
-
-
-            <div
-                class="channel"
-                data-room="gaming"
-            >
-                <span class="hash">#</span>
-
-                gaming
-            </div>
-
+            <div class="category">TEXT CHANNELS</div>
+            <div class="channel active" data-room="general"><span class="hash">#</span>general</div>
+            <div class="channel" data-room="chat"><span class="hash">#</span>chat</div>
+            <div class="channel" data-room="gaming"><span class="hash">#</span>gaming</div>
         </div>
-
 
         <div class="user">
-
-            <div
-                class="avatar"
-                id="avatar"
-            >
-                ?
-            </div>
-
-
+            <div class="avatar" id="avatar">?</div>
             <div class="user-info">
-
-                <strong id="username">
-                    Guest
-                </strong>
-
-                <span>
-                    Online
-                </span>
-
+                <strong id="username">Guest</strong>
+                <span>Online</span>
             </div>
-
         </div>
-
     </aside>
 
-
-    <!-- MAIN -->
-
     <main class="main">
-
-
         <header class="topbar">
-
             <div class="room-title">
-
-                <span class="hash">
-                    #
-                </span>
-
-                <strong id="roomName">
-                    general
-                </strong>
-
+                <span class="hash">#</span>
+                <strong id="roomName">general</strong>
             </div>
-
-
-            <button
-                class="call-button"
-                id="callButton"
-                title="התחל שיחה קולית"
-            >
-                📞
-            </button>
-
+            <button class="call-button" id="callButton" title="התחל שיחה קולית">📞</button>
         </header>
 
+        <section class="messages" id="messages"></section>
 
-        <section
-            class="messages"
-            id="messages"
-        >
-        </section>
-
-
-        <form
-            class="composer"
-            id="composer"
-        >
-
-            <input
-                id="messageInput"
-                placeholder="שלח הודעה ב־#general..."
-                autocomplete="off"
-            >
-
-
-            <button type="submit">
-                שלח
-            </button>
-
+        <form class="composer" id="composer">
+            <input id="messageInput" placeholder="שלח הודעה ב־#general..." autocomplete="off">
+            <button type="submit">שלח</button>
         </form>
-
-
     </main>
 
 </div>
 
-
-<!-- =========================
-     VOICE CALL
-========================= -->
-
-<div
-    class="voice-panel"
-    id="voicePanel"
->
-
+<!-- VOICE CALL -->
+<div class="voice-panel" id="voicePanel">
     <div class="voice-header">
-
-        <strong>
-            📞 שיחה קולית
-        </strong>
-
-        <button
-            class="voice-close"
-            id="voiceClose"
-        >
-            ×
-        </button>
-
+        <strong>📞 שיחה קולית</strong>
+        <button class="voice-close" id="voiceClose">×</button>
     </div>
-
 
     <div class="voice-content">
-
-        <div
-            class="call-status"
-            id="callStatus"
-        >
-            מתחבר...
-        </div>
-
-
-        <div
-            class="participants"
-            id="participants"
-        >
-        </div>
-
-
-        <div
-            class="calling"
-            id="callingText"
-        >
-        </div>
-
+        <div class="call-status" id="callStatus">מתחבר...</div>
+        <div class="participants" id="participants"></div>
+        <div class="calling" id="callingText"></div>
 
         <div class="voice-controls">
-
-            <button
-                class="voice-control"
-                id="muteButton"
-                title="השתק"
-            >
-                🎙️
-            </button>
-
-
-            <button
-                class="voice-control hangup"
-                id="hangupButton"
-                title="נתק"
-            >
-                📵
-            </button>
-
+            <button class="voice-control" id="muteButton" title="השתק">🎙️</button>
+            <button class="voice-control hangup" id="hangupButton" title="נתק">📵</button>
         </div>
-
     </div>
-
 </div>
-
 
 <script>
 
-
-/* =====================================
+/* =====================================================
    SUPABASE
-===================================== */
+===================================================== */
+const SUPABASE_URL = "https://flprshvuamxyubfswvoh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_YrpY7Hau04yFCVRGZr52zA_iqjfznTM";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SUPABASE_URL =
-    "https://flprshvuamxyubfswvoh.supabase.co";
-
-
-const SUPABASE_KEY =
-    "sb_publishable_YrpY7Hau04yFCVRGZr52zA_iqjfznTM";
-
-
-const db =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-/* =====================================
+/* =====================================================
    USER
-===================================== */
-
-let username =
-    localStorage.getItem(
-        "discord_username"
-    );
-
+===================================================== */
+let username = localStorage.getItem("discord_username");
 
 if (!username) {
-
-    username =
-        prompt(
-            "איך לקרוא לך?"
-        ) ||
-        "Guest";
-
-    localStorage.setItem(
-        "discord_username",
-        username
-    );
-
+    username = prompt("איך לקרוא לך?") || "Guest";
+    localStorage.setItem("discord_username", username);
 }
 
+document.getElementById("username").textContent = username;
+document.getElementById("avatar").textContent = username.charAt(0).toUpperCase();
 
-document.getElementById(
-    "username"
-).textContent = username;
-
-
-document.getElementById(
-    "avatar"
-).textContent =
-    username
-        .charAt(0)
-        .toUpperCase();
-
-
-/* =====================================
+/* =====================================================
    CHAT
-===================================== */
+===================================================== */
+let currentRoom = "general";
 
-let currentRoom =
-    "general";
-
-
-const messages =
-    document.getElementById(
-        "messages"
-    );
-
-
-const input =
-    document.getElementById(
-        "messageInput"
-    );
-
-
-const roomName =
-    document.getElementById(
-        "roomName"
-    );
-
+const messages = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const roomName = document.getElementById("roomName");
 
 async function loadMessages() {
-
     messages.innerHTML = "";
 
-
-    const result =
-        await db
-            .from("messages")
-            .select("*")
-            .eq(
-                "room",
-                currentRoom
-            )
-            .order(
-                "created_at",
-                {
-                    ascending: true
-                }
-            );
-
+    const result = await db
+        .from("messages")
+        .select("*")
+        .eq("room", currentRoom)
+        .order("created_at", { ascending: true });
 
     if (result.error) {
-
-        console.error(
-            result.error
-        );
-
+        console.error(result.error);
         messages.innerHTML = `
             <div class="welcome">
-
-                <h1>
-                    שגיאה בחיבור
-                </h1>
-
-                <p>
-                    בדוק את הגדרות Supabase.
-                </p>
-
+                <h1>שגיאה בחיבור</h1>
+                <p>בדוק את הגדרות Supabase.</p>
             </div>
         `;
-
         return;
-
     }
 
-
-    if (
-        result.data.length === 0
-    ) {
-
+    if (result.data.length === 0) {
         messages.innerHTML = `
             <div class="welcome">
-
-                <h1>
-                    ברוכים הבאים ל־#${escapeHTML(
-                        currentRoom
-                    )}
-                </h1>
-
-                <p>
-                    זה תחילת הערוץ.
-                </p>
-
+                <h1>ברוכים הבאים ל־#${escapeHTML(currentRoom)}</h1>
+                <p>זה תחילת הערוץ.</p>
             </div>
         `;
-
     }
 
-
-    result.data.forEach(
-        addMessage
-    );
-
-
+    result.data.forEach(addMessage);
     scrollBottom();
-
 }
-
 
 function addMessage(message) {
+    const element = document.createElement("div");
+    element.className = "message";
 
-    const element =
-        document.createElement(
-            "div"
-        );
+    const avatar = document.createElement("div");
+    avatar.className = "message-avatar";
+    avatar.textContent = message.username.charAt(0).toUpperCase();
 
-    element.className =
-        "message";
+    const body = document.createElement("div");
+    body.className = "message-body";
 
+    const header = document.createElement("div");
+    header.className = "message-header";
 
-    const avatar =
-        document.createElement(
-            "div"
-        );
+    const name = document.createElement("strong");
+    name.textContent = message.username;
 
-    avatar.className =
-        "message-avatar";
+    const time = document.createElement("small");
+    time.textContent = new Date(message.created_at).toLocaleString();
 
+    header.appendChild(name);
+    header.appendChild(time);
 
-    avatar.textContent =
-        message.username
-            .charAt(0)
-            .toUpperCase();
+    const content = document.createElement("div");
+    content.className = "message-content";
+    content.textContent = message.content;
 
+    body.appendChild(header);
+    body.appendChild(content);
 
-    const body =
-        document.createElement(
-            "div"
-        );
+    element.appendChild(avatar);
+    element.appendChild(body);
 
-    body.className =
-        "message-body";
-
-
-    const header =
-        document.createElement(
-            "div"
-        );
-
-    header.className =
-        "message-header";
-
-
-    const name =
-        document.createElement(
-            "strong"
-        );
-
-    name.textContent =
-        message.username;
-
-
-    const time =
-        document.createElement(
-            "small"
-        );
-
-
-    time.textContent =
-        new Date(
-            message.created_at
-        ).toLocaleString();
-
-
-    header.appendChild(
-        name
-    );
-
-    header.appendChild(
-        time
-    );
-
-
-    const content =
-        document.createElement(
-            "div"
-        );
-
-    content.className =
-        "message-content";
-
-
-    content.textContent =
-        message.content;
-
-
-    body.appendChild(
-        header
-    );
-
-    body.appendChild(
-        content
-    );
-
-
-    element.appendChild(
-        avatar
-    );
-
-    element.appendChild(
-        body
-    );
-
-
-    messages.appendChild(
-        element
-    );
-
+    messages.appendChild(element);
 }
 
+document.getElementById("composer").addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-document
-    .getElementById(
-        "composer"
-    )
-    .addEventListener(
-        "submit",
-        async event => {
+    const content = input.value.trim();
+    if (!content) return;
 
-            event.preventDefault();
+    input.value = "";
 
-
-            const content =
-                input.value.trim();
-
-
-            if (!content) {
-                return;
-            }
-
-
-            input.value = "";
-
-
-            const result =
-                await db
-                    .from("messages")
-                    .insert({
-
-                        room:
-                            currentRoom,
-
-                        username:
-                            username,
-
-                        content:
-                            content
-
-                    });
-
-
-            if (result.error) {
-
-                console.error(
-                    result.error
-                );
-
-                alert(
-                    "ההודעה לא נשלחה."
-                );
-
-            }
-
-        }
-    );
-
-
-document
-    .querySelectorAll(
-        ".channel"
-    )
-    .forEach(channel => {
-
-        channel.addEventListener(
-            "click",
-            async () => {
-
-                document
-                    .querySelectorAll(
-                        ".channel"
-                    )
-                    .forEach(c =>
-                        c.classList.remove(
-                            "active"
-                        )
-                    );
-
-
-                channel.classList.add(
-                    "active"
-                );
-
-
-                currentRoom =
-                    channel.dataset.room;
-
-
-                roomName.textContent =
-                    currentRoom;
-
-
-                input.placeholder =
-                    "שלח הודעה ב־#" +
-                    currentRoom;
-
-
-                await loadMessages();
-
-            }
-        );
-
+    const result = await db.from("messages").insert({
+        room: currentRoom,
+        username: username,
+        content: content
     });
 
+    if (result.error) {
+        console.error(result.error);
+        alert("ההודעה לא נשלחה.");
+    }
+});
 
-db
-    .channel(
-        "chat-room"
-    )
-    .on(
-        "postgres_changes",
-        {
-            event:
-                "INSERT",
+document.querySelectorAll(".channel").forEach((channel) => {
+    channel.addEventListener("click", async () => {
+        document.querySelectorAll(".channel").forEach((c) => c.classList.remove("active"));
+        channel.classList.add("active");
 
-            schema:
-                "public",
+        currentRoom = channel.dataset.room;
+        roomName.textContent = currentRoom;
+        input.placeholder = "שלח הודעה ב־#" + currentRoom;
 
-            table:
-                "messages"
-        },
-        payload => {
+        await loadMessages();
+    });
+});
 
-            if (
-                payload.new.room ===
-                currentRoom
-            ) {
-
-                addMessage(
-                    payload.new
-                );
-
-                scrollBottom();
-
-            }
-
+db.channel("chat-room")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        if (payload.new.room === currentRoom) {
+            addMessage(payload.new);
+            scrollBottom();
         }
-    )
+    })
     .subscribe();
 
-
 function scrollBottom() {
-
-    messages.scrollTop =
-        messages.scrollHeight;
-
+    messages.scrollTop = messages.scrollHeight;
 }
-
 
 function escapeHTML(value) {
-
     return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
-
-/* =====================================
+/* =====================================================
    VOICE CHAT
-===================================== */
+===================================================== */
 
-
-/*
-    מזהה ייחודי לדפדפן.
-
-    הוא נשמר רק במכשיר הזה.
-*/
-
-let peerId =
-    localStorage.getItem(
-        "voice_peer_id"
-    );
-
-
+/* מזהה ייחודי לדפדפן - נשמר רק במכשיר הזה */
+let peerId = localStorage.getItem("voice_peer_id");
 if (!peerId) {
-
-    peerId =
-        crypto.randomUUID();
-
-    localStorage.setItem(
-        "voice_peer_id",
-        peerId
-    );
-
+    peerId = crypto.randomUUID();
+    localStorage.setItem("voice_peer_id", peerId);
 }
 
+let voiceRoom = null;
+let voiceChannel = null;
+let localStream = null;
+const peers = new Map();
 
-/*
-    כל שיחה מקבלת חדר נפרד.
-*/
+/* FIX: תור ל-ICE candidates שהגיעו לפני שה-peer היה מוכן לקבל אותם.
+   בלי זה, מועמדי חיבור מוקדמים נזרקים לפח - וזה גורם לשיחות חד-כיווניות
+   או שלא מתחברות בכלל. */
+const pendingCandidates = new Map();
 
-let voiceRoom =
-    null;
+let inCall = false;
+let muted = false;
 
+const voicePanel = document.getElementById("voicePanel");
+const callStatus = document.getElementById("callStatus");
+const participants = document.getElementById("participants");
+const callingText = document.getElementById("callingText");
 
-/*
-    Supabase Realtime channel.
-*/
-
-let voiceChannel =
-    null;
-
-
-/*
-    המיקרופון שלנו.
-*/
-
-let localStream =
-    null;
-
-
-/*
-    חיבורי WebRTC.
-*/
-
-const peers =
-    new Map();
-
-
-/*
-    האם אנחנו בשיחה.
-*/
-
-let inCall =
-    false;
-
-
-/*
-    האם המיקרופון מושתק.
-*/
-
-let muted =
-    false;
-
-
-/* ---------- UI ---------- */
-
-const voicePanel =
-    document.getElementById(
-        "voicePanel"
-    );
-
-
-const callStatus =
-    document.getElementById(
-        "callStatus"
-    );
-
-
-const participants =
-    document.getElementById(
-        "participants"
-    );
-
-
-const callingText =
-    document.getElementById(
-        "callingText"
-    );
-
-
-/* =====================================
-   START CALL
-===================================== */
-
-document
-    .getElementById(
-        "callButton"
-    )
-    .addEventListener(
-        "click",
-        startVoiceCall
-    );
-
+document.getElementById("callButton").addEventListener("click", startVoiceCall);
 
 async function startVoiceCall() {
+    if (inCall) return;
 
-    if (inCall) {
-        return;
-    }
-
-
-    voicePanel.classList.add(
-        "open"
-    );
-
-
-    callStatus.textContent =
-        "מבקש גישה למיקרופון...";
-
+    voicePanel.classList.add("open");
+    callStatus.textContent = "מבקש גישה למיקרופון...";
 
     try {
-
-        localStream =
-            await navigator.mediaDevices
-                .getUserMedia({
-                    audio: true,
-                    video: false
-                });
-
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     } catch (error) {
-
-        console.error(
-            error
-        );
-
-
-        callStatus.textContent =
-            "אין גישה למיקרופון.";
-
-
+        console.error(error);
+        callStatus.textContent = "אין גישה למיקרופון.";
         return;
-
     }
-
 
     inCall = true;
-
     muted = false;
 
+    voiceRoom = "voice:" + currentRoom;
 
-    /*
-        לכל ערוץ יש שיחת קול משלו.
-    */
-
-    voiceRoom =
-        "voice:" +
-        currentRoom;
-
-
-    /*
-        נפתח ערוץ Realtime.
-    */
-
-    voiceChannel =
-        db.channel(
-            voiceRoom,
-            {
-                config: {
-                    broadcast: {
-                        self: false
-                    },
-
-                    presence: {
-                        key: peerId
-                    }
-                }
-            }
-        );
-
-
-    /*
-        קבלת signaling.
-    */
-
-    voiceChannel.on(
-        "broadcast",
-        {
-            event: "voice"
-        },
-        async payload => {
-
-            await handleSignal(
-                payload.payload
-            );
-
+    voiceChannel = db.channel(voiceRoom, {
+        config: {
+            broadcast: { self: false },
+            presence: { key: peerId }
         }
-    );
-
-
-    /*
-        נתחבר.
-    */
-
-    await voiceChannel.subscribe(
-        async status => {
-
-            if (
-                status ===
-                "SUBSCRIBED"
-            ) {
-
-                callStatus.textContent =
-                    "מחובר לשיחה";
-
-
-                /*
-                    נפרסם שאנחנו כאן.
-                */
-
-                await sendSignal({
-                    type:
-                        "hello",
-
-                    from:
-                        peerId,
-
-                    name:
-                        username
-                });
-
-
-                /*
-                    Presence עוזר לנו
-                    למצוא מי כבר בשיחה.
-                */
-
-                await voiceChannel.track({
-
-                    user_id:
-                        peerId,
-
-                    username:
-                        username
-
-                });
-
-
-                updateParticipants();
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================
-   SIGNAL
-===================================== */
-
-async function sendSignal(data) {
-
-    if (!voiceChannel) {
-        return;
-    }
-
-
-    await voiceChannel.send({
-
-        type:
-            "broadcast",
-
-        event:
-            "voice",
-
-        payload:
-            data
-
     });
 
+    voiceChannel.on("broadcast", { event: "voice" }, async (payload) => {
+        await handleSignal(payload.payload);
+    });
+
+    await voiceChannel.subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+            callStatus.textContent = "מחובר לשיחה";
+
+            await sendSignal({ type: "hello", from: peerId, name: username });
+            await voiceChannel.track({ user_id: peerId, username: username });
+
+            updateParticipants();
+        }
+    });
 }
 
+async function sendSignal(data) {
+    if (!voiceChannel) return;
+    await voiceChannel.send({ type: "broadcast", event: "voice", payload: data });
+}
 
-/* =====================================
-   SIGNAL HANDLER
-===================================== */
+/* FIX: פונקציה משותפת שמחליטה מי יוזם את החיבור, לפי השוואת ה-ID-ים.
+   כל צד שמגלה peer חדש (דרך "hello" או "welcome") מריץ את אותה בדיקה -
+   כך שתמיד בדיוק צד אחד יוזם, לא משנה מי גילה את מי קודם. */
+function maybeInitiate(remoteId, remoteName) {
+    if (peers.has(remoteId)) return;
+    if (peerId < remoteId) createPeer(remoteId, remoteName, true);
+}
 
 async function handleSignal(data) {
+    if (!data || data.from === peerId) return;
 
-    if (!data) {
+    /* FIX: תמיד עונים ל-"hello" עם "welcome", גם אם לא אנחנו יוזמים -
+       אחרת אם ה-ID של המצטרף החדש קטן משלנו, אף אחד לא היה יוזם חיבור בכלל. */
+    if (data.type === "hello") {
+        await sendSignal({ type: "welcome", from: peerId, to: data.from, name: username });
+        maybeInitiate(data.from, data.name);
         return;
     }
 
-
-    if (
-        data.from ===
-        peerId
-    ) {
+    /* FIX: תשובת welcome - עכשיו המצטרף החדש יודע על המשתמש הקיים
+       ויכול להחליט (לפי אותה בדיקת ID) אם הוא צריך ליזום. */
+    if (data.type === "welcome") {
+        if (data.to !== peerId) return;
+        maybeInitiate(data.from, data.name);
         return;
     }
 
+    if (data.type === "offer") {
+        const peer = await createPeer(data.from, data.name, false);
+        await peer.setRemoteDescription(new RTCSessionDescription(data.offer));
+        await flushPendingCandidates(data.from, peer);
 
-    /*
-        משתמש חדש נכנס.
-    */
-
-    if (
-        data.type ===
-        "hello"
-    ) {
-
-        /*
-            כדי למנוע ששני הצדדים
-            ייצרו offer בו זמנית,
-            רק ה־ID הקטן יותר
-            יוזם.
-        */
-
-        if (
-            peerId <
-            data.from
-        ) {
-
-            await createPeer(
-                data.from,
-                data.name,
-                true
-            );
-
-        }
-
-        return;
-
-    }
-
-
-    /*
-        Offer
-    */
-
-    if (
-        data.type ===
-        "offer"
-    ) {
-
-        const peer =
-            await createPeer(
-                data.from,
-                data.name,
-                false
-            );
-
-
-        await peer.setRemoteDescription(
-            new RTCSessionDescription(
-                data.offer
-            )
-        );
-
-
-        const answer =
-            await peer.createAnswer();
-
-
-        await peer.setLocalDescription(
-            answer
-        );
-
+        const answer = await peer.createAnswer();
+        await peer.setLocalDescription(answer);
 
         await sendSignal({
-
-            type:
-                "answer",
-
-            from:
-                peerId,
-
-            to:
-                data.from,
-
-            name:
-                username,
-
-            answer:
-                peer.localDescription
-
+            type: "answer",
+            from: peerId,
+            to: data.from,
+            name: username,
+            answer: peer.localDescription
         });
-
-
         return;
-
     }
 
+    if (data.type === "answer") {
+        if (data.to !== peerId) return;
+        const peer = peers.get(data.from);
+        if (!peer) return;
 
-    /*
-        Answer
-    */
-
-    if (
-        data.type ===
-        "answer"
-    ) {
-
-        if (
-            data.to !==
-            peerId
-        ) {
-            return;
-        }
-
-
-        const peer =
-            peers.get(
-                data.from
-            );
-
-
-        if (!peer) {
-            return;
-        }
-
-
-        await peer.setRemoteDescription(
-            new RTCSessionDescription(
-                data.answer
-            )
-        );
-
-
+        await peer.setRemoteDescription(new RTCSessionDescription(data.answer));
+        await flushPendingCandidates(data.from, peer);
         return;
-
     }
 
+    /* FIX: אם ה-peer עוד לא קיים או אין לו remoteDescription עדיין,
+       שומרים את המועמד בתור במקום לזרוק אותו. */
+    if (data.type === "ice") {
+        if (data.to !== peerId) return;
+        const peer = peers.get(data.from);
 
-    /*
-        ICE candidate
-    */
-
-    if (
-        data.type ===
-        "ice"
-    ) {
-
-        if (
-            data.to !==
-            peerId
-        ) {
+        if (!peer || !peer.remoteDescription) {
+            if (!pendingCandidates.has(data.from)) pendingCandidates.set(data.from, []);
+            pendingCandidates.get(data.from).push(data.candidate);
             return;
         }
-
-
-        const peer =
-            peers.get(
-                data.from
-            );
-
-
-        if (!peer) {
-            return;
-        }
-
 
         try {
-
-            await peer.addIceCandidate(
-                new RTCIceCandidate(
-                    data.candidate
-                )
-            );
-
+            await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
         } catch (error) {
-
-            console.error(
-                error
-            );
-
+            console.error(error);
         }
-
     }
-
 }
 
+/* FIX: מריקה את תור מועמדי החיבור הממתינים ברגע שה-peer מוכן לקבל אותם */
+async function flushPendingCandidates(remoteId, peer) {
+    const queued = pendingCandidates.get(remoteId);
+    if (!queued) return;
 
-/* =====================================
-   CREATE PEER
-===================================== */
-
-async function createPeer(
-    remoteId,
-    remoteName,
-    initiator
-) {
-
-    /*
-        אם כבר קיים חיבור,
-        לא יוצרים עוד אחד.
-    */
-
-    if (
-        peers.has(
-            remoteId
-        )
-    ) {
-
-        return peers.get(
-            remoteId
-        );
-
+    for (const candidate of queued) {
+        try {
+            await peer.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+            console.error(error);
+        }
     }
 
+    pendingCandidates.delete(remoteId);
+}
 
-    const peer =
-        new RTCPeerConnection({
+async function createPeer(remoteId, remoteName, initiator) {
+    if (peers.has(remoteId)) return peers.get(remoteId);
 
-            iceServers: [
+    const peer = new RTCPeerConnection({
+        iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" }
+        ]
+    });
 
-                {
-                    urls:
-                        "stun:stun.l.google.com:19302"
-                },
-
-                {
-                    urls:
-                        "stun:stun1.l.google.com:19302"
-                }
-
-            ]
-
-        });
-
-
-    peers.set(
-        remoteId,
-        peer
-    );
-
-
-    /*
-        מוסיפים את המיקרופון
-        שלנו לחיבור.
-    */
+    peers.set(remoteId, peer);
 
     if (localStream) {
-
-        localStream
-            .getTracks()
-            .forEach(track => {
-
-                peer.addTrack(
-                    track,
-                    localStream
-                );
-
-            });
-
+        localStream.getTracks().forEach((track) => peer.addTrack(track, localStream));
     }
 
+    peer.ontrack = (event) => {
+        const stream = event.streams[0];
+        if (!stream) return;
 
-    /*
-        מקבלים שמע מהמשתמש השני.
-    */
+        let audio = document.getElementById("audio-" + remoteId);
+        if (!audio) {
+            audio = document.createElement("audio");
+            audio.id = "audio-" + remoteId;
+            audio.autoplay = true;
+            audio.playsInline = true;
+            document.body.appendChild(audio);
+        }
 
-    peer.ontrack =
-        event => {
+        audio.srcObject = stream;
+    };
 
-            const stream =
-                event.streams[0];
+    peer.onicecandidate = async (event) => {
+        if (event.candidate) {
+            await sendSignal({ type: "ice", from: peerId, to: remoteId, candidate: event.candidate });
+        }
+    };
 
+    peer.onconnectionstatechange = () => {
+        if (peer.connectionState === "connected") {
+            callStatus.textContent = "מחובר לשיחה";
+            callingText.textContent = "";
+        }
 
-            if (!stream) {
-                return;
-            }
-
-
-            let audio =
-                document.getElementById(
-                    "audio-" +
-                    remoteId
-                );
-
-
-            if (!audio) {
-
-                audio =
-                    document.createElement(
-                        "audio"
-                    );
-
-                audio.id =
-                    "audio-" +
-                    remoteId;
-
-                audio.autoplay =
-                    true;
-
-                audio.playsInline =
-                    true;
-
-                document.body.appendChild(
-                    audio
-                );
-
-            }
-
-
-            audio.srcObject =
-                stream;
-
-        };
-
-
-    /*
-        ICE candidates.
-    */
-
-    peer.onicecandidate =
-        async event => {
-
-            if (
-                event.candidate
-            ) {
-
-                await sendSignal({
-
-                    type:
-                        "ice",
-
-                    from:
-                        peerId,
-
-                    to:
-                        remoteId,
-
-                    candidate:
-                        event.candidate
-
-                });
-
-            }
-
-        };
-
-
-    /*
-        מצב החיבור.
-    */
-
-    peer.onconnectionstatechange =
-        () => {
-
-            if (
-                peer.connectionState ===
-                "connected"
-            ) {
-
-                callStatus.textContent =
-                    "מחובר לשיחה";
-
-                callingText.textContent =
-                    "";
-
-            }
-
-
-            if (
-                peer.connectionState ===
-                "disconnected" ||
-
-                peer.connectionState ===
-                "failed" ||
-
-                peer.connectionState ===
-                "closed"
-            ) {
-
-                removePeer(
-                    remoteId
-                );
-
-            }
-
-        };
-
-
-    /*
-        אם אנחנו היוזמים —
-        יוצרים Offer.
-    */
+        if (["disconnected", "failed", "closed"].includes(peer.connectionState)) {
+            removePeer(remoteId);
+        }
+    };
 
     if (initiator) {
-
-        const offer =
-            await peer.createOffer();
-
-
-        await peer.setLocalDescription(
-            offer
-        );
-
+        const offer = await peer.createOffer();
+        await peer.setLocalDescription(offer);
 
         await sendSignal({
-
-            type:
-                "offer",
-
-            from:
-                peerId,
-
-            to:
-                remoteId,
-
-            name:
-                username,
-
-            offer:
-                peer.localDescription
-
+            type: "offer",
+            from: peerId,
+            to: remoteId,
+            name: username,
+            offer: peer.localDescription
         });
-
     }
 
-
-    addParticipant(
-        remoteId,
-        remoteName
-    );
-
+    addParticipant(remoteId, remoteName);
 
     return peer;
-
 }
 
+function addParticipant(id, name) {
+    if (document.getElementById("participant-" + id)) return;
 
-/* =====================================
-   PARTICIPANTS
-===================================== */
-
-function addParticipant(
-    id,
-    name
-) {
-
-    let existing =
-        document.getElementById(
-            "participant-" +
-            id
-        );
-
-
-    if (existing) {
-        return;
-    }
-
-
-    const element =
-        document.createElement(
-            "div"
-        );
-
-
-    element.className =
-        "participant";
-
-
-    element.id =
-        "participant-" +
-        id;
-
-
+    const element = document.createElement("div");
+    element.className = "participant";
+    element.id = "participant-" + id;
     element.innerHTML = `
-
-        <div class="participant-avatar">
-
-            ${escapeHTML(
-                name
-                    .charAt(0)
-                    .toUpperCase()
-            )}
-
-        </div>
-
-        <div class="participant-name">
-
-            ${escapeHTML(name)}
-
-        </div>
-
+        <div class="participant-avatar">${escapeHTML(name.charAt(0).toUpperCase())}</div>
+        <div class="participant-name">${escapeHTML(name)}</div>
     `;
 
-
-    participants.appendChild(
-        element
-    );
-
+    participants.appendChild(element);
 }
-
-
-/* =====================================
-   UPDATE PARTICIPANTS
-===================================== */
 
 async function updateParticipants() {
+    if (!voiceChannel) return;
 
-    if (!voiceChannel) {
-        return;
-    }
+    const state = voiceChannel.presenceState();
 
+    Object.values(state).flat().forEach((user) => {
+        if (user.user_id !== peerId) addParticipant(user.user_id, user.username);
+    });
 
-    const state =
-        voiceChannel.presenceState();
-
-
-    Object.values(
-        state
-    )
-        .flat()
-        .forEach(user => {
-
-            if (
-                user.user_id !==
-                peerId
-            ) {
-
-                addParticipant(
-                    user.user_id,
-                    user.username
-                );
-
-            }
-
-        });
-
-
-    addParticipant(
-        peerId,
-        username
-    );
-
+    addParticipant(peerId, username);
 }
 
-
-/* =====================================
-   REMOVE PEER
-===================================== */
-
-function removePeer(
-    remoteId
-) {
-
-    const peer =
-        peers.get(
-            remoteId
-        );
-
-
+function removePeer(remoteId) {
+    const peer = peers.get(remoteId);
     if (peer) {
-
         peer.close();
-
-        peers.delete(
-            remoteId
-        );
-
+        peers.delete(remoteId);
     }
 
+    pendingCandidates.delete(remoteId);
 
-    const audio =
-        document.getElementById(
-            "audio-" +
-            remoteId
-        );
+    const audio = document.getElementById("audio-" + remoteId);
+    if (audio) audio.remove();
 
-
-    if (audio) {
-
-        audio.remove();
-
-    }
-
-
-    const participant =
-        document.getElementById(
-            "participant-" +
-            remoteId
-        );
-
-
-    if (participant) {
-
-        participant.remove();
-
-    }
-
+    const participant = document.getElementById("participant-" + remoteId);
+    if (participant) participant.remove();
 }
 
-
-/* =====================================
-   MUTE
-===================================== */
-
-document
-    .getElementById(
-        "muteButton"
-    )
-    .addEventListener(
-        "click",
-        toggleMute
-    );
-
+document.getElementById("muteButton").addEventListener("click", toggleMute);
 
 function toggleMute() {
+    if (!localStream) return;
 
-    if (!localStream) {
-        return;
-    }
+    muted = !muted;
+    localStream.getAudioTracks().forEach((track) => (track.enabled = !muted));
 
-
-    muted =
-        !muted;
-
-
-    localStream
-        .getAudioTracks()
-        .forEach(track => {
-
-            track.enabled =
-                !muted;
-
-        });
-
-
-    const button =
-        document.getElementById(
-            "muteButton"
-        );
-
-
-    button.classList.toggle(
-        "muted",
-        muted
-    );
-
-
-    button.textContent =
-        muted
-            ? "🔇"
-            : "🎙️";
-
+    const button = document.getElementById("muteButton");
+    button.classList.toggle("muted", muted);
+    button.textContent = muted ? "🔇" : "🎙️";
 }
 
-
-/* =====================================
-   HANG UP
-===================================== */
-
-document
-    .getElementById(
-        "hangupButton"
-    )
-    .addEventListener(
-        "click",
-        leaveVoice
-    );
-
-
-document
-    .getElementById(
-        "voiceClose"
-    )
-    .addEventListener(
-        "click",
-        leaveVoice
-    );
-
+document.getElementById("hangupButton").addEventListener("click", leaveVoice);
+document.getElementById("voiceClose").addEventListener("click", leaveVoice);
 
 async function leaveVoice() {
-
-    inCall =
-        false;
-
-
-    /*
-        עצירת המיקרופון.
-    */
+    inCall = false;
 
     if (localStream) {
-
-        localStream
-            .getTracks()
-            .forEach(track =>
-                track.stop()
-            );
-
-        localStream =
-            null;
-
+        localStream.getTracks().forEach((track) => track.stop());
+        localStream = null;
     }
 
-
-    /*
-        סגירת WebRTC.
-    */
-
-    peers.forEach(
-        peer =>
-            peer.close()
-    );
-
-
+    peers.forEach((peer) => peer.close());
     peers.clear();
+    pendingCandidates.clear();
 
-
-    /*
-        הסרת audio.
-    */
-
-    document
-        .querySelectorAll(
-            "audio[id^='audio-']"
-        )
-        .forEach(
-            audio =>
-                audio.remove()
-        );
-
-
-    /*
-        ניקוי משתתפים.
-    */
-
-    participants.innerHTML =
-        "";
-
-
-    /*
-        סגירת Supabase channel.
-    */
+    document.querySelectorAll("audio[id^='audio-']").forEach((audio) => audio.remove());
+    participants.innerHTML = "";
 
     if (voiceChannel) {
-
-        try {
-
-            await voiceChannel.untrack();
-
-        } catch {}
-
-        await db.removeChannel(
-            voiceChannel
-        );
-
-        voiceChannel =
-            null;
-
+        try { await voiceChannel.untrack(); } catch {}
+        await db.removeChannel(voiceChannel);
+        voiceChannel = null;
     }
 
-
-    voiceRoom =
-        null;
-
-
-    voicePanel.classList.remove(
-        "open"
-    );
-
-
-    callStatus.textContent =
-        "מנותק";
-
-}
-
-
-/* =====================================
-   START
-===================================== */
-
-loadMessages();<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My Discord</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#313338;color:#f2f3f5}
-.app{display:grid;grid-template-columns:72px 240px 1fr;height:100vh}
-.servers{background:#1e1f22;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.server{width:48px;height:48px;border-radius:16px;background:#313338;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;transition:.15s}
-.server:hover,.server.active{background:#5865f2;border-radius:14px}
-.sidebar{background:#2b2d31;display:flex;flex-direction:column;min-width:0}
-.server-name{height:48px;padding:0 16px;display:flex;align-items:center;font-weight:bold;border-bottom:1px solid #202225}
-.channels{flex:1;overflow-y:auto;padding:12px 8px}
-.category{color:#949ba4;font-size:11px;font-weight:bold;padding:10px 8px 5px}
-.channel{height:38px;border-radius:5px;display:flex;align-items:center;gap:8px;padding:0 10px;color:#b5bac1;cursor:pointer}
-.channel:hover{background:#35373c;color:#fff}.channel.active{background:#404249;color:#fff}
-.hash{color:#949ba4;font-size:22px}
-.user{height:55px;background:#232428;display:flex;align-items:center;padding:7px 10px;gap:9px}
-.avatar,.message-avatar,.participant-avatar{border-radius:50%;background:#5865f2;display:flex;align-items:center;justify-content:center;font-weight:bold}
-.avatar{width:36px;height:36px}.user-info{display:flex;flex-direction:column}.user-info strong{font-size:13px}.user-info span{color:#23a55a;font-size:11px}
-.main{min-width:0;display:flex;flex-direction:column}
-.topbar{height:48px;display:flex;align-items:center;padding:0 18px;border-bottom:1px solid #26272b;justify-content:space-between}
-.room-title{display:flex;align-items:center;gap:7px}
-.call-button{width:38px;height:34px;border:0;border-radius:7px;background:transparent;color:#b5bac1;font-size:20px;cursor:pointer}
-.call-button:hover{background:#3f4147;color:#23a55a}
-.messages{flex:1;overflow-y:auto;padding:20px 0}.welcome{padding:20px}.welcome h1{margin-bottom:5px}.welcome p{color:#949ba4}
-.message{display:flex;direction:rtl;gap:12px;padding:7px 20px}.message:hover{background:#2e3035}
-.message-avatar{width:40px;height:40px;flex-shrink:0}.message-body{min-width:0;text-align:right}
-.message-header{display:flex;align-items:baseline;gap:8px}.message-header small{color:#949ba4;font-size:10px}
-.message-content{margin-top:3px;color:#dbdee1;white-space:pre-wrap;overflow-wrap:anywhere}
-.composer{padding:0 20px 20px;display:flex;direction:rtl;gap:8px}
-.composer input{flex:1;height:44px;border:0;outline:0;border-radius:8px;background:#383a40;color:#fff;padding:0 14px;font-size:14px}
-.composer button{border:0;border-radius:7px;padding:0 20px;background:#5865f2;color:#fff;font-weight:bold;cursor:pointer}
-.voice-panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(430px,calc(100vw - 30px));background:#2b2d31;border-radius:12px;box-shadow:0 15px 50px #0008;z-index:100;display:none;overflow:hidden}
-.voice-panel.open{display:block}.voice-header{padding:18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #202225}
-.voice-close{border:0;background:transparent;color:#b5bac1;font-size:22px;cursor:pointer}.voice-content{padding:20px}
-.call-status{text-align:center;color:#b5bac1;margin-bottom:20px}.participants{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.participant{background:#1e1f22;border-radius:8px;padding:14px 5px;text-align:center}.participant-avatar{width:48px;height:48px;margin:auto auto 8px}
-.participant-name{font-size:12px;overflow:hidden;text-overflow:ellipsis}.voice-controls{margin-top:22px;display:flex;justify-content:center;gap:10px}
-.voice-control{width:48px;height:48px;border:0;border-radius:50%;background:#404249;color:#fff;font-size:20px;cursor:pointer}
-.voice-control.muted,.voice-control.hangup{background:#ed4245}.calling{color:#23a55a;font-size:12px;margin-top:8px;text-align:center}
-@media(max-width:700px){.app{grid-template-columns:60px 190px 1fr}}
-@media(max-width:550px){.app{grid-template-columns:60px 1fr}.sidebar{display:none}}
-</style>
-</head>
-<body>
-
-<div class="app">
-<aside class="servers">
-<div class="server active">D</div><div class="server">G</div><div class="server">N</div>
-</aside>
-
-<aside class="sidebar">
-<div class="server-name">My Discord</div>
-<div class="channels">
-<div class="category">TEXT CHANNELS</div>
-<div class="channel active" data-room="general"><span class="hash">#</span>general</div>
-<div class="channel" data-room="chat"><span class="hash">#</span>chat</div>
-<div class="channel" data-room="gaming"><span class="hash">#</span>gaming</div>
-</div>
-<div class="user">
-<div class="avatar" id="avatar">?</div>
-<div class="user-info"><strong id="username">Guest</strong><span>Online</span></div>
-</div>
-</aside>
-
-<main class="main">
-<header class="topbar">
-<div class="room-title"><span class="hash">#</span><strong id="roomName">general</strong></div>
-<button class="call-button" id="callButton" title="התחל שיחה קולית">📞</button>
-</header>
-
-<section class="messages" id="messages"></section>
-
-<form class="composer" id="composer">
-<input id="messageInput" placeholder="שלח הודעה ב־#general..." autocomplete="off">
-<button>שלח</button>
-</form>
-</main>
-</div>
-
-<div class="voice-panel" id="voicePanel">
-<div class="voice-header">
-<strong>📞 שיחה קולית</strong>
-<button class="voice-close" id="voiceClose">×</button>
-</div>
-<div class="voice-content">
-<div class="call-status" id="callStatus">מתחבר...</div>
-<div class="participants" id="participants"></div>
-<div class="calling" id="callingText"></div>
-<div class="voice-controls">
-<button class="voice-control" id="muteButton">🎙️</button>
-<button class="voice-control hangup" id="hangupButton">📵</button>
-</div>
-</div>
-</div>
-
-<script>
-const db=supabase.createClient(
-"https://flprshvuamxyubfswvoh.supabase.co",
-"sb_publishable_YrpY7Hau04yFCVRGZr52zA_iqjfznTM"
-);
-
-const $=id=>document.getElementById(id);
-
-let username=localStorage.getItem("discord_username");
-if(!username){
-username=prompt("איך לקרוא לך?")||"Guest";
-localStorage.setItem("discord_username",username);
-}
-
-$("username").textContent=username;
-$("avatar").textContent=username[0].toUpperCase();
-
-let currentRoom="general";
-const messages=$("messages"),input=$("messageInput"),roomName=$("roomName");
-
-async function loadMessages(){
-messages.innerHTML="";
-const{data,error}=await db.from("messages").select("*")
-.eq("room",currentRoom).order("created_at",{ascending:true});
-
-if(error){
-console.error(error);
-messages.innerHTML='<div class="welcome"><h1>שגיאה בחיבור</h1><p>בדוק את הגדרות Supabase.</p></div>';
-return;
-}
-
-if(!data.length)
-messages.innerHTML=`<div class="welcome"><h1>ברוכים הבאים ל־#${escapeHTML(currentRoom)}</h1><p>זה תחילת הערוץ.</p></div>`;
-
-data.forEach(addMessage);
-scrollBottom();
-}
-
-function addMessage(m){
-const e=document.createElement("div");
-e.className="message";
-
-const a=document.createElement("div");
-a.className="message-avatar";
-a.textContent=m.username[0].toUpperCase();
-
-const b=document.createElement("div");
-b.className="message-body";
-
-const h=document.createElement("div");
-h.className="message-header";
-
-const n=document.createElement("strong");
-n.textContent=m.username;
-
-const t=document.createElement("small");
-t.textContent=new Date(m.created_at).toLocaleString();
-
-h.append(n,t);
-
-const c=document.createElement("div");
-c.className="message-content";
-c.textContent=m.content;
-
-b.append(h,c);
-e.append(a,b);
-messages.appendChild(e);
-}
-
-$("composer").addEventListener("submit",async e=>{
-e.preventDefault();
-const content=input.value.trim();
-if(!content)return;
-input.value="";
-
-const{error}=await db.from("messages").insert({
-room:currentRoom,username,content
-});
-
-if(error){
-console.error(error);
-alert("ההודעה לא נשלחה.");
-}
-});
-
-document.querySelectorAll(".channel").forEach(ch=>{
-ch.addEventListener("click",async()=>{
-document.querySelectorAll(".channel").forEach(c=>c.classList.remove("active"));
-ch.classList.add("active");
-currentRoom=ch.dataset.room;
-roomName.textContent=currentRoom;
-input.placeholder="שלח הודעה ב־#"+currentRoom;
-await loadMessages();
-});
-});
-
-db.channel("chat-room").on("postgres_changes",{
-event:"INSERT",schema:"public",table:"messages"
-},p=>{
-if(p.new.room===currentRoom){
-addMessage(p.new);
-scrollBottom();
-}
-}).subscribe();
-
-function scrollBottom(){
-messages.scrollTop=messages.scrollHeight;
-}
-
-function escapeHTML(v){
-return String(v).replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;")
-.replaceAll('"',"&quot;")
-.replaceAll("'","&#039;");
-}
-
-
-/* VOICE */
-
-let peerId=localStorage.getItem("voice_peer_id");
-if(!peerId){
-peerId=crypto.randomUUID();
-localStorage.setItem("voice_peer_id",peerId);
-}
-
-let voiceRoom=null,voiceChannel=null,localStream=null;
-let inCall=false,muted=false;
-const peers=new Map();
-
-const voicePanel=$("voicePanel");
-const callStatus=$("callStatus");
-const participants=$("participants");
-const callingText=$("callingText");
-
-$("callButton").addEventListener("click",startVoiceCall);
-
-async function startVoiceCall(){
-if(inCall)return;
-
-voicePanel.classList.add("open");
-callStatus.textContent="מבקש גישה למיקרופון...";
-
-try{
-localStream=await navigator.mediaDevices.getUserMedia({
-audio:true,video:false
-});
-}catch(error){
-console.error(error);
-callStatus.textContent="אין גישה למיקרופון.";
-return;
-}
-
-inCall=true;
-muted=false;
-voiceRoom="voice:"+currentRoom;
-
-voiceChannel=db.channel(voiceRoom,{
-config:{
-broadcast:{self:false},
-presence:{key:peerId}
-}
-});
-
-voiceChannel.on("broadcast",{event:"voice"},
-async p=>await handleSignal(p.payload));
-
-await voiceChannel.subscribe(async status=>{
-if(status==="SUBSCRIBED"){
-callStatus.textContent="מחובר לשיחה";
-
-await sendSignal({
-type:"hello",
-from:peerId,
-name:username
-});
-
-await voiceChannel.track({
-user_id:peerId,
-username
-});
-
-updateParticipants();
-}
-});
-}
-
-async function sendSignal(data){
-if(voiceChannel)
-await voiceChannel.send({
-type:"broadcast",
-event:"voice",
-payload:data
-});
-}
-
-async function handleSignal(data){
-if(!data||data.from===peerId)return;
-
-if(data.type==="hello"){
-if(peerId<data.from)
-await createPeer(data.from,data.name,true);
-return;
-}
-
-if(data.type==="offer"){
-const peer=await createPeer(data.from,data.name,false);
-
-await peer.setRemoteDescription(
-new RTCSessionDescription(data.offer)
-);
-
-const answer=await peer.createAnswer();
-await peer.setLocalDescription(answer);
-
-await sendSignal({
-type:"answer",
-from:peerId,
-to:data.from,
-name:username,
-answer:peer.localDescription
-});
-return;
-}
-
-if(data.type==="answer"){
-if(data.to!==peerId)return;
-
-const peer=peers.get(data.from);
-if(!peer)return;
-
-await peer.setRemoteDescription(
-new RTCSessionDescription(data.answer)
-);
-return;
-}
-
-if(data.type==="ice"){
-if(data.to!==peerId)return;
-
-const peer=peers.get(data.from);
-if(!peer)return;
-
-try{
-await peer.addIceCandidate(
-new RTCIceCandidate(data.candidate)
-);
-}catch(error){
-console.error(error);
-}
-}
-}
-
-async function createPeer(remoteId,remoteName,initiator){
-if(peers.has(remoteId))
-return peers.get(remoteId);
-
-const peer=new RTCPeerConnection({
-iceServers:[
-{urls:"stun:stun.l.google.com:19302"},
-{urls:"stun:stun1.l.google.com:19302"}
-]
-});
-
-peers.set(remoteId,peer);
-
-if(localStream)
-localStream.getTracks().forEach(track=>
-peer.addTrack(track,localStream)
-);
-
-peer.ontrack=event=>{
-const stream=event.streams[0];
-if(!stream)return;
-
-let audio=$("audio-"+remoteId);
-
-if(!audio){
-audio=document.createElement("audio");
-audio.id="audio-"+remoteId;
-audio.autoplay=true;
-audio.playsInline=true;
-document.body.appendChild(audio);
-}
-
-audio.srcObject=stream;
-};
-
-peer.onicecandidate=async event=>{
-if(event.candidate)
-await sendSignal({
-type:"ice",
-from:peerId,
-to:remoteId,
-candidate:event.candidate
-});
-};
-
-peer.onconnectionstatechange=()=>{
-if(peer.connectionState==="connected"){
-callStatus.textContent="מחובר לשיחה";
-callingText.textContent="";
-}
-
-if(["disconnected","failed","closed"].includes(peer.connectionState))
-removePeer(remoteId);
-};
-
-if(initiator){
-const offer=await peer.createOffer();
-await peer.setLocalDescription(offer);
-
-await sendSignal({
-type:"offer",
-from:peerId,
-to:remoteId,
-name:username,
-offer:peer.localDescription
-});
-}
-
-addParticipant(remoteId,remoteName);
-return peer;
-}
-
-function addParticipant(id,name){
-if($("participant-"+id))return;
-
-const e=document.createElement("div");
-e.className="participant";
-e.id="participant-"+id;
-
-e.innerHTML=`
-<div class="participant-avatar">
-${escapeHTML(name[0].toUpperCase())}
-</div>
-<div class="participant-name">
-${escapeHTML(name)}
-</div>`;
-
-participants.appendChild(e);
-}
-
-async function updateParticipants(){
-if(!voiceChannel)return;
-
-Object.values(voiceChannel.presenceState())
-.flat()
-.forEach(user=>{
-if(user.user_id!==peerId)
-addParticipant(user.user_id,user.username);
-});
-
-addParticipant(peerId,username);
-}
-
-function removePeer(id){
-const peer=peers.get(id);
-
-if(peer){
-peer.close();
-peers.delete(id);
-}
-
-$("audio-"+id)?.remove();
-$("participant-"+id)?.remove();
-}
-
-$("muteButton").addEventListener("click",toggleMute);
-
-function toggleMute(){
-if(!localStream)return;
-
-muted=!muted;
-
-localStream.getAudioTracks().forEach(track=>{
-track.enabled=!muted;
-});
-
-const button=$("muteButton");
-
-button.classList.toggle("muted",muted);
-button.textContent=muted?"🔇":"🎙️";
-}
-
-$("hangupButton").addEventListener("click",leaveVoice);
-$("voiceClose").addEventListener("click",leaveVoice);
-
-async function leaveVoice(){
-inCall=false;
-
-if(localStream){
-localStream.getTracks().forEach(track=>track.stop());
-localStream=null;
-}
-
-peers.forEach(peer=>peer.close());
-peers.clear();
-
-document.querySelectorAll("audio[id^='audio-']")
-.forEach(audio=>audio.remove());
-
-participants.innerHTML="";
-
-if(voiceChannel){
-try{
-await voiceChannel.untrack();
-}catch{}
-
-await db.removeChannel(voiceChannel);
-voiceChannel=null;
-}
-
-voiceRoom=null;
-voicePanel.classList.remove("open");
-callStatus.textContent="מנותק";
+    voiceRoom = null;
+    voicePanel.classList.remove("open");
+    callStatus.textContent = "מנותק";
 }
 
 loadMessages();
-</script>
-</body>
-</html>
 
 </script>
 
