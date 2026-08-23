@@ -311,6 +311,7 @@ html, body {
 
     <div class="voice-content">
         <div class="call-status" id="callStatus">מתחבר...</div>
+        <button id="enableAudioButton" style="display:none; width:auto; border:0; border-radius:20px; padding:8px 16px; font-size:13px; margin:0 auto 14px; background:#5865f2; color:white; cursor:pointer;" onclick="enableAudio()">🔊 הפעל שמע</button>
         <div class="participants" id="participants"></div>
         <div class="calling" id="callingText"></div>
 
@@ -507,6 +508,20 @@ const callingText = document.getElementById("callingText");
 
 document.getElementById("callButton").addEventListener("click", startVoiceCall);
 
+function showEnableAudioButton() {
+    const btn = document.getElementById("enableAudioButton");
+    if (btn) btn.style.display = "block";
+}
+
+function enableAudio() {
+    document.querySelectorAll("audio[id^='audio-']").forEach((audio) => {
+        audio.play().catch((error) => console.error(error));
+    });
+
+    const btn = document.getElementById("enableAudioButton");
+    if (btn) btn.style.display = "none";
+}
+
 async function startVoiceCall() {
     if (inCall) return;
 
@@ -651,7 +666,22 @@ async function createPeer(remoteId, remoteName, initiator) {
     const peer = new RTCPeerConnection({
         iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" }
+            { urls: "stun:stun1.l.google.com:19302" },
+            {
+                urls: "turn:openrelay.metered.ca:80",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+            {
+                urls: "turn:openrelay.metered.ca:443",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+            {
+                urls: "turn:openrelay.metered.ca:443?transport=tcp",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            }
         ]
     });
 
@@ -675,6 +705,13 @@ async function createPeer(remoteId, remoteName, initiator) {
         }
 
         audio.srcObject = stream;
+
+        /* FIX: חלק מהדפדפנים חוסמים ניגון שמע אוטומטי גם אחרי
+           user gesture. מפעילים ידנית, ואם זה נחסם - מציגים
+           כפתור "הפעל שמע" כדי שהמשתמש יאשר בלחיצה אחת. */
+        audio.play().catch(() => {
+            showEnableAudioButton();
+        });
     };
 
     peer.onicecandidate = async (event) => {
@@ -784,6 +821,9 @@ async function leaveVoice() {
 
     document.querySelectorAll("audio[id^='audio-']").forEach((audio) => audio.remove());
     participants.innerHTML = "";
+
+    const enableBtn = document.getElementById("enableAudioButton");
+    if (enableBtn) enableBtn.style.display = "none";
 
     if (voiceChannel) {
         try { await voiceChannel.untrack(); } catch {}
