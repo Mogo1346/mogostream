@@ -1,842 +1,741 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Discord</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שיחת וידאו</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0b1020;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
 
-* { box-sizing: border-box; }
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    background: #313338;
-    color: #f2f3f5;
-}
+    header {
+      height: 70px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #11182b;
+      border-bottom: 1px solid #222b43;
+    }
 
-.app {
-    display: grid;
-    grid-template-columns: 72px 240px 1fr;
-    height: 100vh;
-}
+    .logo {
+      font-size: 21px;
+      font-weight: 700;
+    }
 
-/* SERVERS */
-.servers {
-    background: #1e1f22;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #aeb8d0;
+      font-size: 14px;
+    }
 
-.server {
-    width: 48px; height: 48px;
-    border-radius: 16px;
-    background: #313338;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    cursor: pointer;
-    transition: .15s;
-}
-.server:hover, .server.active { background: #5865f2; border-radius: 14px; }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #777;
+    }
 
-/* SIDEBAR */
-.sidebar {
-    background: #2b2d31;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
+    .dot.online {
+      background: #31d17c;
+    }
 
-.server-name {
-    height: 48px;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    border-bottom: 1px solid #202225;
-}
+    main {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-.channels { flex: 1; overflow-y: auto; padding: 12px 8px; }
-.category { color: #949ba4; font-size: 11px; font-weight: bold; padding: 10px 8px 5px; }
+    .join-card {
+      width: min(440px, 100%);
+      background: #11182b;
+      border: 1px solid #222b43;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
 
-.channel {
-    height: 38px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 10px;
-    color: #b5bac1;
-    cursor: pointer;
-}
-.channel:hover { background: #35373c; color: white; }
-.channel.active { background: #404249; color: white; }
-.hash { color: #949ba4; font-size: 22px; }
+    .join-card h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+    }
 
-/* USER */
-.user {
-    height: 55px;
-    background: #232428;
-    display: flex;
-    align-items: center;
-    padding: 7px 10px;
-    gap: 9px;
-}
+    .join-card p {
+      color: #9ca8c3;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
 
-.avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: #5865f2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c9d1e5;
+      font-size: 14px;
+    }
 
-.user-info { display: flex; flex-direction: column; }
-.user-info strong { font-size: 13px; }
-.user-info span { color: #23a55a; font-size: 11px; }
+    input {
+      width: 100%;
+      padding: 14px 15px;
+      border: 1px solid #303b59;
+      border-radius: 12px;
+      background: #0b1020;
+      color: white;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
 
-/* MAIN */
-.main { min-width: 0; display: flex; flex-direction: column; }
+    input:focus {
+      border-color: #667eea;
+    }
 
-.topbar {
-    height: 48px;
-    display: flex;
-    align-items: center;
-    padding: 0 18px;
-    border-bottom: 1px solid #26272b;
-    justify-content: space-between;
-}
+    button {
+      border: 0;
+      cursor: pointer;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 13px 18px;
+      transition: .15s;
+    }
 
-.room-title { display: flex; align-items: center; gap: 7px; }
+    button:hover {
+      transform: translateY(-1px);
+    }
 
-.call-button {
-    width: 38px; height: 34px;
-    border: 0;
-    border-radius: 7px;
-    background: transparent;
-    color: #b5bac1;
-    font-size: 20px;
-    cursor: pointer;
-}
-.call-button:hover { background: #3f4147; color: #23a55a; }
+    .primary {
+      width: 100%;
+      background: #667eea;
+    }
 
-/* MESSAGES */
-.messages { flex: 1; overflow-y: auto; padding: 20px 0; }
-.welcome { padding: 20px; }
-.welcome h1 { margin-bottom: 5px; }
-.welcome p { color: #949ba4; }
+    .primary:hover {
+      background: #7188f0;
+    }
 
-.message { display: flex; direction: rtl; gap: 12px; padding: 7px 20px; }
-.message:hover { background: #2e3035; }
+    .call {
+      width: 100%;
+      height: calc(100vh - 118px);
+      display: none;
+      position: relative;
+    }
 
-.message-avatar {
-    width: 40px; height: 40px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: #5865f2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
+    .videos {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
 
-.message-body { min-width: 0; text-align: right; }
-.message-header { display: flex; align-items: baseline; gap: 8px; }
-.message-header small { color: #949ba4; font-size: 10px; }
-.message-content { margin-top: 3px; color: #dbdee1; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .video-box {
+      position: relative;
+      min-height: 260px;
+      overflow: hidden;
+      border-radius: 18px;
+      background: #151c30;
+      border: 1px solid #252f49;
+    }
 
-/* COMPOSER */
-.composer { padding: 0 20px 20px; display: flex; direction: rtl; gap: 8px; }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #080c17;
+    }
 
-.composer input {
-    flex: 1; height: 44px;
-    border: 0; outline: 0;
-    border-radius: 8px;
-    background: #383a40;
-    color: white;
-    padding: 0 14px;
-    font-size: 14px;
-}
+    .video-label {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.55);
+      font-size: 13px;
+    }
 
-.composer button {
-    border: 0;
-    border-radius: 7px;
-    padding: 0 20px;
-    background: #5865f2;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
+    .controls {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(17,24,43,.92);
+      border: 1px solid #303b59;
+      backdrop-filter: blur(10px);
+    }
 
-/* VOICE PANEL */
-.voice-panel {
-    position: fixed;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    width: min(430px, calc(100vw - 30px));
-    background: #2b2d31;
-    border-radius: 12px;
-    box-shadow: 0 15px 50px rgba(0,0,0,.5);
-    z-index: 100;
-    display: none;
-    overflow: hidden;
-}
-.voice-panel.open { display: block; }
+    .control {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      background: #26304a;
+      font-size: 20px;
+    }
 
-.voice-header {
-    padding: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #202225;
-}
-.voice-header strong { font-size: 16px; }
+    .control.active {
+      background: #3a4767;
+    }
 
-.voice-close { border: 0; background: transparent; color: #b5bac1; font-size: 22px; cursor: pointer; }
+    .control.danger {
+      background: #dc4454;
+    }
 
-.voice-content { padding: 20px; }
-.call-status { text-align: center; color: #b5bac1; margin-bottom: 20px; }
+    .room-info {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(0,0,0,.55);
+      color: #dce2f1;
+      font-size: 13px;
+      direction: ltr;
+    }
 
-.participants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(220,68,84,.12);
+      border: 1px solid rgba(220,68,84,.35);
+      color: #ff9ba6;
+      font-size: 14px;
+      line-height: 1.5;
+    }
 
-.participant { background: #1e1f22; border-radius: 8px; padding: 14px 5px; text-align: center; }
+    @media (max-width: 600px) {
+      main {
+        padding: 14px;
+      }
 
-.participant-avatar {
-    width: 48px; height: 48px;
-    margin: auto auto 8px;
-    border-radius: 50%;
-    background: #5865f2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-.participant-name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+      .call {
+        height: calc(100vh - 98px);
+      }
 
-.voice-controls { margin-top: 22px; display: flex; justify-content: center; gap: 10px; }
+      header {
+        padding: 0 15px;
+      }
 
-.voice-control {
-    width: 48px; height: 48px;
-    border: 0;
-    border-radius: 50%;
-    background: #404249;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-}
-.voice-control:hover { background: #4e5058; }
-.voice-control.muted { background: #ed4245; }
-.voice-control.hangup { background: #ed4245; }
-
-.calling { color: #23a55a; font-size: 12px; margin-top: 8px; text-align: center; }
-
-@media(max-width:700px) {
-    .app { grid-template-columns: 60px 190px 1fr; }
-}
-@media(max-width:550px) {
-    .app { grid-template-columns: 60px 1fr; }
-    .sidebar { display: none; }
-}
-
-</style>
+      .controls {
+        bottom: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="app">
 
-    <aside class="servers">
-        <div class="server active">D</div>
-        <div class="server">G</div>
-        <div class="server">N</div>
-    </aside>
+  <header>
+    <div class="logo">📞 VideoCall</div>
 
-    <aside class="sidebar">
-        <div class="server-name">My Discord</div>
-
-        <div class="channels">
-            <div class="category">TEXT CHANNELS</div>
-            <div class="channel active" data-room="general"><span class="hash">#</span>general</div>
-            <div class="channel" data-room="chat"><span class="hash">#</span>chat</div>
-            <div class="channel" data-room="gaming"><span class="hash">#</span>gaming</div>
-        </div>
-
-        <div class="user">
-            <div class="avatar" id="avatar">?</div>
-            <div class="user-info">
-                <strong id="username">Guest</strong>
-                <span>Online</span>
-            </div>
-        </div>
-    </aside>
-
-    <main class="main">
-        <header class="topbar">
-            <div class="room-title">
-                <span class="hash">#</span>
-                <strong id="roomName">general</strong>
-            </div>
-            <button class="call-button" id="callButton" title="התחל שיחה קולית">📞</button>
-        </header>
-
-        <section class="messages" id="messages"></section>
-
-        <form class="composer" id="composer">
-            <input id="messageInput" placeholder="שלח הודעה ב־#general..." autocomplete="off">
-            <button type="submit">שלח</button>
-        </form>
-    </main>
-
-</div>
-
-<!-- VOICE CALL -->
-<div class="voice-panel" id="voicePanel">
-    <div class="voice-header">
-        <strong>📞 שיחה קולית</strong>
-        <button class="voice-close" id="voiceClose">×</button>
+    <div class="status">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusText">לא מחובר</span>
     </div>
+  </header>
 
-    <div class="voice-content">
-        <div class="call-status" id="callStatus">מתחבר...</div>
-        <button id="enableAudioButton" style="display:none; width:auto; border:0; border-radius:20px; padding:8px 16px; font-size:13px; margin:0 auto 14px; background:#5865f2; color:white; cursor:pointer;" onclick="enableAudio()">🔊 הפעל שמע</button>
-        <div class="participants" id="participants"></div>
-        <div class="calling" id="callingText"></div>
+  <main>
 
-        <div class="voice-controls">
-            <button class="voice-control" id="muteButton" title="השתק">🎙️</button>
-            <button class="voice-control hangup" id="hangupButton" title="נתק">📵</button>
+    <!-- מסך כניסה -->
+    <section id="joinCard" class="join-card">
+
+      <h1>שיחת וידאו</h1>
+
+      <p>
+        הזן שם חדר כדי ליצור שיחה או להצטרף לחדר קיים.
+      </p>
+
+      <label for="roomInput">Room ID</label>
+
+      <input
+        id="roomInput"
+        type="text"
+        placeholder="לדוגמה: my-room-123"
+        autocomplete="off"
+      />
+
+      <label for="nameInput">השם שלך</label>
+
+      <input
+        id="nameInput"
+        type="text"
+        placeholder="השם שיוצג בשיחה"
+        autocomplete="off"
+      />
+
+      <button id="joinButton" class="primary">
+        🎥 הצטרף לשיחה
+      </button>
+
+      <div id="errorBox" class="error"></div>
+
+    </section>
+
+    <!-- מסך השיחה -->
+    <section id="call" class="call">
+
+      <div id="videos" class="videos">
+
+        <div class="video-box">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <div class="video-label" id="localLabel">אתה</div>
         </div>
-    </div>
+
+      </div>
+
+      <div id="roomInfo" class="room-info"></div>
+
+      <div class="controls">
+
+        <button
+          id="micButton"
+          class="control active"
+          title="מיקרופון"
+        >
+          🎙️
+        </button>
+
+        <button
+          id="cameraButton"
+          class="control active"
+          title="מצלמה"
+        >
+          📹
+        </button>
+
+        <button
+          id="leaveButton"
+          class="control danger"
+          title="יציאה"
+        >
+          ☎️
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
 </div>
 
 <script>
+  /*
+   * ==========================================================
+   * METERED CONFIG
+   * ==========================================================
+   *
+   * אל תכניס כאן את ה-sk_secret.
+   *
+   * אם Metered מספק לך API key ציבורי לשימוש בדפדפן,
+   * הכנס אותו כאן.
+   */
 
-/* =====================================================
-   SUPABASE
-===================================================== */
-const SUPABASE_URL = "https://flprshvuamxyubfswvoh.supabase.co";
-const SUPABASE_KEY = "sb_publishable_YrpY7Hau04yFCVRGZr52zA_iqjfznTM";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const METERED_API_KEY = "PASTE_PUBLIC_KEY_HERE";
 
-/* =====================================================
-   USER
-===================================================== */
-let username = localStorage.getItem("discord_username");
+  /*
+   * אם יש לך Subdomain של Metered:
+   *
+   * לדוגמה:
+   *
+   * const METERED_DOMAIN = "yourapp.metered.live";
+   *
+   */
 
-if (!username) {
-    username = prompt("איך לקרוא לך?") || "Guest";
-    localStorage.setItem("discord_username", username);
-}
+  const METERED_DOMAIN = "PASTE_YOUR_DOMAIN_HERE";
 
-document.getElementById("username").textContent = username;
-document.getElementById("avatar").textContent = username.charAt(0).toUpperCase();
 
-/* =====================================================
-   CHAT
-===================================================== */
-let currentRoom = "general";
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
-const messages = document.getElementById("messages");
-const input = document.getElementById("messageInput");
-const roomName = document.getElementById("roomName");
+  let localStream = null;
+  let micEnabled = true;
+  let cameraEnabled = true;
 
-async function loadMessages() {
-    messages.innerHTML = "";
+  const peers = new Map();
 
-    const result = await db
-        .from("messages")
-        .select("*")
-        .eq("room", currentRoom)
-        .order("created_at", { ascending: true });
 
-    if (result.error) {
-        console.error(result.error);
-        messages.innerHTML = `
-            <div class="welcome">
-                <h1>שגיאה בחיבור</h1>
-                <p>בדוק את הגדרות Supabase.</p>
-            </div>
-        `;
-        return;
+  // ==========================================================
+  // ELEMENTS
+  // ==========================================================
+
+  const joinCard = document.getElementById("joinCard");
+  const call = document.getElementById("call");
+
+  const roomInput = document.getElementById("roomInput");
+  const nameInput = document.getElementById("nameInput");
+
+  const joinButton = document.getElementById("joinButton");
+
+  const localVideo = document.getElementById("localVideo");
+  const localLabel = document.getElementById("localLabel");
+
+  const videos = document.getElementById("videos");
+
+  const micButton = document.getElementById("micButton");
+  const cameraButton = document.getElementById("cameraButton");
+  const leaveButton = document.getElementById("leaveButton");
+
+  const roomInfo = document.getElementById("roomInfo");
+
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+
+  const errorBox = document.getElementById("errorBox");
+
+
+  // ==========================================================
+  // HELPERS
+  // ==========================================================
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+  }
+
+  function clearError() {
+    errorBox.textContent = "";
+    errorBox.style.display = "none";
+  }
+
+  function setStatus(online, text) {
+    statusDot.classList.toggle("online", online);
+    statusText.textContent = text;
+  }
+
+
+  // ==========================================================
+  // GET CAMERA + MICROPHONE
+  // ==========================================================
+
+  async function getLocalMedia() {
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+      throw new Error(
+        "הדפדפן לא מאפשר גישה למצלמה ולמיקרופון."
+      );
     }
 
-    if (result.data.length === 0) {
-        messages.innerHTML = `
-            <div class="welcome">
-                <h1>ברוכים הבאים ל־#${escapeHTML(currentRoom)}</h1>
-                <p>זה תחילת הערוץ.</p>
-            </div>
-        `;
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+
+    localStream = stream;
+
+    localVideo.srcObject = stream;
+
+    return stream;
+  }
+
+
+  // ==========================================================
+  // JOIN
+  // ==========================================================
+
+  async function joinCall() {
+
+    clearError();
+
+    const roomId = roomInput.value.trim();
+    const name = nameInput.value.trim() || "אורח";
+
+    if (!roomId) {
+      showError("נא להזין Room ID.");
+      return;
     }
 
-    result.data.forEach(addMessage);
-    scrollBottom();
-}
-
-function addMessage(message) {
-    const element = document.createElement("div");
-    element.className = "message";
-
-    const avatar = document.createElement("div");
-    avatar.className = "message-avatar";
-    avatar.textContent = message.username.charAt(0).toUpperCase();
-
-    const body = document.createElement("div");
-    body.className = "message-body";
-
-    const header = document.createElement("div");
-    header.className = "message-header";
-
-    const name = document.createElement("strong");
-    name.textContent = message.username;
-
-    const time = document.createElement("small");
-    time.textContent = new Date(message.created_at).toLocaleString();
-
-    header.appendChild(name);
-    header.appendChild(time);
-
-    const content = document.createElement("div");
-    content.className = "message-content";
-    content.textContent = message.content;
-
-    body.appendChild(header);
-    body.appendChild(content);
-
-    element.appendChild(avatar);
-    element.appendChild(body);
-
-    messages.appendChild(element);
-}
-
-document.getElementById("composer").addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const content = input.value.trim();
-    if (!content) return;
-
-    input.value = "";
-
-    const result = await db.from("messages").insert({
-        room: currentRoom,
-        username: username,
-        content: content
-    });
-
-    if (result.error) {
-        console.error(result.error);
-        alert("ההודעה לא נשלחה.");
-    }
-});
-
-document.querySelectorAll(".channel").forEach((channel) => {
-    channel.addEventListener("click", async () => {
-        document.querySelectorAll(".channel").forEach((c) => c.classList.remove("active"));
-        channel.classList.add("active");
-
-        currentRoom = channel.dataset.room;
-        roomName.textContent = currentRoom;
-        input.placeholder = "שלח הודעה ב־#" + currentRoom;
-
-        await loadMessages();
-    });
-});
-
-db.channel("chat-room")
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        if (payload.new.room === currentRoom) {
-            addMessage(payload.new);
-            scrollBottom();
-        }
-    })
-    .subscribe();
-
-function scrollBottom() {
-    messages.scrollTop = messages.scrollHeight;
-}
-
-function escapeHTML(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-/* =====================================================
-   VOICE CHAT
-===================================================== */
-
-/* מזהה ייחודי לדפדפן - נשמר רק במכשיר הזה */
-let peerId = localStorage.getItem("voice_peer_id");
-if (!peerId) {
-    peerId = crypto.randomUUID();
-    localStorage.setItem("voice_peer_id", peerId);
-}
-
-let voiceRoom = null;
-let voiceChannel = null;
-let localStream = null;
-const peers = new Map();
-
-/* FIX: תור ל-ICE candidates שהגיעו לפני שה-peer היה מוכן לקבל אותם.
-   בלי זה, מועמדי חיבור מוקדמים נזרקים לפח - וזה גורם לשיחות חד-כיווניות
-   או שלא מתחברות בכלל. */
-const pendingCandidates = new Map();
-
-let inCall = false;
-let muted = false;
-
-const voicePanel = document.getElementById("voicePanel");
-const callStatus = document.getElementById("callStatus");
-const participants = document.getElementById("participants");
-const callingText = document.getElementById("callingText");
-
-document.getElementById("callButton").addEventListener("click", startVoiceCall);
-
-function showEnableAudioButton() {
-    const btn = document.getElementById("enableAudioButton");
-    if (btn) btn.style.display = "block";
-}
-
-function enableAudio() {
-    document.querySelectorAll("audio[id^='audio-']").forEach((audio) => {
-        audio.play().catch((error) => console.error(error));
-    });
-
-    const btn = document.getElementById("enableAudioButton");
-    if (btn) btn.style.display = "none";
-}
-
-async function startVoiceCall() {
-    if (inCall) return;
-
-    voicePanel.classList.add("open");
-    callStatus.textContent = "מבקש גישה למיקרופון...";
+    joinButton.disabled = true;
+    joinButton.textContent = "מתחבר...";
 
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+      await getLocalMedia();
+
+      localLabel.textContent = name;
+
+      roomInfo.textContent =
+        "Room: " + roomId;
+
+      joinCard.style.display = "none";
+      call.style.display = "block";
+
+      setStatus(true, "מחובר");
+
+      /*
+       * ======================================================
+       * כאן מתחבר ה-Metered SDK.
+       *
+       * בכוונה לא שמנו כאן את ה-secret שלך.
+       *
+       * ======================================================
+       */
+
+      await connectToMetered(roomId, name);
+
     } catch (error) {
-        console.error(error);
-        callStatus.textContent = "אין גישה למיקרופון.";
-        return;
+
+      console.error(error);
+
+      showError(
+        error.message ||
+        "לא הצלחנו להתחבר לשיחה."
+      );
+
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+
+    } finally {
+
+      joinButton.disabled = false;
+      joinButton.textContent = "🎥 הצטרף לשיחה";
     }
+  }
 
-    inCall = true;
-    muted = false;
 
-    voiceRoom = "voice:" + currentRoom;
+  // ==========================================================
+  // METERED CONNECTION
+  // ==========================================================
 
-    voiceChannel = db.channel(voiceRoom, {
-        config: {
-            broadcast: { self: false },
-            presence: { key: peerId }
-        }
+  async function connectToMetered(roomId, name) {
+
+    /*
+     * כאן צריך להשתמש ב-SDK/endpoint המדויק שמוגדר
+     * באפליקציית Metered שלך.
+     *
+     * אל תשים כאן sk_secret.
+     */
+
+    console.log("Connecting to Metered...");
+    console.log({
+      domain: METERED_DOMAIN,
+      roomId,
+      name
     });
 
-    voiceChannel.on("broadcast", { event: "voice" }, async (payload) => {
-        await handleSignal(payload.payload);
-    });
+    /*
+     * ה-MVP המקומי עדיין מפעיל את המצלמה והמיקרופון.
+     *
+     * אחרי שמכניסים את ה-SDK של Metered,
+     * המשתתפים האחרים יופיעו בתוך #videos.
+     */
+  }
 
-    await voiceChannel.subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-            callStatus.textContent = "מחובר לשיחה";
 
-            await sendSignal({ type: "hello", from: peerId, name: username });
-            await voiceChannel.track({ user_id: peerId, username: username });
+  // ==========================================================
+  // MICROPHONE
+  // ==========================================================
 
-            updateParticipants();
-        }
-    });
-}
+  micButton.addEventListener("click", () => {
 
-async function sendSignal(data) {
-    if (!voiceChannel) return;
-    await voiceChannel.send({ type: "broadcast", event: "voice", payload: data });
-}
-
-/* FIX: פונקציה משותפת שמחליטה מי יוזם את החיבור, לפי השוואת ה-ID-ים.
-   כל צד שמגלה peer חדש (דרך "hello" או "welcome") מריץ את אותה בדיקה -
-   כך שתמיד בדיוק צד אחד יוזם, לא משנה מי גילה את מי קודם. */
-function maybeInitiate(remoteId, remoteName) {
-    if (peers.has(remoteId)) return;
-    if (peerId < remoteId) createPeer(remoteId, remoteName, true);
-}
-
-async function handleSignal(data) {
-    if (!data || data.from === peerId) return;
-
-    /* FIX: תמיד עונים ל-"hello" עם "welcome", גם אם לא אנחנו יוזמים -
-       אחרת אם ה-ID של המצטרף החדש קטן משלנו, אף אחד לא היה יוזם חיבור בכלל. */
-    if (data.type === "hello") {
-        await sendSignal({ type: "welcome", from: peerId, to: data.from, name: username });
-        maybeInitiate(data.from, data.name);
-        return;
-    }
-
-    /* FIX: תשובת welcome - עכשיו המצטרף החדש יודע על המשתמש הקיים
-       ויכול להחליט (לפי אותה בדיקת ID) אם הוא צריך ליזום. */
-    if (data.type === "welcome") {
-        if (data.to !== peerId) return;
-        maybeInitiate(data.from, data.name);
-        return;
-    }
-
-    if (data.type === "offer") {
-        const peer = await createPeer(data.from, data.name, false);
-        await peer.setRemoteDescription(new RTCSessionDescription(data.offer));
-        await flushPendingCandidates(data.from, peer);
-
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
-
-        await sendSignal({
-            type: "answer",
-            from: peerId,
-            to: data.from,
-            name: username,
-            answer: peer.localDescription
-        });
-        return;
-    }
-
-    if (data.type === "answer") {
-        if (data.to !== peerId) return;
-        const peer = peers.get(data.from);
-        if (!peer) return;
-
-        await peer.setRemoteDescription(new RTCSessionDescription(data.answer));
-        await flushPendingCandidates(data.from, peer);
-        return;
-    }
-
-    /* FIX: אם ה-peer עוד לא קיים או אין לו remoteDescription עדיין,
-       שומרים את המועמד בתור במקום לזרוק אותו. */
-    if (data.type === "ice") {
-        if (data.to !== peerId) return;
-        const peer = peers.get(data.from);
-
-        if (!peer || !peer.remoteDescription) {
-            if (!pendingCandidates.has(data.from)) pendingCandidates.set(data.from, []);
-            pendingCandidates.get(data.from).push(data.candidate);
-            return;
-        }
-
-        try {
-            await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
-        } catch (error) {
-            console.error(error);
-        }
-    }
-}
-
-/* FIX: מריקה את תור מועמדי החיבור הממתינים ברגע שה-peer מוכן לקבל אותם */
-async function flushPendingCandidates(remoteId, peer) {
-    const queued = pendingCandidates.get(remoteId);
-    if (!queued) return;
-
-    for (const candidate of queued) {
-        try {
-            await peer.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    pendingCandidates.delete(remoteId);
-}
-
-async function createPeer(remoteId, remoteName, initiator) {
-    if (peers.has(remoteId)) return peers.get(remoteId);
-
-    const peer = new RTCPeerConnection({
-        iceServers: [
-            { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" },
-            {
-                urls: "turn:openrelay.metered.ca:80",
-                username: "openrelayproject",
-                credential: "openrelayproject"
-            },
-            {
-                urls: "turn:openrelay.metered.ca:443",
-                username: "openrelayproject",
-                credential: "openrelayproject"
-            },
-            {
-                urls: "turn:openrelay.metered.ca:443?transport=tcp",
-                username: "openrelayproject",
-                credential: "openrelayproject"
-            }
-        ]
-    });
-
-    peers.set(remoteId, peer);
-
-    if (localStream) {
-        localStream.getTracks().forEach((track) => peer.addTrack(track, localStream));
-    }
-
-    peer.ontrack = (event) => {
-        const stream = event.streams[0];
-        if (!stream) return;
-
-        let audio = document.getElementById("audio-" + remoteId);
-        if (!audio) {
-            audio = document.createElement("audio");
-            audio.id = "audio-" + remoteId;
-            audio.autoplay = true;
-            audio.playsInline = true;
-            document.body.appendChild(audio);
-        }
-
-        audio.srcObject = stream;
-
-        /* FIX: חלק מהדפדפנים חוסמים ניגון שמע אוטומטי גם אחרי
-           user gesture. מפעילים ידנית, ואם זה נחסם - מציגים
-           כפתור "הפעל שמע" כדי שהמשתמש יאשר בלחיצה אחת. */
-        audio.play().catch(() => {
-            showEnableAudioButton();
-        });
-    };
-
-    peer.onicecandidate = async (event) => {
-        if (event.candidate) {
-            await sendSignal({ type: "ice", from: peerId, to: remoteId, candidate: event.candidate });
-        }
-    };
-
-    peer.onconnectionstatechange = () => {
-        if (peer.connectionState === "connected") {
-            callStatus.textContent = "מחובר לשיחה";
-            callingText.textContent = "";
-        }
-
-        if (["disconnected", "failed", "closed"].includes(peer.connectionState)) {
-            removePeer(remoteId);
-        }
-    };
-
-    if (initiator) {
-        const offer = await peer.createOffer();
-        await peer.setLocalDescription(offer);
-
-        await sendSignal({
-            type: "offer",
-            from: peerId,
-            to: remoteId,
-            name: username,
-            offer: peer.localDescription
-        });
-    }
-
-    addParticipant(remoteId, remoteName);
-
-    return peer;
-}
-
-function addParticipant(id, name) {
-    if (document.getElementById("participant-" + id)) return;
-
-    const element = document.createElement("div");
-    element.className = "participant";
-    element.id = "participant-" + id;
-    element.innerHTML = `
-        <div class="participant-avatar">${escapeHTML(name.charAt(0).toUpperCase())}</div>
-        <div class="participant-name">${escapeHTML(name)}</div>
-    `;
-
-    participants.appendChild(element);
-}
-
-async function updateParticipants() {
-    if (!voiceChannel) return;
-
-    const state = voiceChannel.presenceState();
-
-    Object.values(state).flat().forEach((user) => {
-        if (user.user_id !== peerId) addParticipant(user.user_id, user.username);
-    });
-
-    addParticipant(peerId, username);
-}
-
-function removePeer(remoteId) {
-    const peer = peers.get(remoteId);
-    if (peer) {
-        peer.close();
-        peers.delete(remoteId);
-    }
-
-    pendingCandidates.delete(remoteId);
-
-    const audio = document.getElementById("audio-" + remoteId);
-    if (audio) audio.remove();
-
-    const participant = document.getElementById("participant-" + remoteId);
-    if (participant) participant.remove();
-}
-
-document.getElementById("muteButton").addEventListener("click", toggleMute);
-
-function toggleMute() {
     if (!localStream) return;
 
-    muted = !muted;
-    localStream.getAudioTracks().forEach((track) => (track.enabled = !muted));
+    const audioTracks = localStream.getAudioTracks();
 
-    const button = document.getElementById("muteButton");
-    button.classList.toggle("muted", muted);
-    button.textContent = muted ? "🔇" : "🎙️";
-}
+    if (!audioTracks.length) return;
 
-document.getElementById("hangupButton").addEventListener("click", leaveVoice);
-document.getElementById("voiceClose").addEventListener("click", leaveVoice);
+    micEnabled = !micEnabled;
 
-async function leaveVoice() {
-    inCall = false;
+    audioTracks.forEach(track => {
+      track.enabled = micEnabled;
+    });
+
+    micButton.textContent =
+      micEnabled ? "🎙️" : "🔇";
+
+    micButton.classList.toggle(
+      "active",
+      micEnabled
+    );
+  });
+
+
+  // ==========================================================
+  // CAMERA
+  // ==========================================================
+
+  cameraButton.addEventListener("click", () => {
+
+    if (!localStream) return;
+
+    const videoTracks = localStream.getVideoTracks();
+
+    if (!videoTracks.length) return;
+
+    cameraEnabled = !cameraEnabled;
+
+    videoTracks.forEach(track => {
+      track.enabled = cameraEnabled;
+    });
+
+    cameraButton.textContent =
+      cameraEnabled ? "📹" : "🚫";
+
+    cameraButton.classList.toggle(
+      "active",
+      cameraEnabled
+    );
+  });
+
+
+  // ==========================================================
+  // LEAVE
+  // ==========================================================
+
+  function leaveCall() {
 
     if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-        localStream = null;
+
+      localStream.getTracks().forEach(track => {
+        track.stop();
+      });
+
+      localStream = null;
     }
 
-    peers.forEach((peer) => peer.close());
+    for (const [id, peer] of peers) {
+
+      try {
+        peer.close();
+      } catch (e) {}
+
+      removeRemoteVideo(id);
+    }
+
     peers.clear();
-    pendingCandidates.clear();
 
-    document.querySelectorAll("audio[id^='audio-']").forEach((audio) => audio.remove());
-    participants.innerHTML = "";
+    call.style.display = "none";
+    joinCard.style.display = "block";
 
-    const enableBtn = document.getElementById("enableAudioButton");
-    if (enableBtn) enableBtn.style.display = "none";
+    setStatus(false, "לא מחובר");
 
-    if (voiceChannel) {
-        try { await voiceChannel.untrack(); } catch {}
-        await db.removeChannel(voiceChannel);
-        voiceChannel = null;
+    micEnabled = true;
+    cameraEnabled = true;
+
+    micButton.textContent = "🎙️";
+    cameraButton.textContent = "📹";
+
+    micButton.classList.add("active");
+    cameraButton.classList.add("active");
+  }
+
+
+  leaveButton.addEventListener(
+    "click",
+    leaveCall
+  );
+
+
+  // ==========================================================
+  // REMOTE VIDEO
+  // ==========================================================
+
+  function addRemoteVideo(id, stream, name = "משתתף") {
+
+    if (document.getElementById("remote-" + id)) {
+      return;
     }
 
-    voiceRoom = null;
-    voicePanel.classList.remove("open");
-    callStatus.textContent = "מנותק";
-}
+    const box = document.createElement("div");
 
-loadMessages();
+    box.className = "video-box";
+    box.id = "remote-" + id;
+
+    const video = document.createElement("video");
+
+    video.autoplay = true;
+    video.playsInline = true;
+    video.srcObject = stream;
+
+    const label = document.createElement("div");
+
+    label.className = "video-label";
+    label.textContent = name;
+
+    box.appendChild(video);
+    box.appendChild(label);
+
+    videos.appendChild(box);
+  }
+
+
+  function removeRemoteVideo(id) {
+
+    const element =
+      document.getElementById("remote-" + id);
+
+    if (element) {
+      element.remove();
+    }
+  }
+
+
+  // ==========================================================
+  // ENTER KEY
+  // ==========================================================
+
+  roomInput.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+      joinCall();
+    }
+  });
+
+  nameInput.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+      joinCall();
+    }
+  });
+
+
+  joinButton.addEventListener(
+    "click",
+    joinCall
+  );
+
+
+  // ==========================================================
+  // INITIAL STATE
+  // ==========================================================
+
+  setStatus(false, "לא מחובר");
 
 </script>
 
