@@ -147,7 +147,12 @@ header {
     transition: 0.2s;
     z-index: 900;
 }
-.sidebar.closed { width: 75px; }
+.sidebar.closed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    border-left: none;
+}
 .sidebar.closed .side-text { display: none; }
 .sidebar.closed .side-item { justify-content: center; }
 
@@ -173,7 +178,7 @@ main {
     padding: 88px 25px 40px;
     transition: 0.2s;
 }
-main.full { margin-right: 75px; }
+main.full { margin-right: 0; }
 
 /* ========================= CATEGORIES ========================= */
 .categories {
