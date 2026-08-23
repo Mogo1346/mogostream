@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בינה מלאכותית</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --bg: #12181f;
+    --panel: #1a222c;
+    --panel-alt: #202a36;
+    --text: #f2ede4;
+    --secondary: #93a1ae;
+    --border: #2b3542;
+    --accent: #d4a94a;
+    --bubble-user: #2a3644;
+}
+
+body.light {
+    --bg: #f2ede4;
+    --panel: #ffffff;
+    --panel-alt: #f8f4ec;
+    --text: #171310;
+    --secondary: #6b5f4f;
+    --border: #e2d9c8;
+    --accent: #a97a1f;
+    --bubble-user: #eee3cd;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* ========================= HEADER ========================= */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "Frank Ruhl Libre", serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Frank Ruhl Libre", serif;
+    font-size: 16px;
+    color: var(--accent);
+}
+
+.header-actions { display: flex; gap: 10px; }
+
+.icon-btn-round {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+}
+.icon-btn-round:hover { border-color: var(--accent); }
+
+/* ========================= CHAT AREA ========================= */
+.chat-wrap {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.chat-inner {
+    width: 100%;
+    max-width: 760px;
+    padding: 28px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--secondary);
+    padding: 40px 20px;
+}
+
+.empty-state .glyph {
+    font-family: "Frank Ruhl Libre", serif;
+    font-size: 46px;
+    color: var(--accent);
+    margin-bottom: 14px;
+}
+
+.empty-state h2 {
+    font-family: "Frank Ruhl Libre", serif;
+    color: var(--text);
+    font-size: 22px;
+    margin: 0 0 8px;
+}
+
+.suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.suggestion-chip {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.suggestion-chip:hover { border-color: var(--accent); }
+
+.message-row {
+    display: flex;
+    gap: 10px;
+}
+
+.message-row.user { flex-direction: row-reverse; }
+
+.avatar-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-family: "Frank Ruhl Libre", serif;
+    margin-top: 2px;
+}
+
+.avatar-dot.assistant { border: 1.5px solid var(--accent); color: var(--accent); }
+.avatar-dot.user { background: var(--secondary); color: var(--bg); }
+
+.bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    line-height: 1.7;
+    font-size: 15px;
+    white-space: pre-wrap;
+}
+
+.message-row.assistant .bubble {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top-right-radius: 4px;
+}
+
+.message-row.user .bubble {
+    background: var(--bubble-user);
+    border-top-left-radius: 4px;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--secondary);
+    animation: bounce 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.error-bubble {
+    color: #e08a8a;
+    font-size: 13px;
+}
+
+/* ========================= INPUT BAR ========================= */
+.input-bar {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.input-inner {
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 10px 10px 10px 16px;
+}
+
+#messageInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 15px;
+    resize: none;
+    max-height: 140px;
+    line-height: 1.5;
+    padding: 6px 0;
+}
+#messageInput::placeholder { color: var(--secondary); }
+
+.send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.send-btn:disabled { opacity: 0.4; cursor: default; }
+
+@media(max-width: 600px) {
+    header { padding: 14px 16px; }
+    .chat-inner { padding: 18px 12px 12px; }
+    .bubble { max-width: 88%; font-size: 14px; }
+    .input-bar { padding: 12px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">
+        <div class="brand-mark">א</div>
+        <span>עוזר AI</span>
+    </div>
+
+    <div class="header-actions">
+        <button class="icon-btn-round" onclick="clearChat()" title="שיחה חדשה">🗑️</button>
+        <button class="icon-btn-round" onclick="toggleTheme()" id="themeBtn">☀️</button>
+    </div>
+</header>
+
+<div class="chat-wrap" id="chatWrap">
+    <div class="chat-inner" id="chatInner">
+        <div class="empty-state" id="emptyState">
+            <div class="glyph">א</div>
+            <h2>איך אפשר לעזור היום?</h2>
+            <div class="suggestions">
+                <button class="suggestion-chip" onclick="sendSuggestion('תן לי רעיון לארוחת ערב מהירה')">רעיון לארוחת ערב</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('תסביר לי בקצרה מה זה בינה מלאכותית')">מה זה AI?</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('כתוב לי בדיחה קצרה')">ספר בדיחה</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="input-bar">
+    <div class="input-inner">
+        <textarea
+            id="messageInput"
+            rows="1"
+            placeholder="כתוב הודעה..."
+            onkeydown="handleKeydown(event)"
+            oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+    </div>
+</div>
+
+<script>
+
+/* =====================================================
+   API KEY (Gemini - free tier)
+===================================================== */
+const GEMINI_API_KEY = "AQ.Ab8RN6Lmc9pZ85YmKaDlTYoDAFpg7hCkX_rTyYZJ60lnF3p73A";
+const GEMINI_MODEL = "gemini-3.6-flash";
+
+/* =====================================================
+   STATE
+===================================================== */
+let conversation = [];
+let isWaiting = false;
+
+/* =====================================================
+   INIT
+===================================================== */
+window.addEventListener("load", function() {
+    if (localStorage.getItem("chatTheme") === "light") {
+        document.body.classList.add("light");
+        document.getElementById("themeBtn").textContent = "🌙";
+    }
+    document.getElementById("messageInput").focus();
+});
+
+/* =====================================================
+   THEME
+===================================================== */
+function toggleTheme() {
+    document.body.classList.toggle("light");
+    const isLight = document.body.classList.contains("light");
+    document.getElementById("themeBtn").textContent = isLight ? "🌙" : "☀️";
+    localStorage.setItem("chatTheme", isLight ? "light" : "dark");
+}
+
+/* =====================================================
+   INPUT HANDLING
+===================================================== */
+function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 140) + "px";
+}
+
+function handleKeydown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function sendSuggestion(text) {
+    document.getElementById("messageInput").value = text;
+    sendMessage();
+}
+
+/* =====================================================
+   CLEAR CHAT
+===================================================== */
+function clearChat() {
+    conversation = [];
+    document.getElementById("chatInner").innerHTML = `
+        <div class="empty-state" id="emptyState">
+            <div class="glyph">א</div>
+            <h2>איך אפשר לעזור היום?</h2>
+            <div class="suggestions">
+                <button class="suggestion-chip" onclick="sendSuggestion('תן לי רעיון לארוחת ערב מהירה')">רעיון לארוחת ערב</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('תסביר לי בקצרה מה זה בינה מלאכותית')">מה זה AI?</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('כתוב לי בדיחה קצרה')">ספר בדיחה</button>
+            </div>
+        </div>
+    `;
+}
+
+/* =====================================================
+   SEND MESSAGE
+===================================================== */
+async function sendMessage() {
+    if (isWaiting) return;
+
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const emptyState = document.getElementById("emptyState");
+    if (emptyState) emptyState.remove();
+
+    appendMessage("user", text);
+    conversation.push({ role: "user", content: text });
+
+    input.value = "";
+    autoResize(input);
+
+    isWaiting = true;
+    document.getElementById("sendBtn").disabled = true;
+
+    const typingId = appendTyping();
+
+    try {
+        const replyText = await callGemini();
+
+        removeTyping(typingId);
+
+        if (!replyText) {
+            throw new Error("לא התקבלה תשובה.");
+        }
+
+        appendMessage("assistant", replyText);
+        conversation.push({ role: "assistant", content: replyText });
+
+    } catch (error) {
+        removeTyping(typingId);
+        console.error(error);
+        appendError(error.message);
+
+    } finally {
+        isWaiting = false;
+        document.getElementById("sendBtn").disabled = false;
+        input.focus();
+    }
+}
+
+/* =====================================================
+   GEMINI API CALL
+===================================================== */
+async function callGemini() {
+    const contents = conversation.map((msg) => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }]
+    }));
+
+    const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY
+            },
+            body: JSON.stringify({ contents })
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data?.error?.message || "שגיאה בקבלת תשובה מ-Gemini.");
+    }
+
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    return parts.map((p) => p.text || "").join("\n").trim();
+}
+
+/* =====================================================
+   RENDER HELPERS
+===================================================== */
+function appendMessage(role, text) {
+    const chatInner = document.getElementById("chatInner");
+
+    const row = document.createElement("div");
+    row.className = "message-row " + role;
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar-dot " + role;
+    avatar.textContent = role === "assistant" ? "א" : "";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+
+    scrollToBottom();
+}
+
+function appendTyping() {
+    const chatInner = document.getElementById("chatInner");
+
+    const row = document.createElement("div");
+    row.className = "message-row assistant";
+    row.id = "typing-" + Date.now();
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar-dot assistant";
+    avatar.textContent = "א";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+
+    scrollToBottom();
+
+    return row.id;
+}
+
+function removeTyping(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+function appendError(message) {
+    const chatInner = document.getElementById("chatInner");
+
+    const row = document.createElement("div");
+    row.className = "message-row assistant";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar-dot assistant";
+    avatar.textContent = "!";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble error-bubble";
+    bubble.textContent = "משהו השתבש: " + message;
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    const wrap = document.getElementById("chatWrap");
+    wrap.scrollTop = wrap.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>

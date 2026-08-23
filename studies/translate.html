@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>טרנזלייט</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --bg: #12181f;
+    --panel: #1a222c;
+    --panel-alt: #202a36;
+    --text: #f2ede4;
+    --secondary: #93a1ae;
+    --border: #2b3542;
+    --accent: #d4a94a;
+}
+
+body.light {
+    --bg: #f2ede4;
+    --panel: #ffffff;
+    --panel-alt: #f8f4ec;
+    --text: #171310;
+    --secondary: #6b5f4f;
+    --border: #e2d9c8;
+    --accent: #a97a1f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", Arial, sans-serif;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* ========================= HEADER ========================= */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "Frank Ruhl Libre", serif;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Frank Ruhl Libre", serif;
+    font-size: 17px;
+    color: var(--accent);
+}
+
+.theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--accent); }
+
+/* ========================= MAIN ========================= */
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+}
+
+.lang-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.lang-bar select {
+    flex: 1;
+    background: var(--panel-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.swap-btn {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--accent);
+    font-size: 16px;
+    cursor: pointer;
+}
+.swap-btn:hover { background: var(--panel-alt); }
+
+.translate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
+}
+
+.panel textarea {
+    flex: 1;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.panel textarea::placeholder { color: var(--secondary); }
+
+.panel-output {
+    flex: 1;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    overflow-y: auto;
+}
+
+.panel-output.empty { color: var(--secondary); }
+
+.panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.char-count {
+    font-size: 12px;
+    color: var(--secondary);
+}
+
+.panel-actions { display: flex; gap: 8px; }
+
+.icon-btn {
+    border: none;
+    background: transparent;
+    color: var(--secondary);
+    font-size: 15px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+.icon-btn:hover { color: var(--accent); background: var(--panel-alt); }
+
+.detected-lang {
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+.status-line {
+    text-align: center;
+    color: var(--secondary);
+    font-size: 12px;
+    margin-top: 16px;
+    min-height: 16px;
+}
+
+/* ========================= MOBILE ========================= */
+@media(max-width: 750px) {
+    header { padding: 18px 20px; }
+    main { padding: 32px 16px 60px; }
+    .translate-grid { grid-template-columns: 1fr; }
+    .swap-btn { transform: rotate(90deg); }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">
+        <div class="brand-mark">א</div>
+        <span>תרגום</span>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️</button>
+</header>
+
+<main>
+
+    <div class="lang-bar">
+        <select id="sourceLang" onchange="onLangChange()">
+            <option value="auto">זיהוי שפה אוטומטי</option>
+        </select>
+
+        <button class="swap-btn" onclick="swapLanguages()" title="החלף שפות">⇄</button>
+
+        <select id="targetLang" onchange="onLangChange()">
+            <option value="en">אנגלית</option>
+        </select>
+    </div>
+
+    <div class="translate-grid">
+
+        <div class="panel">
+            <textarea
+                id="sourceText"
+                placeholder="הקלד או הדבק טקסט לתרגום..."
+                oninput="onInputChange()"
+            ></textarea>
+
+            <div class="detected-lang" id="detectedLang"></div>
+
+            <div class="panel-footer">
+                <span class="char-count" id="charCount">0 / 5000</span>
+                <div class="panel-actions">
+                    <button class="icon-btn" onclick="clearSource()" title="נקה">🗑️</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-output empty" id="targetText">התרגום יופיע כאן</div>
+
+            <div class="panel-footer">
+                <span class="char-count" id="targetStatus"></span>
+                <div class="panel-actions">
+                    <button class="icon-btn" onclick="copyTranslation()" title="העתק">📋</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="status-line" id="statusLine"></div>
+
+</main>
+
+<script>
+
+/* =====================================================
+   LANGUAGES
+===================================================== */
+const LANGUAGES = [
+    { code: "he", name: "עברית" },
+    { code: "en", name: "אנגלית" },
+    { code: "ar", name: "ערבית" },
+    { code: "ru", name: "רוסית" },
+    { code: "fr", name: "צרפתית" },
+    { code: "es", name: "ספרדית" },
+    { code: "de", name: "גרמנית" },
+    { code: "it", name: "איטלקית" },
+    { code: "pt", name: "פורטוגזית" },
+    { code: "zh-CN", name: "סינית" },
+    { code: "ja", name: "יפנית" },
+    { code: "ko", name: "קוריאנית" },
+    { code: "hi", name: "הינדי" },
+    { code: "tr", name: "טורקית" },
+    { code: "uk", name: "אוקראינית" },
+    { code: "th", name: "תאית" },
+    { code: "nl", name: "הולנדית" },
+    { code: "pl", name: "פולנית" }
+];
+
+const LANG_NAME_BY_CODE = Object.fromEntries(LANGUAGES.map((l) => [l.code, l.name]));
+
+let debounceTimer = null;
+let activeController = null;
+
+/* =====================================================
+   INIT
+===================================================== */
+window.addEventListener("load", function() {
+    if (localStorage.getItem("translateTheme") === "light") {
+        document.body.classList.add("light");
+        document.getElementById("themeBtn").textContent = "🌙";
+    }
+
+    populateLanguageSelects();
+
+    const savedSource = localStorage.getItem("translateSourceLang") || "auto";
+    const savedTarget = localStorage.getItem("translateTargetLang") || "en";
+
+    document.getElementById("sourceLang").value = savedSource;
+    document.getElementById("targetLang").value = savedTarget;
+});
+
+function populateLanguageSelects() {
+    const sourceSelect = document.getElementById("sourceLang");
+    const targetSelect = document.getElementById("targetLang");
+
+    LANGUAGES.forEach((lang) => {
+        const opt1 = document.createElement("option");
+        opt1.value = lang.code;
+        opt1.textContent = lang.name;
+        sourceSelect.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = lang.code;
+        opt2.textContent = lang.name;
+        targetSelect.appendChild(opt2);
+    });
+}
+
+/* =====================================================
+   THEME
+===================================================== */
+function toggleTheme() {
+    document.body.classList.toggle("light");
+    const isLight = document.body.classList.contains("light");
+    document.getElementById("themeBtn").textContent = isLight ? "🌙" : "☀️";
+    localStorage.setItem("translateTheme", isLight ? "light" : "dark");
+}
+
+/* =====================================================
+   LANGUAGE CHANGE / SWAP
+===================================================== */
+function onLangChange() {
+    localStorage.setItem("translateSourceLang", document.getElementById("sourceLang").value);
+    localStorage.setItem("translateTargetLang", document.getElementById("targetLang").value);
+    triggerTranslate();
+}
+
+function swapLanguages() {
+    const sourceSelect = document.getElementById("sourceLang");
+    const targetSelect = document.getElementById("targetLang");
+
+    if (sourceSelect.value === "auto") return;
+
+    const sourceVal = sourceSelect.value;
+    const targetVal = targetSelect.value;
+
+    sourceSelect.value = targetVal;
+    targetSelect.value = sourceVal;
+
+    const sourceText = document.getElementById("sourceText");
+    const targetText = document.getElementById("targetText");
+
+    if (!targetText.classList.contains("empty")) {
+        sourceText.value = targetText.textContent;
+    }
+
+    onLangChange();
+    onInputChange();
+}
+
+/* =====================================================
+   INPUT HANDLING (debounced)
+===================================================== */
+function onInputChange() {
+    const text = document.getElementById("sourceText").value;
+
+    document.getElementById("charCount").textContent = text.length + " / 5000";
+
+    if (text.length > 5000) {
+        document.getElementById("charCount").style.color = "#e05252";
+    } else {
+        document.getElementById("charCount").style.color = "";
+    }
+
+    clearTimeout(debounceTimer);
+
+    if (!text.trim()) {
+        resetOutput();
+        return;
+    }
+
+    debounceTimer = setTimeout(triggerTranslate, 450);
+}
+
+function clearSource() {
+    document.getElementById("sourceText").value = "";
+    document.getElementById("charCount").textContent = "0 / 5000";
+    resetOutput();
+}
+
+function resetOutput() {
+    const out = document.getElementById("targetText");
+    out.textContent = "התרגום יופיע כאן";
+    out.classList.add("empty");
+    document.getElementById("detectedLang").textContent = "";
+    document.getElementById("targetStatus").textContent = "";
+    document.getElementById("statusLine").textContent = "";
+}
+
+/* =====================================================
+   TRANSLATE (unofficial free Google endpoint)
+===================================================== */
+function triggerTranslate() {
+    const text = document.getElementById("sourceText").value.trim();
+    if (!text) {
+        resetOutput();
+        return;
+    }
+    translateText(text);
+}
+
+async function translateText(text) {
+    const sourceLang = document.getElementById("sourceLang").value;
+    const targetLang = document.getElementById("targetLang").value;
+
+    if (activeController) {
+        activeController.abort();
+    }
+    activeController = new AbortController();
+
+    document.getElementById("statusLine").textContent = "מתרגם...";
+
+    const url =
+        "https://translate.googleapis.com/translate_a/single" +
+        "?client=gtx" +
+        "&sl=" + encodeURIComponent(sourceLang) +
+        "&tl=" + encodeURIComponent(targetLang) +
+        "&dt=t" +
+        "&q=" + encodeURIComponent(text.slice(0, 5000));
+
+    try {
+        const response = await fetch(url, { signal: activeController.signal });
+
+        if (!response.ok) {
+            throw new Error("שגיאת שרת (" + response.status + ")");
+        }
+
+        const data = await response.json();
+
+        const translated = (data[0] || [])
+            .map((chunk) => chunk[0])
+            .filter(Boolean)
+            .join("");
+
+        const out = document.getElementById("targetText");
+        out.textContent = translated || "";
+        out.classList.toggle("empty", !translated);
+
+        const detectedCode = data[2];
+        if (sourceLang === "auto" && detectedCode) {
+            const detectedName = LANG_NAME_BY_CODE[detectedCode] || detectedCode;
+            document.getElementById("detectedLang").textContent = "זוהתה שפה: " + detectedName;
+        } else {
+            document.getElementById("detectedLang").textContent = "";
+        }
+
+        document.getElementById("targetStatus").textContent = translated.length + " תווים";
+        document.getElementById("statusLine").textContent = "";
+
+    } catch (error) {
+        if (error.name === "AbortError") return;
+
+        console.error(error);
+        document.getElementById("statusLine").textContent =
+            "לא ניתן היה לתרגם כרגע. ייתכן שזה שירות לא-רשמי שהשתנה או שיש בעיית רשת.";
+    }
+}
+
+/* =====================================================
+   COPY
+===================================================== */
+function copyTranslation() {
+    const out = document.getElementById("targetText");
+    if (out.classList.contains("empty") || !out.textContent) return;
+
+    navigator.clipboard.writeText(out.textContent);
+
+    const status = document.getElementById("targetStatus");
+    const original = status.textContent;
+    status.textContent = "הועתק!";
+    setTimeout(() => { status.textContent = original; }, 1200);
+}
+
+</script>
+
+</body>
+</html>
