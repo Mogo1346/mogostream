@@ -236,7 +236,7 @@ let hideTimeout;
 
 // קבלת URL מ-localStorage
 function getVideoUrl() {
-  const stored = sessionStorage.getItem('gameUrl');
+  const stored = localStorage.getItem('gameUrl');
 
   if (!stored) {
     showError();

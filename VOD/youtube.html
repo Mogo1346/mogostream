@@ -1,43 +1,1109 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
+
 <head>
-    <meta charset="UTF-8">
-    <title>יוטיוב</title>
-    <style>
-        body { font-family: Arial, sans-serif; direction: rtl; }
-        #results iframe { display: block; margin: 10px auto; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube</title>
+
+<style>
+
+/* ========================= משתנים ========================= */
+:root {
+    --bg: #ffffff;
+    --text: #0f0f0f;
+    --secondary: #606060;
+    --hover: #f2f2f2;
+    --border: #e5e5e5;
+    --header: #ffffff;
+    --red: #ff0000;
+}
+
+body.dark {
+    --bg: #0f0f0f;
+    --text: #ffffff;
+    --secondary: #aaaaaa;
+    --hover: #272727;
+    --border: #303030;
+    --header: #0f0f0f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ========================= HEADER ========================= */
+header {
+    height: 64px;
+    background: var(--header);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 18px;
+    position: fixed;
+    top: 0; right: 0; left: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border);
+}
+
+.menu {
+    width: 42px; height: 42px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.menu:hover { background: var(--hover); }
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 21px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.youtube-logo {
+    width: 36px; height: 25px;
+    background: #ff0000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+}
+
+.search-area {
+    flex: 1;
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    direction: ltr;
+}
+
+.search-area input {
+    flex: 1;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 21px 0 0 21px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 0 18px;
+    font-size: 16px;
+    outline: none;
+}
+.search-area input:focus { border-color: #777; }
+
+.search-button {
+    width: 64px;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 21px 21px 0;
+    background: var(--hover);
+    color: var(--text);
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.voice {
+    width: 42px; height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: var(--hover);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.header-buttons { display: flex; gap: 5px; }
+.header-buttons button {
+    width: 42px; height: 42px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 19px;
+}
+.header-buttons button:hover { background: var(--hover); }
+
+/* ========================= SIDEBAR ========================= */
+.sidebar {
+    position: fixed;
+    top: 64px; right: 0; bottom: 0;
+    width: 230px;
+    background: var(--bg);
+    padding: 12px;
+    overflow-y: auto;
+    transition: 0.2s;
+    z-index: 900;
+}
+.sidebar.closed { width: 75px; }
+.sidebar.closed .side-text { display: none; }
+.sidebar.closed .side-item { justify-content: center; }
+
+.side-item {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    padding: 0 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.side-item:hover { background: var(--hover); }
+.side-item.active { background: var(--hover); font-weight: bold; }
+
+.side-icon { width: 25px; text-align: center; font-size: 20px; }
+.side-title { color: var(--secondary); font-size: 13px; padding: 20px 15px 7px; }
+
+/* ========================= MAIN ========================= */
+main {
+    margin-right: 230px;
+    padding: 88px 25px 40px;
+    transition: 0.2s;
+}
+main.full { margin-right: 75px; }
+
+/* ========================= CATEGORIES ========================= */
+.categories {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 22px;
+}
+.category {
+    border: none;
+    background: var(--hover);
+    color: var(--text);
+    padding: 9px 17px;
+    border-radius: 9px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 14px;
+}
+.category:hover { background: #d7d7d7; }
+
+/* ========================= VIDEO GRID ========================= */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 32px 18px;
+}
+
+.video-card { cursor: pointer; min-width: 0; }
+
+.thumbnail-wrapper { position: relative; }
+
+.thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    background: #ddd;
+}
+
+.duration {
+    position: absolute;
+    bottom: 8px; left: 8px;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 3px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.video-info { display: flex; gap: 11px; padding-top: 10px; }
+
+.avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.video-title {
+    font-weight: bold;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.channel { color: var(--secondary); font-size: 13px; margin-bottom: 3px; }
+.meta { color: var(--secondary); font-size: 12px; }
+
+/* ========================= SKELETON LOADING ========================= */
+.skeleton-card { min-width: 0; }
+
+.skeleton-thumb,
+.skeleton-line,
+.skeleton-avatar {
+    background: linear-gradient(90deg, var(--hover) 25%, var(--border) 37%, var(--hover) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+
+.skeleton-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+}
+
+.skeleton-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}
+
+/* ========================= WATCH PAGE ========================= */
+.watch-page { max-width: 1250px; margin: auto; }
+
+.player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 12px;
+    background: black;
+}
+
+.watch-title { font-size: 22px; font-weight: bold; line-height: 1.4; margin-top: 18px; }
+.watch-channel { color: var(--secondary); margin-top: 8px; }
+
+.watch-actions { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+
+.watch-button {
+    border: none;
+    background: var(--hover);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.watch-button:hover { opacity: .8; }
+
+.description {
+    background: var(--hover);
+    border-radius: 12px;
+    padding: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-size: 14px;
+}
+
+.related { margin-top: 35px; }
+.related h2 { font-size: 20px; }
+
+/* ========================= LOADING (spinner, used on watch page) ========================= */
+.loading { text-align: center; padding: 80px 20px; color: var(--secondary); }
+
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--border);
+    border-top-color: #ff0000;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: auto auto 20px;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========================= INFINITE SCROLL ========================= */
+.scroll-sentinel { height: 1px; }
+
+.load-more-indicator {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+.load-more-indicator .spinner {
+    width: 26px; height: 26px;
+    margin: 0;
+    border-width: 3px;
+}
+
+/* ========================= ERROR ========================= */
+.error { text-align: center; padding: 80px 20px; }
+.error h2 { font-size: 25px; }
+.error p { color: var(--secondary); }
+
+.error.quota-error h2 { color: #e0a800; }
+
+/* ========================= MOBILE ========================= */
+@media(max-width: 900px) {
+    .sidebar { width: 75px; }
+    .side-text { display: none; }
+    .side-item { justify-content: center; }
+    main { margin-right: 75px; }
+    .logo span:last-child { display: none; }
+}
+
+@media(max-width: 650px) {
+    header { gap: 7px; padding: 0 8px; }
+    .voice { display: none; }
+    .header-buttons { display: none; }
+    .search-area { max-width: none; }
+    main { margin-right: 0; padding: 80px 10px 30px; }
+    .sidebar { display: none; }
+    .video-grid { grid-template-columns: 1fr; gap: 25px; }
+    .thumbnail, .skeleton-thumb { border-radius: 9px; }
+    .watch-title { font-size: 18px; }
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>יוטיוב</h1>
-<input type="text" id="search" placeholder="חפש סרטון">
-<button onclick="searchVideos()">חפש</button>
+<!-- ========================= HEADER ========================= -->
+<header>
+    <button class="menu" onclick="toggleSidebar()">☰</button>
 
-<div id="results"></div>
+    <div class="logo" onclick="home()">
+        <div class="youtube-logo">▶</div>
+        <span>YouTube</span>
+    </div>
+
+    <div class="search-area">
+        <input id="searchInput" type="text" placeholder="חיפוש" onkeydown="searchEnter(event)">
+        <button class="search-button" onclick="search()">🔍</button>
+    </div>
+
+    <button class="voice" onclick="voiceSearch()">🎤</button>
+
+    <div class="header-buttons">
+        <button onclick="toggleDark()">🌙</button>
+        <button onclick="home()">🏠</button>
+    </div>
+</header>
+
+<!-- ========================= SIDEBAR ========================= -->
+<aside id="sidebar" class="sidebar">
+
+    <div class="side-item active" onclick="home()">
+        <span class="side-icon">🏠</span>
+        <span class="side-text">דף הבית</span>
+    </div>
+
+    <div class="side-item" onclick="trending()">
+        <span class="side-icon">🔥</span>
+        <span class="side-text">פופולרי</span>
+    </div>
+
+    <div class="side-item" onclick="historyPage()">
+        <span class="side-icon">🕘</span>
+        <span class="side-text">היסטוריה</span>
+    </div>
+
+    <div class="side-title">קטגוריות</div>
+
+    <div class="side-item" onclick="category('מוזיקה')">
+        <span class="side-icon">🎵</span>
+        <span class="side-text">מוזיקה</span>
+    </div>
+
+    <div class="side-item" onclick="category('משחקים')">
+        <span class="side-icon">🎮</span>
+        <span class="side-text">משחקים</span>
+    </div>
+
+    <div class="side-item" onclick="category('טכנולוגיה')">
+        <span class="side-icon">💻</span>
+        <span class="side-text">טכנולוגיה</span>
+    </div>
+
+    <div class="side-item" onclick="category('חדשות')">
+        <span class="side-icon">📰</span>
+        <span class="side-text">חדשות</span>
+    </div>
+
+    <div class="side-item" onclick="category('ספורט')">
+        <span class="side-icon">⚽</span>
+        <span class="side-text">ספורט</span>
+    </div>
+
+    <div class="side-item" onclick="category('סרטים')">
+        <span class="side-icon">🎬</span>
+        <span class="side-text">סרטים</span>
+    </div>
+
+</aside>
+
+<!-- ========================= MAIN ========================= -->
+<main id="main">
+    <div id="app"></div>
+</main>
 
 <script>
-    const API_KEY = "AIzaSyAZ5sxJ0nQqtDZTJbhW2o8yxJ_KrDq_nF4";
 
-    function searchVideos() {
-        const query = document.getElementById("search").value;
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=5&key=${API_KEY}`;
+/* =====================================================
+   API
+===================================================== */
+const API_KEY = "AIzaSyAZ5sxJ0nQqtDZTJbhW2o8yxJ_KrDq_nF4";
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const resultsDiv = document.getElementById("results");
-                resultsDiv.innerHTML = "";
-                data.items.forEach(item => {
-                    const videoId = item.id.videoId;
-                    const iframe = `<iframe width="560" height="315" 
-                                     src="https://www.youtube.com/embed/${videoId}" 
-                                     frameborder="0" allowfullscreen></iframe>`;
-                    resultsDiv.innerHTML += iframe;
-                });
-            })
-            .catch(error => console.error("שגיאה:", error));
+let currentQuery = "";
+let nextPageToken = "";
+let infiniteObserver = null;
+
+/* =====================================================
+   START
+===================================================== */
+window.addEventListener("load", function() {
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
     }
+    home();
+});
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main");
+    sidebar.classList.toggle("closed");
+    main.classList.toggle("full");
+}
+
+/* =====================================================
+   DARK MODE
+===================================================== */
+function toggleDark() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+}
+
+/* =====================================================
+   ENTER SEARCH
+===================================================== */
+function searchEnter(event) {
+    if (event.key === "Enter") {
+        search();
+    }
+}
+
+/* =====================================================
+   SEARCH
+===================================================== */
+function search() {
+    const input = document.getElementById("searchInput");
+    const query = input.value.trim();
+
+    if (!query) return;
+
+    currentQuery = query;
+    nextPageToken = "";
+    getVideos(query, false);
+}
+
+/* =====================================================
+   CATEGORY
+===================================================== */
+function category(name) {
+    document.getElementById("searchInput").value = name;
+    currentQuery = name;
+    nextPageToken = "";
+    getVideos(name, false);
+}
+
+/* =====================================================
+   FRIENDLY ERROR MESSAGES (quota / key issues)
+===================================================== */
+function friendlyErrorMessage(data, fallback) {
+    const reason = data?.error?.errors?.[0]?.reason;
+
+    if (reason === "quotaExceeded" || reason === "dailyLimitExceeded" || reason === "rateLimitExceeded") {
+        return "המכסה היומית של ה-API נגמרה. אפשר לנסות שוב מחר, או להשתמש במפתח API אחר.";
+    }
+
+    if (reason === "keyInvalid" || reason === "badRequest" || reason === "forbidden") {
+        return "מפתח ה-API אינו תקין או שאין לו הרשאה. יש לבדוק את ההגדרות ב-Google Cloud Console.";
+    }
+
+    return data?.error?.message || fallback;
+}
+
+/* =====================================================
+   INFINITE SCROLL SETUP
+===================================================== */
+function disconnectInfiniteScroll() {
+    if (infiniteObserver) {
+        infiniteObserver.disconnect();
+        infiniteObserver = null;
+    }
+}
+
+function setupInfiniteScroll() {
+    disconnectInfiniteScroll();
+
+    const sentinel = document.getElementById("scrollSentinel");
+    if (!sentinel) return;
+
+    infiniteObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting && nextPageToken) {
+                loadMore();
+            }
+        });
+    }, { rootMargin: "600px" });
+
+    infiniteObserver.observe(sentinel);
+}
+
+/* =====================================================
+   GET VIDEOS
+===================================================== */
+async function getVideos(query, append) {
+
+    if (!append) {
+        document.getElementById("app").innerHTML = skeletonGrid();
+    } else {
+        const indicator = document.getElementById("loadMoreIndicator");
+        if (indicator) indicator.style.display = "flex";
+    }
+
+    let url =
+        "https://www.googleapis.com/youtube/v3/search" +
+        "?part=snippet" +
+        "&q=" + encodeURIComponent(query) +
+        "&type=video" +
+        "&maxResults=12" +
+        "&key=" + encodeURIComponent(API_KEY);
+
+    if (nextPageToken) {
+        url += "&pageToken=" + encodeURIComponent(nextPageToken);
+    }
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        console.log("YouTube API:", data);
+
+        if (!response.ok) {
+            throw new Error(friendlyErrorMessage(data, "YouTube API error"));
+        }
+
+        nextPageToken = data.nextPageToken || "";
+        displayVideos(data.items, append);
+
+    } catch (error) {
+        console.error(error);
+        const indicator = document.getElementById("loadMoreIndicator");
+        if (indicator) indicator.style.display = "none";
+        showError(error.message);
+    }
+}
+
+/* =====================================================
+   DISPLAY VIDEOS
+===================================================== */
+function displayVideos(videos, append) {
+
+    if (!videos || videos.length === 0) {
+        showError("לא נמצאו סרטונים.");
+        return;
+    }
+
+    let cards = "";
+
+    videos.forEach((video) => {
+        cards += renderVideoCard(video, { idKind: "search" });
+    });
+
+    if (!append) {
+        document.getElementById("app").innerHTML = `
+            ${categoriesHTML()}
+
+            <div id="videoGrid" class="video-grid">
+                ${cards}
+            </div>
+
+            <div id="loadMoreIndicator" class="load-more-indicator">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="scrollSentinel" class="scroll-sentinel"></div>
+        `;
+
+        setupInfiniteScroll();
+
+    } else {
+        const grid = document.getElementById("videoGrid");
+        if (grid) {
+            grid.insertAdjacentHTML("beforeend", cards);
+        }
+
+        const indicator = document.getElementById("loadMoreIndicator");
+        if (indicator) indicator.style.display = "none";
+    }
+}
+
+/* =====================================================
+   SHARED VIDEO CARD RENDERER
+   idKind: "search" (video.id.videoId) or "flat" (video.id string)
+===================================================== */
+function renderVideoCard(video, opts = {}) {
+    const id = opts.idKind === "search" ? video.id.videoId : video.id;
+
+    const title = escapeHTML(video.snippet.title);
+    const channel = escapeHTML(video.snippet.channelTitle);
+
+    const thumbnail =
+        video.snippet.thumbnails.high?.url ||
+        video.snippet.thumbnails.medium?.url ||
+        video.snippet.thumbnails.default?.url;
+
+    const views = video.statistics?.viewCount
+        ? Number(video.statistics.viewCount).toLocaleString("he-IL") + " צפיות"
+        : "";
+
+    return `
+        <div class="video-card" onclick="watch('${id}')">
+            <div class="thumbnail-wrapper">
+                <img class="thumbnail" src="${thumbnail}" alt="${title}" loading="lazy">
+            </div>
+            <div class="video-info">
+                <img class="avatar" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" alt="">
+                <div>
+                    <div class="video-title">${title}</div>
+                    <div class="channel">${channel}</div>
+                    <div class="meta">${views || "YouTube"}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* =====================================================
+   SKELETON GRID (loading placeholder)
+===================================================== */
+function skeletonGrid(count = 12) {
+    let cards = "";
+
+    for (let i = 0; i < count; i++) {
+        cards += `
+            <div class="skeleton-card">
+                <div class="skeleton-thumb"></div>
+                <div class="video-info">
+                    <div class="skeleton-avatar"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-line" style="width:90%;"></div>
+                        <div class="skeleton-line" style="width:55%;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    return `<div class="video-grid">${cards}</div>`;
+}
+
+/* =====================================================
+   CATEGORIES HTML
+===================================================== */
+function categoriesHTML() {
+    return `
+        <div class="categories">
+            <button class="category" onclick="category('מוזיקה')">מוזיקה</button>
+            <button class="category" onclick="category('משחקים')">משחקים</button>
+            <button class="category" onclick="category('טכנולוגיה')">טכנולוגיה</button>
+            <button class="category" onclick="category('חדשות')">חדשות</button>
+            <button class="category" onclick="category('ספורט')">ספורט</button>
+            <button class="category" onclick="category('קומדיה')">קומדיה</button>
+            <button class="category" onclick="category('מיינקראפט')">Minecraft</button>
+        </div>
+    `;
+}
+
+/* =====================================================
+   LOAD MORE
+===================================================== */
+function loadMore() {
+    if (!nextPageToken) return;
+    getVideos(currentQuery, true);
+}
+
+/* =====================================================
+   HOME
+===================================================== */
+function home() {
+    disconnectInfiniteScroll();
+
+    currentQuery = "מוזיקה משחקים טכנולוגיה";
+    nextPageToken = "";
+
+    document.getElementById("searchInput").value = "";
+
+    getVideos(currentQuery, false);
+}
+
+/* =====================================================
+   WATCH
+===================================================== */
+async function watch(videoId) {
+    disconnectInfiniteScroll();
+    saveHistory(videoId);
+
+    document.getElementById("app").innerHTML = loading();
+
+    try {
+        const url =
+            "https://www.googleapis.com/youtube/v3/videos" +
+            "?part=snippet,statistics" +
+            "&id=" + encodeURIComponent(videoId) +
+            "&key=" + encodeURIComponent(API_KEY);
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(friendlyErrorMessage(data, "שגיאה"));
+        }
+
+        if (!data.items || !data.items.length) {
+            throw new Error("הסרטון לא נמצא.");
+        }
+
+        renderWatch(data.items[0]);
+
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+/* =====================================================
+   WATCH PAGE
+===================================================== */
+function renderWatch(video) {
+    const snippet = video.snippet;
+    const stats = video.statistics || {};
+    const id = video.id;
+
+    const title = escapeHTML(snippet.title);
+    const channel = escapeHTML(snippet.channelTitle);
+    const description = escapeHTML(snippet.description);
+
+    const views = stats.viewCount
+        ? Number(stats.viewCount).toLocaleString("he-IL") + " צפיות"
+        : "";
+
+    document.getElementById("app").innerHTML = `
+        <div class="watch-page">
+
+            <iframe
+                class="player"
+                src="https://www.youtube.com/embed/${id}"
+                title="${title}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen>
+            </iframe>
+
+            <div class="watch-title">${title}</div>
+
+            <div class="watch-channel">
+                ${channel}${views ? " · " + views : ""}
+            </div>
+
+            <div class="watch-actions">
+                <button class="watch-button" onclick="share('${id}')">🔗 שיתוף</button>
+                <button class="watch-button" onclick="like()">👍 אהבתי</button>
+                <button class="watch-button" onclick="window.open('https://www.youtube.com/watch?v=${id}', '_blank')">▶ פתח ב-YouTube</button>
+                <button class="watch-button" onclick="home()">← חזרה</button>
+            </div>
+
+            <div class="description">${description || "אין תיאור."}</div>
+
+            <div class="related">
+                <h2>סרטונים נוספים</h2>
+                <div id="relatedGrid">${skeletonGrid(8)}</div>
+            </div>
+
+        </div>
+    `;
+
+    getRelated(snippet.title);
+}
+
+/* =====================================================
+   RELATED
+===================================================== */
+async function getRelated(title) {
+    const words = title
+        .replace(/[^\u0590-\u05FFa-zA-Z0-9 ]/g, "")
+        .split(" ")
+        .slice(0, 5)
+        .join(" ");
+
+    try {
+        const url =
+            "https://www.googleapis.com/youtube/v3/search" +
+            "?part=snippet" +
+            "&q=" + encodeURIComponent(words) +
+            "&type=video" +
+            "&maxResults=8" +
+            "&key=" + encodeURIComponent(API_KEY);
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const grid = document.getElementById("relatedGrid");
+        if (!grid) return;
+
+        if (!response.ok || !data.items) {
+            grid.innerHTML = `<p style="color:var(--secondary);">לא ניתן לטעון סרטונים נוספים כרגע.</p>`;
+            return;
+        }
+
+        let html = '<div class="video-grid">';
+
+        data.items.forEach((video) => {
+            html += renderVideoCard(video, { idKind: "search" });
+        });
+
+        html += "</div>";
+        grid.innerHTML = html;
+
+    } catch (error) {
+        console.error(error);
+        const grid = document.getElementById("relatedGrid");
+        if (grid) {
+            grid.innerHTML = `<p style="color:var(--secondary);">לא ניתן לטעון סרטונים נוספים כרגע.</p>`;
+        }
+    }
+}
+
+/* =====================================================
+   TRENDING
+===================================================== */
+function trending() {
+    disconnectInfiniteScroll();
+
+    document.getElementById("app").innerHTML = `
+        <h2 style="margin-bottom:25px;">🔥 פופולרי</h2>
+        ${skeletonGrid(24)}
+    `;
+
+    const url =
+        "https://www.googleapis.com/youtube/v3/videos" +
+        "?part=snippet,statistics" +
+        "&chart=mostPopular" +
+        "&regionCode=IL" +
+        "&maxResults=24" +
+        "&key=" + encodeURIComponent(API_KEY);
+
+    fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.error) {
+                throw new Error(friendlyErrorMessage(data, "שגיאה"));
+            }
+
+            let html = `<h2 style="margin-bottom:25px;">🔥 פופולרי</h2><div class="video-grid">`;
+
+            data.items.forEach((video) => {
+                html += renderVideoCard(video, { idKind: "flat" });
+            });
+
+            html += "</div>";
+
+            document.getElementById("app").innerHTML = html;
+        })
+        .catch((error) => {
+            showError(error.message);
+        });
+}
+
+/* =====================================================
+   HISTORY
+===================================================== */
+function saveHistory(id) {
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+
+    history = history.filter((x) => x !== id);
+    history.unshift(id);
+    history = history.slice(0, 30);
+
+    localStorage.setItem("history", JSON.stringify(history));
+}
+
+/* =====================================================
+   HISTORY PAGE
+===================================================== */
+async function historyPage() {
+    disconnectInfiniteScroll();
+
+    const history = JSON.parse(localStorage.getItem("history") || "[]");
+
+    if (!history.length) {
+        document.getElementById("app").innerHTML = `
+            <div class="error">
+                <h2>🕘 היסטוריה</h2>
+                <p>עדיין לא צפית בסרטונים.</p>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById("app").innerHTML = `
+        <h2 style="margin-bottom:25px;">🕘 היסטוריה</h2>
+        ${skeletonGrid(Math.min(history.length, 12))}
+    `;
+
+    const url =
+        "https://www.googleapis.com/youtube/v3/videos" +
+        "?part=snippet" +
+        "&id=" + history.join(",") +
+        "&key=" + encodeURIComponent(API_KEY);
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(friendlyErrorMessage(data, "שגיאה"));
+        }
+
+        let html = `<h2 style="margin-bottom:25px;">🕘 היסטוריה</h2><div class="video-grid">`;
+
+        data.items.forEach((video) => {
+            html += renderVideoCard(video, { idKind: "flat" });
+        });
+
+        html += "</div>";
+
+        document.getElementById("app").innerHTML = html;
+
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+/* =====================================================
+   SHARE
+===================================================== */
+function share(id) {
+    const url = "https://www.youtube.com/watch?v=" + id;
+
+    if (navigator.share) {
+        navigator.share({ title: "YouTube", url: url });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert("הקישור הועתק!");
+    }
+}
+
+/* =====================================================
+   LIKE
+===================================================== */
+function like() {
+    alert("כדי לעשות לייק אמיתי צריך להתחבר לחשבון YouTube.");
+}
+
+/* =====================================================
+   VOICE SEARCH (with cross-browser fallback)
+===================================================== */
+function voiceSearch() {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+        alert("חיפוש קולי אינו נתמך בדפדפן הזה. נסה Chrome או Edge.");
+        return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = "he-IL";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById("searchInput").value = text;
+        search();
+    };
+
+    recognition.onerror = function(event) {
+        let message = "חיפוש קולי נכשל.";
+
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+            message = "יש לאשר גישה למיקרופון כדי להשתמש בחיפוש קולי.";
+        } else if (event.error === "no-speech") {
+            message = "לא זוהה דיבור. נסה שוב.";
+        }
+
+        alert(message);
+    };
+}
+
+/* =====================================================
+   LOADING (spinner — used for the watch page only)
+===================================================== */
+function loading() {
+    return `
+        <div class="loading">
+            <div class="spinner"></div>
+            טוען...
+        </div>
+    `;
+}
+
+/* =====================================================
+   ERROR
+===================================================== */
+function showError(message) {
+    document.getElementById("app").innerHTML = `
+        <div class="error">
+            <h2>⚠️ משהו השתבש</h2>
+            <p>${escapeHTML(message)}</p>
+        </div>
+    `;
+}
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+function escapeHTML(text) {
+    if (text === undefined || text === null) return "";
+
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 </script>
 
 </body>

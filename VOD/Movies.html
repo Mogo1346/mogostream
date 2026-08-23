@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>סרט</title>
+  <title>סרטא</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; }
@@ -247,6 +247,7 @@ async function loadMovie() {
     // כפתור צפייה
     document.getElementById('watchBtn').addEventListener('click', () => {
       const url = `https://player.videasy.net/movie/${movieId}?color=FFD600`;
+      //const url = `https://vidcore.io/movie/${movieId}`;
 
       const gameData = {
         url: url,
@@ -254,7 +255,7 @@ async function loadMovie() {
         id: movieId
       };
 
-      sessionStorage.setItem("gameUrl", JSON.stringify(gameData));
+      localStorage.setItem("gameUrl", JSON.stringify(gameData));
       window.location.href = "player.html";
     });
 

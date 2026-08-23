@@ -218,7 +218,8 @@ async function loadSeries() {
               const s = epEl.dataset.season;
               const e = epEl.dataset.episode;
               const url = `https://player.videasy.net/tv/${seriesId}/${s}/${e}?color=FFD600`;
-              localStorage.setItem("gameUrl", url);
+              //const url = `https://vidcore.io/tv/${seriesId}/${s}/${e}`;
+              localStorage.setItem("gameUrl", JSON.stringify({ url: url }));
               window.location.href = "player.html";
             });
           });

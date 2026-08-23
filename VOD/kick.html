@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kick</title>
+
+<style>
+
+:root {
+    --bg: #ffffff;
+    --text: #0f0f0f;
+    --secondary: #606060;
+    --hover: #f2f2f2;
+    --border: #e5e5e5;
+    --header: #ffffff;
+    --accent: #53fc18;
+}
+
+body.dark {
+    --bg: #0f0f0f;
+    --text: #ffffff;
+    --secondary: #aaaaaa;
+    --hover: #272727;
+    --border: #303030;
+    --header: #0f0f0f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* HEADER */
+header {
+    height: 64px;
+    background: var(--header);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 18px;
+    position: fixed;
+    top: 0; right: 0; left: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border);
+}
+
+.menu {
+    width: 42px; height: 42px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.menu:hover { background: var(--hover); }
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 21px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.kick-logo {
+    width: 36px; height: 25px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.search-area {
+    flex: 1;
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    direction: ltr;
+}
+
+.search-area input {
+    flex: 1;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 21px 0 0 21px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 0 18px;
+    font-size: 16px;
+    outline: none;
+}
+.search-area input:focus { border-color: #777; }
+
+.search-button {
+    width: 64px;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 21px 21px 0;
+    background: var(--hover);
+    color: var(--text);
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.header-buttons { display: flex; gap: 5px; }
+.header-buttons button {
+    width: 42px; height: 42px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 19px;
+}
+.header-buttons button:hover { background: var(--hover); }
+
+/* SIDEBAR */
+.sidebar {
+    position: fixed;
+    top: 64px; right: 0; bottom: 0;
+    width: 230px;
+    background: var(--bg);
+    padding: 12px;
+    overflow-y: auto;
+    transition: 0.2s;
+    z-index: 900;
+}
+.sidebar.closed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    border-left: none;
+}
+.sidebar.closed .side-text { display: none; }
+.sidebar.closed .side-item { justify-content: center; }
+
+.side-item {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    padding: 0 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.side-item:hover { background: var(--hover); }
+.side-item.active { background: var(--hover); font-weight: bold; }
+
+.side-icon { width: 25px; text-align: center; font-size: 20px; }
+.side-title { color: var(--secondary); font-size: 13px; padding: 20px 15px 7px; }
+
+/* MAIN */
+main {
+    margin-right: 230px;
+    padding: 88px 25px 40px;
+    transition: 0.2s;
+}
+main.full { margin-right: 0; }
+
+/* VIDEO GRID (streams) */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 32px 18px;
+}
+
+.video-card { cursor: pointer; min-width: 0; }
+
+.thumbnail-wrapper { position: relative; }
+
+.thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    background: #ddd;
+}
+
+.live-badge {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: #ff0000;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.viewer-badge {
+    position: absolute;
+    bottom: 8px; left: 8px;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.favorite-star {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.favorite-star.active { color: #ffd400; }
+.favorite-star:hover { background: rgba(0,0,0,0.8); }
+
+.video-info { display: flex; gap: 11px; padding-top: 10px; }
+
+.video-title {
+    font-weight: bold;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.channel { color: var(--secondary); font-size: 13px; margin-bottom: 3px; }
+.meta { color: var(--secondary); font-size: 12px; }
+
+/* SKELETON */
+.skeleton-card { min-width: 0; }
+.skeleton-thumb, .skeleton-line {
+    background: linear-gradient(90deg, var(--hover) 25%, var(--border) 37%, var(--hover) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+.skeleton-thumb { width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; }
+.skeleton-line { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+@keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}
+
+/* CATEGORY CHIPS */
+.categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 22px; }
+.category {
+    border: none;
+    background: var(--hover);
+    color: var(--text);
+    padding: 9px 17px;
+    border-radius: 9px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 14px;
+}
+.category:hover { background: #d7d7d7; }
+.category.active { background: var(--accent); color: #000; font-weight: bold; }
+
+/* WATCH PAGE */
+.watch-page { max-width: 1250px; margin: auto; }
+
+.player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 12px;
+    background: black;
+}
+
+.watch-title { font-size: 22px; font-weight: bold; line-height: 1.4; margin-top: 18px; }
+.watch-channel { color: var(--secondary); margin-top: 8px; }
+
+.watch-actions { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+.watch-button {
+    border: none;
+    background: var(--hover);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.watch-button:hover { opacity: .8; }
+
+.offline-notice {
+    background: var(--hover);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    color: var(--secondary);
+    font-size: 16px;
+}
+
+/* LOADING */
+.loading { text-align: center; padding: 80px 20px; color: var(--secondary); }
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: auto auto 20px;
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ERROR */
+.error { text-align: center; padding: 80px 20px; }
+.error h2 { font-size: 25px; }
+.error p { color: var(--secondary); }
+
+@media(max-width: 900px) {
+    .sidebar { width: 75px; }
+    .side-text { display: none; }
+    .side-item { justify-content: center; }
+    main { margin-right: 75px; }
+    .logo span:last-child { display: none; }
+}
+
+@media(max-width: 650px) {
+    header { gap: 7px; padding: 0 8px; }
+    .header-buttons { display: none; }
+    .search-area { max-width: none; }
+    main { margin-right: 0; padding: 80px 10px 30px; }
+    .sidebar { display: none; }
+    .video-grid { grid-template-columns: 1fr; gap: 25px; }
+    .thumbnail, .skeleton-thumb { border-radius: 9px; }
+    .watch-title { font-size: 18px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <button class="menu" onclick="toggleSidebar()">☰</button>
+
+    <div class="logo" onclick="home()">
+        <div class="kick-logo">K</div>
+        <span>Kick</span>
+    </div>
+
+    <div class="search-area">
+        <input id="searchInput" type="text" placeholder="שם ערוץ מדויק (למשל: xqc)" onkeydown="searchEnter(event)">
+        <button class="search-button" onclick="search()">🔍</button>
+    </div>
+
+    <div class="header-buttons">
+        <button onclick="toggleDark()">🌙</button>
+        <button onclick="home()">🏠</button>
+    </div>
+</header>
+
+<aside id="sidebar" class="sidebar">
+
+    <div class="side-item active" id="navHome" onclick="home()">
+        <span class="side-icon">🏠</span>
+        <span class="side-text">דף הבית</span>
+    </div>
+
+    <div class="side-item" id="navFollowing" onclick="showFavorites()">
+        <span class="side-icon">⭐</span>
+        <span class="side-text">מועדפים</span>
+    </div>
+
+    <div class="side-title">קטגוריות</div>
+
+    <div id="categoryList">
+        <div class="side-item">
+            <span class="side-icon">⏳</span>
+            <span class="side-text">טוען...</span>
+        </div>
+    </div>
+
+</aside>
+
+<main id="main">
+    <div id="app"></div>
+</main>
+
+<script>
+
+/* =====================================================
+   API CREDENTIALS
+===================================================== */
+const CLIENT_ID = "01M0NY8XZR06WK3QVQRQACCGA9";
+const CLIENT_SECRET = "dec66b7e11cec150f8aef5ac2141a2de90243a9377d8ac5aaea32db11ba44c0b";
+
+const TOKEN_URL = "https://id.kick.com/oauth/token";
+const API_BASE = "https://api.kick.com/public/v1";
+
+let accessToken = null;
+let tokenExpiry = 0;
+
+let currentCategoryId = null;
+let currentCategoryName = "";
+let categories = [];
+let viewingFavorites = false;
+
+/* Kick has no "list all categories" endpoint - it requires a search
+   query (?q=...). So we search for a fixed set of popular category
+   names and use the first match of each to build the sidebar. */
+const CATEGORY_SEARCH_TERMS = [
+    "Just Chatting",
+    "Slots",
+    "IRL",
+    "Grand Theft Auto V",
+    "Minecraft",
+    "Call of Duty",
+    "Music",
+    "Sports"
+];
+
+/* =====================================================
+   START
+===================================================== */
+window.addEventListener("load", function() {
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
+    }
+    loadCategories();
+    home();
+});
+
+/* =====================================================
+   SIDEBAR / DARK MODE
+===================================================== */
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("closed");
+    document.getElementById("main").classList.toggle("full");
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+}
+
+function searchEnter(event) {
+    if (event.key === "Enter") search();
+}
+
+/* =====================================================
+   OAUTH - APP ACCESS TOKEN (client credentials)
+===================================================== */
+async function getAccessToken() {
+    if (accessToken && Date.now() < tokenExpiry) {
+        return accessToken;
+    }
+
+    const response = await fetch(TOKEN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            grant_type: "client_credentials",
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET
+        })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data?.error_description || data?.message || "נכשל אימות מול Kick (OAuth).");
+    }
+
+    accessToken = data.access_token;
+    tokenExpiry = Date.now() + ((data.expires_in || 1800) - 60) * 1000;
+
+    return accessToken;
+}
+
+/* =====================================================
+   GENERIC AUTHENTICATED FETCH TO KICK API
+===================================================== */
+async function kickFetch(path) {
+    const token = await getAccessToken();
+
+    const response = await fetch(API_BASE + path, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (response.status === 401) {
+        accessToken = null;
+        const retryToken = await getAccessToken();
+        const retryResponse = await fetch(API_BASE + path, {
+            headers: { "Authorization": "Bearer " + retryToken }
+        });
+        return handleKickResponse(retryResponse);
+    }
+
+    return handleKickResponse(response);
+}
+
+async function handleKickResponse(response) {
+    let data;
+
+    try {
+        data = await response.json();
+    } catch (e) {
+        throw new Error("תגובה לא תקינה מ-Kick API.");
+    }
+
+    if (!response.ok) {
+        if (response.status === 429) {
+            throw new Error("יותר מדי בקשות ל-Kick API כרגע. נסה שוב בעוד רגע.");
+        }
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("אין הרשאה לגשת ל-Kick API. יש לבדוק את ה-Client ID / Secret.");
+        }
+        throw new Error(data?.message || "שגיאת Kick API.");
+    }
+
+    return data;
+}
+
+/* =====================================================
+   CATEGORIES (sidebar)
+===================================================== */
+async function loadCategories() {
+    try {
+        const results = await Promise.all(
+            CATEGORY_SEARCH_TERMS.map((term) =>
+                kickFetch("/categories?q=" + encodeURIComponent(term)).catch(() => null)
+            )
+        );
+
+        categories = results
+            .map((r) => r?.data?.[0])
+            .filter(Boolean);
+
+        const list = document.getElementById("categoryList");
+
+        if (!categories.length) {
+            list.innerHTML = `<div class="side-item"><span class="side-text" style="color:var(--secondary);">אין קטגוריות</span></div>`;
+            return;
+        }
+
+        list.innerHTML = categories.map((cat) => `
+            <div class="side-item" onclick="browseCategory(${cat.id}, '${escapeHTML(cat.name).replace(/'/g, "\\'")}')">
+                <span class="side-icon">🎮</span>
+                <span class="side-text">${escapeHTML(cat.name)}</span>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById("categoryList").innerHTML =
+            `<div class="side-item"><span class="side-text" style="color:var(--secondary);">לא ניתן לטעון קטגוריות</span></div>`;
+    }
+}
+
+/* =====================================================
+   HOME (top live streams)
+===================================================== */
+function home() {
+    currentCategoryId = null;
+    currentCategoryName = "";
+    setActiveNav("navHome");
+    document.getElementById("searchInput").value = "";
+    loadLivestreams();
+}
+
+function browseCategory(id, name) {
+    currentCategoryId = id;
+    currentCategoryName = name;
+    setActiveNav(null);
+    loadLivestreams();
+}
+
+function setActiveNav(id) {
+    document.querySelectorAll(".side-item").forEach((el) => el.classList.remove("active"));
+    if (id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("active");
+    }
+}
+
+/* =====================================================
+   LOAD LIVESTREAMS
+===================================================== */
+async function loadLivestreams() {
+    document.getElementById("app").innerHTML = skeletonGrid();
+
+    let path = "/livestreams?sort=viewer_count&limit=24";
+    if (currentCategoryId) {
+        path += "&category_id=" + encodeURIComponent(currentCategoryId);
+    }
+
+    try {
+        const data = await kickFetch(path);
+        displayStreams(data.data || []);
+    } catch (error) {
+        console.error(error);
+        showError(error.message);
+    }
+}
+
+function displayStreams(streams) {
+    const heading = currentCategoryName
+        ? `🔴 שידורים חיים · ${escapeHTML(currentCategoryName)}`
+        : `🔴 שידורים חיים פופולריים`;
+
+    if (!streams.length) {
+        document.getElementById("app").innerHTML = `
+            <h2 style="margin-bottom:25px;">${heading}</h2>
+            <div class="error">
+                <h2>😴 אין שידורים חיים כרגע</h2>
+                <p>נסה קטגוריה אחרת או חזור מאוחר יותר.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let cards = "";
+
+    streams.forEach((stream) => {
+        cards += renderStreamCard(stream);
+    });
+
+    document.getElementById("app").innerHTML = `
+        <h2 style="margin-bottom:25px;">${heading}</h2>
+        <div class="video-grid">${cards}</div>
+    `;
+}
+
+/* =====================================================
+   STREAM CARD
+===================================================== */
+function renderStreamCard(stream) {
+    const slug = stream.channel_slug || stream.slug || "";
+    const title = escapeHTML(stream.stream_title || stream.title || "ללא כותרת");
+    const username = escapeHTML(stream.channel_username || slug);
+    const category = escapeHTML(stream.category_name || stream.category?.name || "");
+    const viewers = Number(stream.viewer_count || 0).toLocaleString("he-IL");
+    const thumbnail = stream.thumbnail_url || stream.thumbnail?.url || "";
+    const fav = isFavorite(slug);
+
+    return `
+        <div class="video-card" onclick="watch('${escapeAttr(slug)}')">
+            <div class="thumbnail-wrapper">
+                <img class="thumbnail" src="${thumbnail}" alt="${title}" loading="lazy" onerror="this.style.background='#ddd';this.src='';">
+                <div class="live-badge">LIVE</div>
+                <div class="viewer-badge">👁 ${viewers}</div>
+                <button
+                    class="favorite-star ${fav ? "active" : ""}"
+                    data-fav-slug="${escapeAttr(slug)}"
+                    onclick="toggleFavorite('${escapeAttr(slug)}', event)"
+                    title="הוסף/הסר ממועדפים"
+                >${fav ? "★" : "☆"}</button>
+            </div>
+            <div class="video-info">
+                <div>
+                    <div class="video-title">${title}</div>
+                    <div class="channel">${username}</div>
+                    <div class="meta">${category}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* =====================================================
+   SKELETON GRID
+===================================================== */
+function skeletonGrid(count = 12) {
+    let cards = "";
+    for (let i = 0; i < count; i++) {
+        cards += `
+            <div class="skeleton-card">
+                <div class="skeleton-thumb"></div>
+                <div class="video-info">
+                    <div style="flex:1;">
+                        <div class="skeleton-line" style="width:90%;"></div>
+                        <div class="skeleton-line" style="width:55%;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    return `<div class="video-grid">${cards}</div>`;
+}
+
+/* =====================================================
+   FAVORITES (stored locally - no Kick login needed)
+===================================================== */
+function getFavorites() {
+    return JSON.parse(localStorage.getItem("kickFavorites") || "[]");
+}
+
+function isFavorite(slug) {
+    return getFavorites().includes(slug);
+}
+
+function toggleFavorite(slug, event) {
+    if (event) event.stopPropagation();
+
+    let favorites = getFavorites();
+
+    if (favorites.includes(slug)) {
+        favorites = favorites.filter((s) => s !== slug);
+    } else {
+        favorites.push(slug);
+    }
+
+    localStorage.setItem("kickFavorites", JSON.stringify(favorites));
+
+    document.querySelectorAll(`[data-fav-slug="${cssEscape(slug)}"]`).forEach((btn) => {
+        btn.classList.toggle("active", favorites.includes(slug));
+        btn.textContent = favorites.includes(slug) ? "★" : "☆";
+    });
+}
+
+function cssEscape(text) {
+    return String(text).replace(/["\\]/g, "\\$&");
+}
+
+async function showFavorites() {
+    viewingFavorites = true;
+    currentCategoryId = null;
+    currentCategoryName = "";
+    setActiveNav("navFollowing");
+
+    const favorites = getFavorites();
+
+    if (!favorites.length) {
+        document.getElementById("app").innerHTML = `
+            <h2 style="margin-bottom:25px;">⭐ מועדפים</h2>
+            <div class="error">
+                <h2>עדיין אין מועדפים</h2>
+                <p>לחץ על כוכב ⭐ בכרטיס של ערוץ או בעמוד הצפייה כדי להוסיף אותו לכאן.</p>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById("app").innerHTML = `
+        <h2 style="margin-bottom:25px;">⭐ מועדפים</h2>
+        ${skeletonGrid(favorites.length)}
+    `;
+
+    try {
+        const results = await Promise.all(
+            favorites.map((slug) =>
+                kickFetch("/channels?slug=" + encodeURIComponent(slug))
+                    .then((data) => data?.data?.[0])
+                    .catch(() => null)
+            )
+        );
+
+        const channels = results.filter(Boolean);
+
+        if (!channels.length) {
+            document.getElementById("app").innerHTML = `
+                <h2 style="margin-bottom:25px;">⭐ מועדפים</h2>
+                <div class="error">
+                    <h2>לא ניתן לטעון את הערוצים המועדפים</h2>
+                    <p>ייתכן שהערוצים כבר לא קיימים.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let cards = "";
+        channels.forEach((channel) => {
+            cards += renderStreamCard({
+                channel_slug: channel.slug,
+                channel_username: channel.slug,
+                stream_title: channel.stream?.stream_title,
+                category_name: channel.category?.name,
+                viewer_count: channel.stream?.viewer_count,
+                thumbnail_url: channel.stream?.thumbnail?.url,
+                is_live: channel.stream?.is_live
+            });
+        });
+
+        document.getElementById("app").innerHTML = `
+            <h2 style="margin-bottom:25px;">⭐ מועדפים</h2>
+            <div class="video-grid">${cards}</div>
+        `;
+
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+
+/* =====================================================
+   SEARCH (exact channel slug lookup)
+===================================================== */
+function search() {
+    const input = document.getElementById("searchInput");
+    const query = input.value.trim().toLowerCase().replace(/\s+/g, "");
+
+    if (!query) return;
+
+    watch(query);
+}
+
+/* =====================================================
+   WATCH (channel page)
+===================================================== */
+async function watch(slug) {
+    if (!slug) {
+        showError("שם ערוץ לא תקין.");
+        return;
+    }
+
+    setActiveNav(null);
+    document.getElementById("app").innerHTML = loading();
+
+    try {
+        const data = await kickFetch("/channels?slug=" + encodeURIComponent(slug));
+        const channel = (data.data || [])[0];
+
+        if (!channel) {
+            throw new Error(`הערוץ "${slug}" לא נמצא. ודא שהשם מדויק (כמו שמופיע בכתובת ה-URL של הערוץ).`);
+        }
+
+        renderWatch(channel, slug);
+
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+function renderWatch(channel, slug) {
+    const isLive = !!(channel.stream && channel.stream.is_live);
+    const title = escapeHTML(channel.stream?.stream_title || channel.stream_title || "");
+    const category = escapeHTML(channel.category?.name || channel.stream?.category?.name || "");
+    const viewers = channel.stream?.viewer_count
+        ? Number(channel.stream.viewer_count).toLocaleString("he-IL") + " צופים"
+        : "";
+    const username = escapeHTML(channel.slug || slug);
+    const fav = isFavorite(slug);
+
+    document.getElementById("app").innerHTML = `
+        <div class="watch-page">
+
+            ${isLive ? `
+                <iframe
+                    class="player"
+                    src="https://player.kick.com/${encodeURIComponent(slug)}"
+                    allowfullscreen>
+                </iframe>
+            ` : `
+                <div class="offline-notice">
+                    📴 הערוץ <strong>${username}</strong> אינו משדר כרגע.
+                </div>
+            `}
+
+            <div class="watch-title">${title || username}</div>
+
+            <div class="watch-channel">
+                ${username}${category ? " · " + category : ""}${viewers ? " · " + viewers : ""}
+            </div>
+
+            <div class="watch-actions">
+                <button
+                    class="watch-button favorite-star ${fav ? "active" : ""}"
+                    style="position:static; width:auto; height:auto; padding:10px 18px; border-radius:20px; background:var(--hover); font-size:14px;"
+                    data-fav-slug="${escapeAttr(slug)}"
+                    onclick="toggleFavorite('${escapeAttr(slug)}')"
+                >${fav ? "★ במועדפים" : "☆ הוסף למועדפים"}</button>
+                <button class="watch-button" onclick="window.open('https://kick.com/${encodeURIComponent(slug)}', '_blank')">▶ פתח ב-Kick</button>
+                <button class="watch-button" onclick="share('${escapeAttr(slug)}')">🔗 שיתוף</button>
+                <button class="watch-button" onclick="home()">← חזרה</button>
+            </div>
+
+        </div>
+    `;
+}
+
+/* =====================================================
+   SHARE
+===================================================== */
+function share(slug) {
+    const url = "https://kick.com/" + slug;
+
+    if (navigator.share) {
+        navigator.share({ title: "Kick", url: url });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert("הקישור הועתק!");
+    }
+}
+
+/* =====================================================
+   LOADING / ERROR
+===================================================== */
+function loading() {
+    return `
+        <div class="loading">
+            <div class="spinner"></div>
+            טוען...
+        </div>
+    `;
+}
+
+function showError(message) {
+    document.getElementById("app").innerHTML = `
+        <div class="error">
+            <h2>⚠️ משהו השתבש</h2>
+            <p>${escapeHTML(message)}</p>
+        </div>
+    `;
+}
+
+/* =====================================================
+   ESCAPE HELPERS
+===================================================== */
+function escapeHTML(text) {
+    if (text === undefined || text === null) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeAttr(text) {
+    return escapeHTML(text).replace(/'/g, "\\'");
+}
+
+</script>
+
+</body>
+</html>
