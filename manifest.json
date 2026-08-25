@@ -1,15 +1,15 @@
 {
-    "name": "MogoStream",
-    "short_name": "Mogo",
-    "start_url": "/mogostream/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#000000",
-    "icons": [
-        {
-            "src": "https://lh3.googleusercontent.com/gg-dl/AAQ_wbFwktBEqC_3N0tW8mJ7VVAaqJCqQJMawBQIcWaPVlumJ1BvuhnMl-E6ijlXFkiuWEKgLjB-vk1cqi4yK7g9MfX18DcAnRm4BmWpDj36oYPAQZZChODmbSi9R_uk-W0rwFrsdf9Wpa7G65buaH9YWOwtUulaa5io3_RvxhYoqDFfJiic=s1024-rj",
-            "sizes": "192x192",
-            "type": "image/png"
-        }
-    ]
+  "name": "My Website",
+  "short_name": "My App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg"
+    }
+  ]
 }
