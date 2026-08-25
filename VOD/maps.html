@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maps</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <title>Maps - ניווט בזמן אמת</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+
     <style>
         * {
             margin: 0;
@@ -13,18 +16,16 @@
         }
 
         body {
-            font-family: 'Roboto', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             overflow: hidden;
         }
 
         #map {
             width: 100vw;
             height: 100vh;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
 
+        /* חיפוש ולוח בקרה */
         .search-container {
             position: absolute;
             top: 20px;
@@ -33,26 +34,142 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            padding: 12px;
+            width: 380px;
+            max-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-row {
             display: flex;
             align-items: center;
-            padding: 10px 15px;
-            width: 400px;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .search-row input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 15px;
+            outline: none;
+            direction: rtl;
+        }
+
+        .search-row input:focus {
+            border-color: #4285f4;
         }
 
         .search-icon {
-            color: #5f6368;
-            margin-left: 10px;
-            font-size: 20px;
+            font-size: 18px;
         }
 
-        #search-input {
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        #navigate-btn, #stop-btn {
             border: none;
-            outline: none;
-            flex: 1;
+            border-radius: 5px;
+            padding: 11px;
             font-size: 16px;
-            font-family: inherit;
+            cursor: pointer;
+            font-weight: bold;
         }
 
+        #navigate-btn {
+            flex: 1;
+            background: #4285f4;
+            color: white;
+        }
+
+        #navigate-btn:hover {
+            background: #3367d6;
+        }
+
+        #stop-btn {
+            background: #d93025;
+            color: white;
+            display: none;
+        }
+
+        #stop-btn:hover {
+            background: #b31412;
+        }
+
+        /* הוראות ניווט בזמן אמת */
+        .current-instruction-box {
+            display: none;
+            background: #1a73e8;
+            color: white;
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .current-instruction-box.active {
+            display: flex;
+        }
+
+        .current-instruction-icon {
+            font-size: 28px;
+        }
+
+        .current-instruction-text {
+            font-size: 16px;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .instructions-container {
+            display: none;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            overflow-y: auto;
+            max-height: 250px;
+        }
+
+        .instructions-container.active {
+            display: block;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 4px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .instruction-item.active-step {
+            background: #e8f0fe;
+            font-weight: bold;
+        }
+
+        .instruction-icon {
+            font-size: 18px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .instruction-text {
+            flex: 1;
+        }
+
+        .instruction-distance {
+            color: #777;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        /* כפתורי מפה */
         .controls {
             position: absolute;
             bottom: 40px;
@@ -63,7 +180,7 @@
             gap: 10px;
         }
 
-        .control-btn {
+        .control-btn, .location-btn {
             background: white;
             border: none;
             border-radius: 4px;
@@ -75,32 +192,9 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            transition: background 0.2s;
         }
 
-        .control-btn:hover {
-            background: #f5f5f5;
-        }
-
-        .menu-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .menu-btn:hover {
+        .control-btn:hover, .location-btn:hover {
             background: #f5f5f5;
         }
 
@@ -109,139 +203,338 @@
             bottom: 40px;
             left: 70px;
             z-index: 1000;
-            background: white;
-            border: none;
-            border-radius: 4px;
-            width: 40px;
-            height: 40px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: background 0.2s;
         }
 
-        .location-btn:hover {
-            background: #f5f5f5;
-        }
-
-        .info-panel {
+        /* מידע על המסלול */
+        .route-info {
             position: absolute;
-            bottom: 0;
-            right: 20px;
-            background: white;
-            border-radius: 8px 8px 0 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
-            padding: 15px;
+            top: 20px;
+            left: 20px;
             z-index: 1000;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             display: none;
+            min-width: 200px;
         }
 
-        .info-panel.active {
+        .route-info.active {
             display: block;
         }
 
-        .marker-popup {
-            font-family: 'Roboto', Arial, sans-serif;
+        .route-time {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .route-distance {
+            color: #555;
+            margin-top: 4px;
         }
     </style>
 </head>
+
 <body>
-    <div id="map"></div>
-    
-    <button class="menu-btn">☰</button>
-    
-    <div class="search-container">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" placeholder="חפש ב-Google Maps">
+
+<div id="map"></div>
+
+<div class="search-container">
+    <div class="search-row">
+        <span class="search-icon">📍</span>
+        <input type="text" id="start-input" placeholder="נקודת התחלה (ברירת מחדל: המיקום שלי)" value="המיקום שלי">
     </div>
 
-    <div class="controls">
-        <button class="control-btn" id="zoom-in">+</button>
-        <button class="control-btn" id="zoom-out">−</button>
+    <div class="search-row">
+        <span class="search-icon">🏁</span>
+        <input type="text" id="destination-input" placeholder="לאן תרצה לנסוע?">
     </div>
 
-    <button class="location-btn" id="my-location">📍</button>
+    <div class="btn-group">
+        <button id="navigate-btn">🚗 התחל ניווט בזמן אמת</button>
+        <button id="stop-btn">🛑 עצור ניווט</button>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script>
-        // Initialize map - centered on Israel
-        const map = L.map('map', {
-            zoomControl: false
-        }).setView([31.5, 34.9], 8);
+    <!-- הוראה נוכחית בולטת למעלה -->
+    <div class="current-instruction-box" id="current-instruction-box">
+        <span class="current-instruction-icon" id="current-icon">⬆️</span>
+        <span class="current-instruction-text" id="current-text">מתחיל ניווט...</span>
+    </div>
 
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+    <!-- רשימת כל ההוראות -->
+    <div class="instructions-container" id="instructions-container"></div>
+</div>
 
-        // Custom controls
-        document.getElementById('zoom-in').addEventListener('click', () => {
-            map.zoomIn();
-        });
+<div class="route-info" id="route-info">
+    <div class="route-time" id="route-time"></div>
+    <div class="route-distance" id="route-distance"></div>
+</div>
 
-        document.getElementById('zoom-out').addEventListener('click', () => {
-            map.zoomOut();
-        });
+<div class="controls">
+    <button class="control-btn" id="zoom-in">+</button>
+    <button class="control-btn" id="zoom-out">−</button>
+</div>
 
-        // My location button
-        document.getElementById('my-location').addEventListener('click', () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    map.setView([lat, lng], 15);
-                    
-                    L.marker([lat, lng])
-                        .addTo(map)
-                        .bindPopup('המיקום שלך')
-                        .openPopup();
-                }, () => {
-                    alert('לא ניתן לגשת למיקום שלך');
-                });
-            }
-        });
+<button class="location-btn" id="my-location">📍</button>
 
-        // Search functionality
-        const searchInput = document.getElementById('search-input');
-        searchInput.addEventListener('keypress', async (e) => {
-            if (e.key === 'Enter' && searchInput.value.trim()) {
-                const query = searchInput.value.trim();
-                
-                try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-                    const data = await response.json();
-                    
-                    if (data && data.length > 0) {
-                        const result = data[0];
-                        const lat = parseFloat(result.lat);
-                        const lng = parseFloat(result.lon);
-                        
-                        map.setView([lat, lng], 13);
-                        
-                        L.marker([lat, lng])
-                            .addTo(map)
-                            .bindPopup(`<div class="marker-popup"><strong>${result.display_name}</strong></div>`)
-                            .openPopup();
-                    } else {
-                        alert('לא נמצאו תוצאות');
-                    }
-                } catch (error) {
-                    alert('שגיאה בחיפוש');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+    const map = L.map('map', { zoomControl: false }).setView([31.5, 34.9], 8);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let startMarker = null;
+    let destinationMarker = null;
+    let routeLine = null;
+    let watchId = null;
+    let currentSteps = [];
+    let currentStepIndex = 0;
+    let destinationCoords = null;
+
+    document.getElementById('zoom-in').addEventListener('click', () => map.zoomIn());
+    document.getElementById('zoom-out').addEventListener('click', () => map.zoomOut());
+
+    // אייקון ייעודי למיקום המשתמש בזמן אמת
+    const userLocationIcon = L.divIcon({
+        className: 'user-location-marker',
+        html: `<div style="background-color: #4285f4; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.5);"></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+    });
+
+    document.getElementById('my-location').addEventListener('click', () => {
+        if (!navigator.geolocation) return alert('הדפדפן שלך לא תומך במיקום.');
+        navigator.geolocation.getCurrentPosition(
+            pos => map.setView([pos.coords.latitude, pos.coords.longitude], 16),
+            () => alert('לא ניתן לגשת למיקום שלך.')
+        );
+    });
+
+    async function geocode(address) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=il`;
+        const response = await fetch(url, { headers: { 'Accept-Language': 'he' } });
+        const data = await response.json();
+        if (!data || data.length === 0) return null;
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), name: data[0].display_name };
+    }
+
+    // חישוב מרחק במטרים בין שתי נקודות גיאוגרפיות (Haversine Formula)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function formatInstruction(step) {
+        const type = step.maneuver.type;
+        const modifier = step.maneuver.modifier;
+        const name = step.name ? `ל-<strong>${step.name}</strong>` : '';
+
+        let icon = '⬆️';
+        let text = 'המשך ישר';
+
+        switch (type) {
+            case 'depart': icon = '🚗'; text = `צא לדרך ${step.name || ''}`; break;
+            case 'arrive': icon = '🏁'; text = 'הגעת ליעד!'; break;
+            case 'turn':
+            case 'end of road':
+                if (modifier && modifier.includes('left')) {
+                    icon = modifier.includes('sharp') ? '↲' : '⬅️';
+                    text = `פנה שמאלה ${name}`;
+                } else if (modifier && modifier.includes('right')) {
+                    icon = modifier.includes('sharp') ? '↳' : '➡️';
+                    text = `פנה ימינה ${name}`;
+                } else {
+                    text = `המשך ישר ${name}`;
                 }
-            }
-        });
+                break;
+            case 'roundabout':
+            case 'rotary':
+                icon = '🔄';
+                text = `בכיכר, צא ביציאה ה-${step.maneuver.exit || 1} ${name}`;
+                break;
+            case 'fork':
+                icon = modifier && modifier.includes('left') ? '↖️' : '↗️';
+                text = `השתלב ${modifier && modifier.includes('left') ? 'משמאל' : 'מימין'} ${name}`;
+                break;
+        }
+        return { text, icon };
+    }
 
-        // Add click handler to map
-        map.on('click', (e) => {
-            L.marker([e.latlng.lat, e.latlng.lng])
-                .addTo(map)
-                .bindPopup(`מיקום: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`)
-                .openPopup();
+    // ניווט בלייב בעת תנועה
+    function handleLivePositionUpdate(position) {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+
+        // עדכון סמן המשתמש והזזת המפה
+        if (startMarker) {
+            startMarker.setLatLng([userLat, userLng]);
+        } else {
+            startMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map);
+        }
+        map.setView([userLat, userLng], 17);
+
+        if (!currentSteps || currentSteps.length === 0) return;
+
+        // בדיקת הגעה ליעד (פחות מ-20 מטר)
+        const distToDest = calculateDistance(userLat, userLng, destinationCoords.lat, destinationCoords.lng);
+        if (distToDest < 20) {
+            document.getElementById('current-icon').textContent = '🏁';
+            document.getElementById('current-text').textContent = 'הגעת ליעד!';
+            stopNavigation();
+            return;
+        }
+
+        // בדיקת התקדמות בשלבי הניווט
+        const nextStep = currentSteps[currentStepIndex];
+        if (nextStep && nextStep.maneuver) {
+            const stepLat = nextStep.maneuver.location[1];
+            const stepLng = nextStep.maneuver.location[0];
+            const distToStep = calculateDistance(userLat, userLng, stepLat, stepLng);
+
+            // אם הגענו לנקודת הפנייה (מרחק של פחות מ-25 מטר), עוברים להוראה הבאה
+            if (distToStep < 25 && currentStepIndex < currentSteps.length - 1) {
+                currentStepIndex++;
+            }
+        }
+
+        // עדכון תצוגת ההוראה הפעילה
+        const activeStep = currentSteps[currentStepIndex];
+        const { text, icon } = formatInstruction(activeStep);
+        document.getElementById('current-icon').textContent = icon;
+        document.getElementById('current-text').innerHTML = text;
+
+        // הדגשת השלב ברשימה
+        document.querySelectorAll('.instruction-item').forEach((el, idx) => {
+            el.classList.toggle('active-step', idx === currentStepIndex);
         });
-    </script>
+    }
+
+    document.getElementById('navigate-btn').addEventListener('click', async () => {
+        const startText = document.getElementById('start-input').value.trim();
+        const destinationText = document.getElementById('destination-input').value.trim();
+
+        if (!destinationText) return alert('יש להזין יעד לנסיעה.');
+
+        const button = document.getElementById('navigate-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const instructionsContainer = document.getElementById('instructions-container');
+
+        try {
+            button.disabled = true;
+            button.textContent = 'מחשב מסלול...';
+
+            let start;
+            if (startText === 'המיקום שלי' || !startText) {
+                if (!navigator.geolocation) throw new Error('Geolocation unavailable');
+                start = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                        reject
+                    );
+                });
+            } else {
+                start = await geocode(startText);
+            }
+
+            const destination = await geocode(destinationText);
+            if (!start || !destination) return alert('מיקום התחלה או יעד לא נמצאו.');
+
+            destinationCoords = destination;
+
+            // ציור סמנים ראשוניים
+            if (startMarker) map.removeLayer(startMarker);
+            if (destinationMarker) map.removeLayer(destinationMarker);
+
+            startMarker = L.marker([start.lat, start.lng], { icon: userLocationIcon }).addTo(map);
+            destinationMarker = L.marker([destination.lat, destination.lng])
+                .addTo(map)
+                .bindPopup(`<strong>🏁 ${destination.name}</strong>`);
+
+            // בקשת מסלול
+            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&steps=true`;
+            const routeResponse = await fetch(routeUrl);
+            const routeData = await routeResponse.json();
+
+            if (routeData.code !== 'Ok' || !routeData.routes.length) throw new Error('Route not found');
+
+            const route = routeData.routes[0];
+            currentSteps = route.legs[0].steps;
+            currentStepIndex = 0;
+
+            if (routeLine) map.removeLayer(routeLine);
+            const coordinates = route.geometry.coordinates.map(p => [p[1], p[0]]);
+            routeLine = L.polyline(coordinates, { color: '#4285f4', weight: 6, opacity: 0.9 }).addTo(map);
+
+            // הצגת נתוני זמן ומרחק
+            const distKm = (route.distance / 1000).toFixed(1);
+            const durationMin = Math.round(route.duration / 60);
+            document.getElementById('route-time').textContent = `🚗 ${durationMin} דקות`;
+            document.getElementById('route-distance').textContent = `📏 ${distKm} ק"מ`;
+            document.getElementById('route-info').classList.add('active');
+
+            // בניית רשימת השלבים
+            instructionsContainer.innerHTML = '';
+            currentSteps.forEach((step, idx) => {
+                const { text, icon } = formatInstruction(step);
+                const stepDist = step.distance >= 1000 ? `${(step.distance/1000).toFixed(1)} ק"מ` : `${Math.round(step.distance)} מ'`;
+                const item = document.createElement('div');
+                item.className = `instruction-item ${idx === 0 ? 'active-step' : ''}`;
+                item.innerHTML = `
+                    <span class="instruction-icon">${icon}</span>
+                    <span class="instruction-text">${text}</span>
+                    <span class="instruction-distance">${step.distance > 0 ? stepDist : ''}</span>
+                `;
+                instructionsContainer.appendChild(item);
+            });
+
+            instructionsContainer.classList.add('active');
+            document.getElementById('current-instruction-box').classList.add('active');
+
+            // הפעלת מעקב GPS בזמן אמת בלולאה
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(
+                    handleLivePositionUpdate,
+                    err => console.error(err),
+                    { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+                );
+            }
+
+            button.style.display = 'none';
+            stopBtn.style.display = 'block';
+
+        } catch (err) {
+            console.error(err);
+            alert('שגיאה בחישוב המסלול. בדוק את הכתובות.');
+            button.disabled = false;
+            button.textContent = '🚗 התחל ניווט בזמן אמת';
+        }
+    });
+
+    function stopNavigation() {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+        document.getElementById('navigate-btn').style.display = 'block';
+        document.getElementById('navigate-btn').disabled = false;
+        document.getElementById('navigate-btn').textContent = '🚗 התחל ניווט בזמן אמת';
+        document.getElementById('stop-btn').style.display = 'none';
+    }
+
+    document.getElementById('stop-btn').addEventListener('click', stopNavigation);
+</script>
+
 </body>
 </html>
