@@ -64,11 +64,7 @@ function goToChannel(url) {
 
 <script>
 if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/mogostream/sw.js", {
-            scope: "/mogostream/"
-        });
-    });
+    navigator.serviceWorker.register("/mogostream/sw.js");
 }
 </script>
 

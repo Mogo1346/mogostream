@@ -1,15 +1,9 @@
-const CACHE_NAME = "mogo-stream-v1";
+const CACHE_NAME = "mogo-stream-v2";
 
 const FILES_TO_CACHE = [
     "/mogostream/",
     "/mogostream/index.html",
-    "/mogostream/manifest.webmanifest",
-    "/mogostream/channels.html",
-    "/mogostream/VOD.html",
-    "/mogostream/radio.html",
-    "/mogostream/games.html",
-    "/mogostream/studies.html",
-    "/mogostream/player.html"
+    "/mogostream/manifest.webmanifest"
 ];
 
 self.addEventListener("install", event => {
@@ -34,8 +28,7 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
     event.respondWith(
-        caches.match(event.request).then(cached => {
-            return cached || fetch(event.request);
-        })
+        caches.match(event.request)
+            .then(cached => cached || fetch(event.request))
     );
 });
