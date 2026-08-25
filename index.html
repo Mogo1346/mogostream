@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="manifest" href="/mogostream/manifest.webmanifest">
     <title>מוגו סטרים</title>
     <style>
         .buttons {
@@ -65,7 +65,7 @@ function goToChannel(url) {
 <script>
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js");
+        navigator.serviceWorker.register("/mogostream/sw.js");
     });
 }
 </script>
