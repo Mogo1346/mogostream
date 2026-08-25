@@ -1,7 +1,7 @@
 {
     "name": "MogoStream",
     "short_name": "Mogo",
-    "start_url": "/",
+    "start_url": "/mogostream/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",
