@@ -1,540 +1,1169 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maps - ניווט בזמן אמת</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מפה וניווט</title>
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+  :root{
+    --ink:#0c1b2a;
+    --ink-2:#132840;
+    --paper:#f6f3ea;
+    --paper-dim:#eae5d6;
+    --amber:#e2a23b;
+    --route:#2f6fed;
+    --line:rgba(255,255,255,0.09);
+    --text-dim:#9fb1c4;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%; width:100%;
+    font-family:'Assistant', sans-serif;
+    background:var(--ink);
+    overflow:hidden;
+  }
+  #app{
+    display:flex;
+    height:100vh;
+    width:100vw;
+  }
 
-        body {
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
+  /* ---------- Sidebar ---------- */
+  #sidebar{
+    width:380px;
+    min-width:380px;
+    background:var(--ink);
+    color:var(--paper);
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--line);
+    z-index:1000;
+    transition:margin-right .25s ease;
+  }
+  #sidebar.collapsed{ margin-right:-380px; }
 
-        #map {
-            width: 100vw;
-            height: 100vh;
-        }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:20px 20px 14px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand-mark{
+    width:34px;height:34px;
+    border-radius:50%;
+    background:conic-gradient(from 220deg, var(--amber), var(--route), var(--amber));
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    position:relative;
+  }
+  .brand-mark::after{
+    content:"";
+    width:12px;height:12px;
+    background:var(--ink);
+    border-radius:50%;
+  }
+  .brand h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:19px;
+    margin:0;
+    letter-spacing:.2px;
+  }
+  .brand span{
+    display:block;
+    font-size:11px;
+    color:var(--text-dim);
+    font-weight:500;
+    letter-spacing:.5px;
+  }
 
-        /* חיפוש ולוח בקרה */
-        .search-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            padding: 12px;
-            width: 380px;
-            max-height: calc(100vh - 40px);
-            display: flex;
-            flex-direction: column;
-        }
+  .panel{
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+  }
 
-        .search-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
+  .field{
+    position:relative;
+    margin-bottom:10px;
+  }
+  .field:last-child{margin-bottom:0;}
+  .field .dot{
+    position:absolute;
+    right:14px; top:50%; transform:translateY(-50%);
+    width:9px;height:9px;border-radius:50%;
+    background:var(--amber);
+  }
+  .field.dest .dot{ background:var(--route); border-radius:2px; }
+  .field input{
+    width:100%;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    color:var(--paper);
+    padding:12px 38px 12px 14px;
+    border-radius:10px;
+    font-size:14.5px;
+    font-family:'Assistant',sans-serif;
+    outline:none;
+  }
+  .field input::placeholder{ color:var(--text-dim); }
+  .field input:focus{ border-color:var(--amber); }
 
-        .search-row input {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            font-size: 15px;
-            outline: none;
-            direction: rtl;
-        }
+  .suggestions{
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0; left:0;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    max-height:220px;
+    overflow-y:auto;
+    z-index:1400;
+    display:none;
+  }
+  .suggestions.show{ display:block; }
+  .suggestions div{
+    padding:10px 14px;
+    font-size:13.5px;
+    cursor:pointer;
+    border-bottom:1px solid var(--line);
+  }
+  .suggestions div:last-child{ border-bottom:none; }
+  .suggestions div:hover{ background:rgba(226,162,59,0.14); }
 
-        .search-row input:focus {
-            border-color: #4285f4;
-        }
+  .row-btns{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+  }
+  .btn{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:10px 8px;
+    font-family:'Assistant', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:active{ transform:scale(.96); }
+  .btn-primary{ background:var(--amber); color:var(--ink); }
+  .btn-ghost{ background:var(--ink-2); color:var(--paper); border:1px solid var(--line); }
+  .btn-ghost:hover{ filter:brightness(1.15); }
+  .btn-primary:hover{ filter:brightness(1.08); }
 
-        .search-icon {
-            font-size: 18px;
-        }
+  .modes{
+    display:flex;
+    gap:6px;
+    margin-top:12px;
+  }
+  .mode{
+    flex:1;
+    text-align:center;
+    padding:8px 4px;
+    border-radius:9px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    font-size:12.5px;
+    cursor:pointer;
+    color:var(--text-dim);
+    font-weight:600;
+  }
+  .mode.active{
+    background:rgba(47,111,237,0.18);
+    border-color:var(--route);
+    color:var(--paper);
+  }
 
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
+  /* ---------- Alternative routes ---------- */
+  #route-options{
+    display:none;
+    gap:8px;
+    padding:0 20px 16px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  #route-options.show{ display:flex; }
+  .route-chip{
+    flex:1;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .route-chip.active{
+    border-color:var(--amber);
+    background:rgba(226,162,59,0.14);
+  }
+  .route-chip .rc-time{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14px;
+    font-weight:700;
+  }
+  .route-chip .rc-dist{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
 
-        #navigate-btn, #stop-btn {
-            border: none;
-            border-radius: 5px;
-            padding: 11px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+  /* ---------- Navigation controls ---------- */
+  .nav-row{
+    display:none;
+    padding:0 20px 16px 20px;
+  }
+  .nav-row.show{ display:block; }
+  .btn-nav-start{ background:#2f6fed; color:var(--paper); width:100%; padding:12px; font-size:14.5px; }
+  .btn-nav-start:hover{ filter:brightness(1.12); }
+  .btn-nav-stop{ background:#c0392b; color:var(--paper); width:100%; padding:12px; font-size:14.5px; }
+  .btn-nav-stop:hover{ filter:brightness(1.12); }
 
-        #navigate-btn {
-            flex: 1;
-            background: #4285f4;
-            color: white;
-        }
+  .step.active{
+    background:rgba(47,111,237,0.14);
+    border-right:3px solid var(--route);
+  }
+  .step.done{ opacity:0.4; }
 
-        #navigate-btn:hover {
-            background: #3367d6;
-        }
+  /* ---------- Trip summary ---------- */
+  #summary{
+    display:none;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  #summary.show{ display:block; }
+  .ticket{
+    background:var(--ink-2);
+    border:1px dashed var(--text-dim);
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .ticket .big{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:26px;
+    font-weight:700;
+    line-height:1;
+  }
+  .ticket .lbl{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:4px;
+    letter-spacing:.3px;
+  }
+  .ticket .divider{
+    width:1px;height:34px;
+    background:var(--line);
+  }
 
-        #stop-btn {
-            background: #d93025;
-            color: white;
-            display: none;
-        }
+  /* ---------- Directions list ---------- */
+  #directions{
+    flex:1;
+    overflow-y:auto;
+    padding:6px 0 20px 0;
+  }
+  #directions .empty{
+    padding:40px 24px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:13.5px;
+    line-height:1.7;
+  }
+  .step{
+    display:flex;
+    gap:12px;
+    padding:12px 20px;
+    border-bottom:1px solid var(--line);
+    align-items:flex-start;
+    cursor:pointer;
+  }
+  .step:hover{ background:rgba(255,255,255,0.03); }
+  .step .num{
+    width:24px;height:24px;
+    border-radius:50%;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;
+    font-weight:700;
+    flex-shrink:0;
+    color:var(--amber);
+    margin-top:1px;
+  }
+  .step .txt{ font-size:13.5px; line-height:1.5; }
+  .step .dist{ font-size:11.5px; color:var(--text-dim); margin-top:2px; }
 
-        #stop-btn:hover {
-            background: #b31412;
-        }
+  /* ---------- Map area ---------- */
+  #map-wrap{
+    position:relative;
+    flex:1;
+    height:100vh;
+  }
+  #map{ height:100%; width:100%; }
 
-        /* הוראות ניווט בזמן אמת */
-        .current-instruction-box {
-            display: none;
-            background: #1a73e8;
-            color: white;
-            padding: 14px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            align-items: center;
-            gap: 12px;
-        }
+  #toggle-sidebar{
+    position:absolute;
+    top:16px; right:16px;
+    z-index:1000;
+    width:42px;height:42px;
+    border-radius:50%;
+    background:var(--ink);
+    color:var(--paper);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    font-size:18px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  }
 
-        .current-instruction-box.active {
-            display: flex;
-        }
+  #locate-btn{
+    position:absolute;
+    bottom:28px; right:16px;
+    z-index:1000;
+    width:46px;height:46px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--ink);
+    border:none;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    font-size:19px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  }
 
-        .current-instruction-icon {
-            font-size: 28px;
-        }
+  /* ---------- Bottom navigation banner ---------- */
+  /* Sits on the map itself (not the sidebar) so the current turn is always
+     visible during navigation, even with the sidebar collapsed on mobile. */
+  #nav-banner{
+    display:none;
+    position:absolute;
+    left:16px; right:16px; bottom:28px;
+    z-index:1100;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:16px;
+    padding:14px 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.45);
+    align-items:center;
+    gap:14px;
+    font-family:'Assistant', sans-serif;
+  }
+  #nav-banner.show{ display:flex; }
+  #nav-banner-arrow{
+    font-size:26px;
+    color:var(--amber);
+    flex-shrink:0;
+    width:36px;height:36px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--ink-2);
+    border-radius:10px;
+  }
+  #nav-banner-dist{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;
+    font-weight:700;
+  }
+  #nav-banner-instr{
+    font-size:13.5px;
+    color:var(--text-dim);
+    margin-top:2px;
+    line-height:1.4;
+  }
 
-        .current-instruction-text {
-            font-size: 16px;
-            font-weight: bold;
-            flex: 1;
-        }
+  /* Live position marker: Leaflet applies its own transform for position to
+     the outer icon element, and we apply rotation separately to an inner
+     div, so the two can animate independently. The position transition's
+     duration is set dynamically in JS (matched to the real GPS fix
+     interval) so movement glides continuously instead of snapping. */
+  .nav-marker-icon{ transition: transform 800ms linear; }
+  .nav-marker-arrow{ transition: transform 150ms linear; transform-origin:center center; }
 
-        .instructions-container {
-            display: none;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            overflow-y: auto;
-            max-height: 250px;
-        }
+  .leaflet-routing-container{ display:none !important; }
 
-        .instructions-container.active {
-            display: block;
-        }
+  ::-webkit-scrollbar{ width:6px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
 
-        .instruction-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 4px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-
-        .instruction-item.active-step {
-            background: #e8f0fe;
-            font-weight: bold;
-        }
-
-        .instruction-icon {
-            font-size: 18px;
-            min-width: 24px;
-            text-align: center;
-        }
-
-        .instruction-text {
-            flex: 1;
-        }
-
-        .instruction-distance {
-            color: #777;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        /* כפתורי מפה */
-        .controls {
-            position: absolute;
-            bottom: 40px;
-            left: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .control-btn, .location-btn {
-            background: white;
-            border: none;
-            border-radius: 4px;
-            width: 40px;
-            height: 40px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .control-btn:hover, .location-btn:hover {
-            background: #f5f5f5;
-        }
-
-        .location-btn {
-            position: absolute;
-            bottom: 40px;
-            left: 70px;
-            z-index: 1000;
-        }
-
-        /* מידע על המסלול */
-        .route-info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            padding: 12px 18px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            display: none;
-            min-width: 200px;
-        }
-
-        .route-info.active {
-            display: block;
-        }
-
-        .route-time {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .route-distance {
-            color: #555;
-            margin-top: 4px;
-        }
-    </style>
+  @media (max-width:760px){
+    #sidebar{ position:absolute; height:100vh; width:88vw; min-width:0; }
+    #sidebar.collapsed{ margin-right:-88vw; }
+  }
+</style>
 </head>
-
 <body>
 
-<div id="map"></div>
-
-<div class="search-container">
-    <div class="search-row">
-        <span class="search-icon">📍</span>
-        <input type="text" id="start-input" placeholder="נקודת התחלה (ברירת מחדל: המיקום שלי)" value="המיקום שלי">
+<div id="app">
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <h1>מסלול</h1>
+        <span>ניווט מבוסס OpenStreetMap</span>
+      </div>
     </div>
 
-    <div class="search-row">
-        <span class="search-icon">🏁</span>
-        <input type="text" id="destination-input" placeholder="לאן תרצה לנסוע?">
+    <div class="panel">
+      <div class="field">
+        <input id="from-input" type="text" placeholder="נקודת מוצא">
+        <div class="dot"></div>
+        <div class="suggestions" id="from-suggestions"></div>
+      </div>
+      <div class="field dest">
+        <input id="to-input" type="text" placeholder="יעד">
+        <div class="dot"></div>
+        <div class="suggestions" id="to-suggestions"></div>
+      </div>
+
+      <div class="modes">
+        <div class="mode active" data-mode="driving">🚗 רכב</div>
+        <div class="mode" data-mode="foot">🚶 הליכה</div>
+        <div class="mode" data-mode="bike">🚴 אופניים</div>
+      </div>
+
+      <div class="row-btns">
+        <button class="btn btn-ghost" id="my-location-btn">📍 המיקום שלי</button>
+        <button class="btn btn-primary" id="go-btn">נווט</button>
+      </div>
+      <div class="row-btns">
+        <button class="btn btn-ghost" id="clear-btn" style="flex:1;">נקה מסלול</button>
+      </div>
     </div>
 
-    <div class="btn-group">
-        <button id="navigate-btn">🚗 התחל ניווט בזמן אמת</button>
-        <button id="stop-btn">🛑 עצור ניווט</button>
+    <div id="route-options"></div>
+
+    <div id="summary">
+      <div class="ticket">
+        <div>
+          <div class="big" id="sum-duration">--</div>
+          <div class="lbl">זמן נסיעה</div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <div class="big" id="sum-distance">--</div>
+          <div class="lbl">מרחק</div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <div class="big" id="sum-eta">--</div>
+          <div class="lbl">הגעה משוערת</div>
+        </div>
+      </div>
     </div>
 
-    <!-- הוראה נוכחית בולטת למעלה -->
-    <div class="current-instruction-box" id="current-instruction-box">
-        <span class="current-instruction-icon" id="current-icon">⬆️</span>
-        <span class="current-instruction-text" id="current-text">מתחיל ניווט...</span>
+    <div class="nav-row" id="nav-start-row">
+      <button class="btn btn-nav-start" id="nav-start-btn">🧭 התחל ניווט</button>
+    </div>
+    <div class="nav-row" id="nav-stop-row">
+      <button class="btn btn-nav-stop" id="nav-stop-btn">⏹ עצור ניווט</button>
     </div>
 
-    <!-- רשימת כל ההוראות -->
-    <div class="instructions-container" id="instructions-container"></div>
+    <div id="directions">
+      <div class="empty">חפשו נקודת מוצא ויעד, או לחצו על המפה כדי לבחור מיקומים, ולאחר מכן לחצו על "נווט" כדי לקבל הוראות ניווט מלאות.</div>
+    </div>
+  </div>
+
+  <div id="map-wrap">
+    <div id="toggle-sidebar">☰</div>
+    <div id="map"></div>
+    <button id="locate-btn" title="המיקום שלי">🎯</button>
+    <div id="nav-banner">
+      <div id="nav-banner-arrow">➜</div>
+      <div id="nav-banner-text">
+        <div id="nav-banner-dist">--</div>
+        <div id="nav-banner-instr">--</div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="route-info" id="route-info">
-    <div class="route-time" id="route-time"></div>
-    <div class="route-distance" id="route-distance"></div>
-</div>
-
-<div class="controls">
-    <button class="control-btn" id="zoom-in">+</button>
-    <button class="control-btn" id="zoom-out">−</button>
-</div>
-
-<button class="location-btn" id="my-location">📍</button>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
 
 <script>
-    const map = L.map('map', { zoomControl: false }).setView([31.5, 34.9], 8);
+  // ---------------- Map init ----------------
+  const map = L.map('map', { zoomControl:false }).setView([32.0853, 34.7818], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  L.control.zoom({ position:'bottomleft' }).addTo(map);
+
+  const amberIcon = L.divIcon({
+    className:'', html:`<div style="width:16px;height:16px;background:#e2a23b;border:3px solid #0c1b2a;border-radius:50%;box-shadow:0 0 0 2px rgba(226,162,59,.4)"></div>`,
+    iconSize:[16,16], iconAnchor:[8,8]
+  });
+  const blueIcon = L.divIcon({
+    className:'', html:`<div style="width:16px;height:16px;background:#2f6fed;border:3px solid #0c1b2a;border-radius:3px;box-shadow:0 0 0 2px rgba(47,111,237,.4)"></div>`,
+    iconSize:[16,16], iconAnchor:[8,8]
+  });
+
+  // Live-navigation marker. The outer container (className 'nav-marker-icon')
+  // is what Leaflet moves via its own CSS transform when we call setLatLng —
+  // giving that class a transition lets position glide smoothly. The inner
+  // 'nav-marker-arrow' div is rotated separately and independently (via the
+  // compass or a bearing fallback) so heading can update far more often than
+  // GPS fixes arrive, without fighting Leaflet's position transform.
+  function makeNavIcon(){
+    return L.divIcon({
+      className:'nav-marker-icon',
+      html:`<div class="nav-marker-arrow" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;">
+              <div style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:20px solid #2f6fed;filter:drop-shadow(0 0 3px rgba(0,0,0,.5));"></div>
+            </div>`,
+      iconSize:[26,26], iconAnchor:[13,13]
+    });
+  }
+
+  let fromLatLng = null;
+  let toLatLng = null;
+  let fromMarker = null;
+  let toMarker = null;
+  let routingControl = null;
+  let currentMode = 'driving';
+  let pickMode = null; // 'from' | 'to' | null -- next map click sets this point
+
+  // Alternative-route state: the OSRM router already returns multiple route
+  // alternatives per request; these hold them so the user can switch between
+  // them without a new network request.
+  let lastRoutes = [];
+  let selectedRouteIndex = 0;
+  let manualRouteLine = null; // drawn when a non-primary alternative is selected
+  let currentRoute = null; // the route object currently shown, used for live nav tracking
+
+  // Live navigation state
+  let navWatchId = null;
+  let navMarker = null;
+  let navMarkerEl = null;      // cached outer marker DOM node (position, via Leaflet's own transform)
+  let navArrowEl = null;       // cached inner arrow DOM node (rotation, set independently of position)
+  let navLastLatLng = null;
+  let navLastFixTime = null;
+  let navHeadingDeg = 0;
+  let navOrientationActive = false;
+
+  // Guards against stale async responses: if the user clicks "נווט" again
+  // before a previous request finishes, that older request's routesfound/
+  // routingerror could otherwise still fire afterwards and silently overwrite
+  // the newer, correct state (this was the likely cause of the nav-start
+  // button sometimes failing to appear).
+  let buildSeq = 0;
+
+  // Public OSRM demo server (router.project-osrm.org) only supports the "driving" profile,
+  // so walking/cycling requests were silently failing and leaving the old car route on screen.
+  // These FOSSGIS-hosted OSRM instances actually support all three profiles.
+  const routerConfig = {
+    driving: { serviceUrl: 'https://routing.openstreetmap.de/routed-car/route/v1',   profile: 'driving' },
+    foot:    { serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',  profile: 'foot' },
+    bike:    { serviceUrl: 'https://routing.openstreetmap.de/routed-bike/route/v1',  profile: 'bike' },
+  };
+
+  // ---------------- Geocoding (Nominatim) ----------------
+  // Accepts an optional AbortSignal so callers can cancel a stale in-flight
+  // request when the user keeps typing — otherwise an older response could
+  // arrive after a newer one and overwrite it with outdated suggestions.
+  async function geocode(query, signal){
+    if(!query || query.trim().length < 2) return [];
+    const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=0&limit=5&q=${encodeURIComponent(query)}`;
+    try{
+      const res = await fetch(url, { headers: { 'Accept-Language':'he' }, signal });
+      return await res.json();
+    }catch(e){
+      if(e.name === 'AbortError') return null; // superseded by a newer request; caller should ignore
+      console.error('geocode error', e);
+      return [];
+    }
+  }
+
+  function debounce(fn, wait){
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(()=>fn(...args), wait);
+    };
+  }
+
+  function setupAutocomplete(inputEl, suggestBox, onPick){
+    let activeController = null;
+
+    const run = debounce(async () => {
+      if(activeController) activeController.abort();
+      activeController = new AbortController();
+      const results = await geocode(inputEl.value, activeController.signal);
+      if(results === null) return; // this request was aborted, a newer one is in flight
+
+      if(results.length === 0){
+        suggestBox.classList.remove('show');
+        suggestBox.innerHTML = '';
+        return;
+      }
+      suggestBox.innerHTML = results.map((r,i) =>
+        `<div data-i="${i}">${r.display_name}</div>`
+      ).join('');
+      suggestBox.classList.add('show');
+      [...suggestBox.children].forEach((el,i) => {
+        el.addEventListener('click', () => {
+          const r = results[i];
+          inputEl.value = r.display_name;
+          suggestBox.classList.remove('show');
+          onPick({ lat: parseFloat(r.lat), lng: parseFloat(r.lon) });
+        });
+      });
+    }, 400);
+
+    inputEl.addEventListener('input', run);
+    document.addEventListener('click', (e) => {
+      if(e.target !== inputEl) suggestBox.classList.remove('show');
+    });
+  }
+
+  setupAutocomplete(
+    document.getElementById('from-input'),
+    document.getElementById('from-suggestions'),
+    (latlng) => setPoint('from', latlng)
+  );
+  setupAutocomplete(
+    document.getElementById('to-input'),
+    document.getElementById('to-suggestions'),
+    (latlng) => setPoint('to', latlng)
+  );
+
+  // ---------------- Point setting ----------------
+  function setPoint(which, latlng, panTo=true){
+    if(which === 'from'){
+      fromLatLng = latlng;
+      if(fromMarker) map.removeLayer(fromMarker);
+      fromMarker = L.marker(latlng, { icon:amberIcon, draggable:true }).addTo(map);
+      fromMarker.on('dragend', () => { fromLatLng = fromMarker.getLatLng(); reverseGeocodeInto('from-input', fromLatLng); });
+    } else {
+      toLatLng = latlng;
+      if(toMarker) map.removeLayer(toMarker);
+      toMarker = L.marker(latlng, { icon:blueIcon, draggable:true }).addTo(map);
+      toMarker.on('dragend', () => { toLatLng = toMarker.getLatLng(); reverseGeocodeInto('to-input', toLatLng); });
+    }
+    if(panTo) map.panTo(latlng);
+  }
+
+  async function reverseGeocodeInto(inputId, latlng){
+    try{
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`;
+      const res = await fetch(url, { headers:{ 'Accept-Language':'he' }});
+      const data = await res.json();
+      document.getElementById(inputId).value = data.display_name || `${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`;
+    }catch(e){
+      document.getElementById(inputId).value = `${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`;
+    }
+  }
+
+  // Click on map to set points: first click sets "from" if empty, else "to"
+  map.on('click', (e) => {
+    if(pickMode === 'from'){ setPoint('from', e.latlng, false); reverseGeocodeInto('from-input', e.latlng); pickMode = null; return; }
+    if(pickMode === 'to'){ setPoint('to', e.latlng, false); reverseGeocodeInto('to-input', e.latlng); pickMode = null; return; }
+    if(!fromLatLng){ setPoint('from', e.latlng, false); reverseGeocodeInto('from-input', e.latlng); }
+    else if(!toLatLng){ setPoint('to', e.latlng, false); reverseGeocodeInto('to-input', e.latlng); }
+  });
+
+  // ---------------- My location ----------------
+  document.getElementById('my-location-btn').addEventListener('click', () => useMyLocation('from'));
+  document.getElementById('locate-btn').addEventListener('click', () => useMyLocation(fromLatLng ? 'to' : 'from'));
+
+  function useMyLocation(which){
+    if(!navigator.geolocation){
+      alert('הדפדפן לא תומך באיתור מיקום');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setPoint(which, latlng);
+      reverseGeocodeInto(which === 'from' ? 'from-input' : 'to-input', latlng);
+      map.setView(latlng, 15);
+    }, () => {
+      alert('לא ניתן היה לאתר את המיקום שלך');
+    });
+  }
+
+  // ---------------- Mode selector ----------------
+  document.querySelectorAll('.mode').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.mode').forEach(m => m.classList.remove('active'));
+      el.classList.add('active');
+      currentMode = el.dataset.mode;
+      if(fromLatLng && toLatLng) buildRoute();
+    });
+  });
+
+  // ---------------- Routing ----------------
+  document.getElementById('go-btn').addEventListener('click', async () => {
+    if(!fromLatLng){
+      const results = await geocode(document.getElementById('from-input').value);
+      if(results[0]) setPoint('from', { lat:parseFloat(results[0].lat), lng:parseFloat(results[0].lon) }, false);
+    }
+    if(!toLatLng){
+      const results = await geocode(document.getElementById('to-input').value);
+      if(results[0]) setPoint('to', { lat:parseFloat(results[0].lat), lng:parseFloat(results[0].lon) }, false);
+    }
+    if(!fromLatLng || !toLatLng){
+      alert('יש להזין נקודת מוצא ויעד תקינים');
+      return;
+    }
+    buildRoute();
+  });
+
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    fromLatLng = null; toLatLng = null;
+    if(fromMarker){ map.removeLayer(fromMarker); fromMarker = null; }
+    if(toMarker){ map.removeLayer(toMarker); toMarker = null; }
+    if(routingControl){ map.removeControl(routingControl); routingControl = null; }
+    if(manualRouteLine){ map.removeLayer(manualRouteLine); manualRouteLine = null; }
+    stopNavigation();
+    lastRoutes = [];
+    selectedRouteIndex = 0;
+    currentRoute = null;
+    document.getElementById('from-input').value = '';
+    document.getElementById('to-input').value = '';
+    document.getElementById('summary').classList.remove('show');
+    document.getElementById('route-options').classList.remove('show');
+    document.getElementById('route-options').innerHTML = '';
+    document.getElementById('nav-start-row').classList.remove('show');
+    document.getElementById('directions').innerHTML = '<div class="empty">חפשו נקודת מוצא ויעד, או לחצו על המפה כדי לבחור מיקומים, ולאחר מכן לחצו על "נווט" כדי לקבל הוראות ניווט מלאות.</div>';
+  });
+
+  function buildRoute(){
+    if(routingControl){ map.removeControl(routingControl); routingControl = null; }
+    if(manualRouteLine){ map.removeLayer(manualRouteLine); manualRouteLine = null; }
+    stopNavigation();
+
+    // Clear any previously displayed trip info immediately so a stale result
+    // (e.g. from the last mode) is never shown while the new one loads.
+    document.getElementById('summary').classList.remove('show');
+    document.getElementById('directions').innerHTML = '<div class="empty">מחשב מסלול...</div>';
+    document.getElementById('route-options').classList.remove('show');
+    document.getElementById('route-options').innerHTML = '';
+    document.getElementById('nav-start-row').classList.remove('show');
+    lastRoutes = [];
+    selectedRouteIndex = 0;
+    currentRoute = null;
+
+    const cfg = routerConfig[currentMode];
+    const mySeq = ++buildSeq;
+
+    routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(fromLatLng.lat, fromLatLng.lng),
+        L.latLng(toLatLng.lat, toLatLng.lng)
+      ],
+      router: L.Routing.osrmv1({
+        serviceUrl: cfg.serviceUrl,
+        profile: cfg.profile,
+        routingOptions: { alternatives: true, steps: true }
+      }),
+      createMarker: () => null, // we manage our own markers
+      addWaypoints: false,
+      routeWhileDragging: false,
+      show: false,
+      fitSelectedRoutes: true,
+      showAlternatives: true,
+      altLineOptions: {
+        styles: [{ color:'#9fb1c4', weight:4, opacity:0.55, dashArray:'2,8' }]
+      },
+      lineOptions: {
+        styles: [{ color:'#2f6fed', weight:5, opacity:0.9 }]
+      }
     }).addTo(map);
 
-    let startMarker = null;
-    let destinationMarker = null;
-    let routeLine = null;
-    let watchId = null;
-    let currentSteps = [];
-    let currentStepIndex = 0;
-    let destinationCoords = null;
-
-    document.getElementById('zoom-in').addEventListener('click', () => map.zoomIn());
-    document.getElementById('zoom-out').addEventListener('click', () => map.zoomOut());
-
-    // אייקון ייעודי למיקום המשתמש בזמן אמת
-    const userLocationIcon = L.divIcon({
-        className: 'user-location-marker',
-        html: `<div style="background-color: #4285f4; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.5);"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
+    routingControl.on('routesfound', (e) => {
+      if(mySeq !== buildSeq) return; // a newer buildRoute() call has since started; ignore this stale response
+      if(!e.routes || e.routes.length === 0 || !e.routes[0]){
+        document.getElementById('directions').innerHTML = '<div class="empty">לא נמצא מסלול תקין. נסו נקודות אחרות.</div>';
+        return;
+      }
+      lastRoutes = e.routes;
+      renderRouteOptions(lastRoutes);
+      selectRoute(0);
     });
 
-    document.getElementById('my-location').addEventListener('click', () => {
-        if (!navigator.geolocation) return alert('הדפדפן שלך לא תומך במיקום.');
-        navigator.geolocation.getCurrentPosition(
-            pos => map.setView([pos.coords.latitude, pos.coords.longitude], 16),
-            () => alert('לא ניתן לגשת למיקום שלך.')
-        );
+    routingControl.on('routingerror', () => {
+      if(mySeq !== buildSeq) return;
+      document.getElementById('directions').innerHTML = '<div class="empty">לא ניתן היה למצוא מסלול עבור מצב הנסיעה שנבחר בין הנקודות שנבחרו. נסו נקודות אחרות או מצב נסיעה אחר.</div>';
+      document.getElementById('summary').classList.remove('show');
+    });
+  }
+
+  // Renders the small chip row letting the user pick between route alternatives.
+  // OSRM returns these alongside the primary route in the same response, so
+  // switching between them is instant and needs no extra network request.
+  function renderRouteOptions(routes){
+    const el = document.getElementById('route-options');
+    if(routes.length <= 1){
+      el.classList.remove('show');
+      el.innerHTML = '';
+      return;
+    }
+    el.innerHTML = routes.map((r, i) => {
+      const mins = Math.round(r.summary.totalTime / 60);
+      const km = (r.summary.totalDistance / 1000).toFixed(1);
+      return `<div class="route-chip${i===0 ? ' active' : ''}" data-idx="${i}">
+        <div class="rc-time">${mins} ד'</div>
+        <div class="rc-dist">${km} ק"מ</div>
+      </div>`;
+    }).join('');
+    el.classList.add('show');
+    [...el.querySelectorAll('.route-chip')].forEach(chip => {
+      chip.addEventListener('click', () => selectRoute(parseInt(chip.dataset.idx)));
+    });
+  }
+
+  // Switches the displayed route to lastRoutes[idx]. Index 0 is whatever the
+  // routing control already drew as the primary line, so selecting it just
+  // means removing any manually-drawn alternative line. Any other index gets
+  // its own plain polyline drawn on top, since the control only ever renders
+  // one route as the bold primary line.
+  function selectRoute(idx){
+    selectedRouteIndex = idx;
+    currentRoute = lastRoutes[idx];
+
+    if(manualRouteLine){ map.removeLayer(manualRouteLine); manualRouteLine = null; }
+
+    if(idx !== 0){
+      manualRouteLine = L.polyline(currentRoute.coordinates, {
+        color:'#2f6fed', weight:5, opacity:0.9
+      }).addTo(map);
+      map.fitBounds(manualRouteLine.getBounds(), { padding:[40,40] });
+    }
+
+    document.querySelectorAll('.route-chip').forEach((chip,i) => {
+      chip.classList.toggle('active', i === idx);
     });
 
-    async function geocode(address) {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=il`;
-        const response = await fetch(url, { headers: { 'Accept-Language': 'he' } });
-        const data = await response.json();
-        if (!data || data.length === 0) return null;
-        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), name: data[0].display_name };
+    renderSummary(currentRoute);
+    renderDirections(currentRoute);
+    document.getElementById('nav-start-row').classList.add('show');
+  }
+
+  function renderSummary(route){
+    const km = (route.summary.totalDistance / 1000).toFixed(1);
+    const mins = Math.round(route.summary.totalTime / 60);
+    const hrs = Math.floor(mins/60);
+    const remMins = mins % 60;
+    const durationStr = hrs > 0 ? `${hrs} ש' ${remMins} ד'` : `${mins} ד'`;
+    const eta = new Date(Date.now() + route.summary.totalTime*1000);
+    const etaStr = eta.toLocaleTimeString('he-IL', { hour:'2-digit', minute:'2-digit' });
+
+    document.getElementById('sum-duration').textContent = durationStr;
+    document.getElementById('sum-distance').textContent = `${km} ק"מ`;
+    document.getElementById('sum-eta').textContent = etaStr;
+    document.getElementById('summary').classList.add('show');
+  }
+
+  function renderDirections(route){
+    const dirEl = document.getElementById('directions');
+    if(!route.instructions || route.instructions.length === 0){
+      dirEl.innerHTML = '<div class="empty">אין הוראות ניווט זמינות למסלול זה.</div>';
+      return;
     }
+    dirEl.innerHTML = route.instructions.map((instr, i) => {
+      const distText = instr.distance > 0 ? formatDistance(instr.distance) : '';
+      return `<div class="step" data-idx="${i}">
+        <div class="num">${i+1}</div>
+        <div>
+          <div class="txt">${buildHebrewInstruction(instr)}</div>
+          <div class="dist">${distText}</div>
+        </div>
+      </div>`;
+    }).join('');
 
-    // חישוב מרחק במטרים בין שתי נקודות גיאוגרפיות (Haversine Formula)
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3;
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function formatInstruction(step) {
-        const type = step.maneuver.type;
-        const modifier = step.maneuver.modifier;
-        const name = step.name ? `ל-<strong>${step.name}</strong>` : '';
-
-        let icon = '⬆️';
-        let text = 'המשך ישר';
-
-        switch (type) {
-            case 'depart': icon = '🚗'; text = `צא לדרך ${step.name || ''}`; break;
-            case 'arrive': icon = '🏁'; text = 'הגעת ליעד!'; break;
-            case 'turn':
-            case 'end of road':
-                if (modifier && modifier.includes('left')) {
-                    icon = modifier.includes('sharp') ? '↲' : '⬅️';
-                    text = `פנה שמאלה ${name}`;
-                } else if (modifier && modifier.includes('right')) {
-                    icon = modifier.includes('sharp') ? '↳' : '➡️';
-                    text = `פנה ימינה ${name}`;
-                } else {
-                    text = `המשך ישר ${name}`;
-                }
-                break;
-            case 'roundabout':
-            case 'rotary':
-                icon = '🔄';
-                text = `בכיכר, צא ביציאה ה-${step.maneuver.exit || 1} ${name}`;
-                break;
-            case 'fork':
-                icon = modifier && modifier.includes('left') ? '↖️' : '↗️';
-                text = `השתלב ${modifier && modifier.includes('left') ? 'משמאל' : 'מימין'} ${name}`;
-                break;
+    [...dirEl.querySelectorAll('.step')].forEach((el) => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.idx);
+        const coord = route.instructions[idx];
+        // Jump to relevant point along the route if index available
+        if(coord && route.coordinates && coord.index !== undefined){
+          const pt = route.coordinates[coord.index];
+          if(pt) map.setView([pt.lat, pt.lng], 17);
         }
-        return { text, icon };
-    }
-
-    // ניווט בלייב בעת תנועה
-    function handleLivePositionUpdate(position) {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-
-        // עדכון סמן המשתמש והזזת המפה
-        if (startMarker) {
-            startMarker.setLatLng([userLat, userLng]);
-        } else {
-            startMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map);
-        }
-        map.setView([userLat, userLng], 17);
-
-        if (!currentSteps || currentSteps.length === 0) return;
-
-        // בדיקת הגעה ליעד (פחות מ-20 מטר)
-        const distToDest = calculateDistance(userLat, userLng, destinationCoords.lat, destinationCoords.lng);
-        if (distToDest < 20) {
-            document.getElementById('current-icon').textContent = '🏁';
-            document.getElementById('current-text').textContent = 'הגעת ליעד!';
-            stopNavigation();
-            return;
-        }
-
-        // בדיקת התקדמות בשלבי הניווט
-        const nextStep = currentSteps[currentStepIndex];
-        if (nextStep && nextStep.maneuver) {
-            const stepLat = nextStep.maneuver.location[1];
-            const stepLng = nextStep.maneuver.location[0];
-            const distToStep = calculateDistance(userLat, userLng, stepLat, stepLng);
-
-            // אם הגענו לנקודת הפנייה (מרחק של פחות מ-25 מטר), עוברים להוראה הבאה
-            if (distToStep < 25 && currentStepIndex < currentSteps.length - 1) {
-                currentStepIndex++;
-            }
-        }
-
-        // עדכון תצוגת ההוראה הפעילה
-        const activeStep = currentSteps[currentStepIndex];
-        const { text, icon } = formatInstruction(activeStep);
-        document.getElementById('current-icon').textContent = icon;
-        document.getElementById('current-text').innerHTML = text;
-
-        // הדגשת השלב ברשימה
-        document.querySelectorAll('.instruction-item').forEach((el, idx) => {
-            el.classList.toggle('active-step', idx === currentStepIndex);
-        });
-    }
-
-    document.getElementById('navigate-btn').addEventListener('click', async () => {
-        const startText = document.getElementById('start-input').value.trim();
-        const destinationText = document.getElementById('destination-input').value.trim();
-
-        if (!destinationText) return alert('יש להזין יעד לנסיעה.');
-
-        const button = document.getElementById('navigate-btn');
-        const stopBtn = document.getElementById('stop-btn');
-        const instructionsContainer = document.getElementById('instructions-container');
-
-        try {
-            button.disabled = true;
-            button.textContent = 'מחשב מסלול...';
-
-            let start;
-            if (startText === 'המיקום שלי' || !startText) {
-                if (!navigator.geolocation) throw new Error('Geolocation unavailable');
-                start = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(
-                        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                        reject
-                    );
-                });
-            } else {
-                start = await geocode(startText);
-            }
-
-            const destination = await geocode(destinationText);
-            if (!start || !destination) return alert('מיקום התחלה או יעד לא נמצאו.');
-
-            destinationCoords = destination;
-
-            // ציור סמנים ראשוניים
-            if (startMarker) map.removeLayer(startMarker);
-            if (destinationMarker) map.removeLayer(destinationMarker);
-
-            startMarker = L.marker([start.lat, start.lng], { icon: userLocationIcon }).addTo(map);
-            destinationMarker = L.marker([destination.lat, destination.lng])
-                .addTo(map)
-                .bindPopup(`<strong>🏁 ${destination.name}</strong>`);
-
-            // בקשת מסלול
-            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&steps=true`;
-            const routeResponse = await fetch(routeUrl);
-            const routeData = await routeResponse.json();
-
-            if (routeData.code !== 'Ok' || !routeData.routes.length) throw new Error('Route not found');
-
-            const route = routeData.routes[0];
-            currentSteps = route.legs[0].steps;
-            currentStepIndex = 0;
-
-            if (routeLine) map.removeLayer(routeLine);
-            const coordinates = route.geometry.coordinates.map(p => [p[1], p[0]]);
-            routeLine = L.polyline(coordinates, { color: '#4285f4', weight: 6, opacity: 0.9 }).addTo(map);
-
-            // הצגת נתוני זמן ומרחק
-            const distKm = (route.distance / 1000).toFixed(1);
-            const durationMin = Math.round(route.duration / 60);
-            document.getElementById('route-time').textContent = `🚗 ${durationMin} דקות`;
-            document.getElementById('route-distance').textContent = `📏 ${distKm} ק"מ`;
-            document.getElementById('route-info').classList.add('active');
-
-            // בניית רשימת השלבים
-            instructionsContainer.innerHTML = '';
-            currentSteps.forEach((step, idx) => {
-                const { text, icon } = formatInstruction(step);
-                const stepDist = step.distance >= 1000 ? `${(step.distance/1000).toFixed(1)} ק"מ` : `${Math.round(step.distance)} מ'`;
-                const item = document.createElement('div');
-                item.className = `instruction-item ${idx === 0 ? 'active-step' : ''}`;
-                item.innerHTML = `
-                    <span class="instruction-icon">${icon}</span>
-                    <span class="instruction-text">${text}</span>
-                    <span class="instruction-distance">${step.distance > 0 ? stepDist : ''}</span>
-                `;
-                instructionsContainer.appendChild(item);
-            });
-
-            instructionsContainer.classList.add('active');
-            document.getElementById('current-instruction-box').classList.add('active');
-
-            // הפעלת מעקב GPS בזמן אמת בלולאה
-            if (navigator.geolocation) {
-                watchId = navigator.geolocation.watchPosition(
-                    handleLivePositionUpdate,
-                    err => console.error(err),
-                    { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
-                );
-            }
-
-            button.style.display = 'none';
-            stopBtn.style.display = 'block';
-
-        } catch (err) {
-            console.error(err);
-            alert('שגיאה בחישוב המסלול. בדוק את הכתובות.');
-            button.disabled = false;
-            button.textContent = '🚗 התחל ניווט בזמן אמת';
-        }
+      });
     });
+  }
 
-    function stopNavigation() {
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-        }
-        document.getElementById('navigate-btn').style.display = 'block';
-        document.getElementById('navigate-btn').disabled = false;
-        document.getElementById('navigate-btn').textContent = '🚗 התחל ניווט בזמן אמת';
-        document.getElementById('stop-btn').style.display = 'none';
+  function formatDistance(m){
+    if(m < 1000) return `${Math.round(m)} מ'`;
+    return `${(m/1000).toFixed(1)} ק"מ`;
+  }
+
+  // ---------------- Live navigation ----------------
+  // Tracks the device's real position via watchPosition, moves an arrow
+  // marker that rotates to face the direction of travel, keeps the map
+  // centered on the user, and highlights whichever instruction step is
+  // currently closest so the sidebar always shows "what's next".
+
+  function bearingBetween(a, b){
+    const toRad = d => d * Math.PI / 180;
+    const toDeg = r => r * 180 / Math.PI;
+    const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+    const dLon = toRad(b.lng - a.lng);
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  }
+
+  function distanceMeters(a, b){
+    const R = 6371000;
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(s));
+  }
+
+  // Updates everything that depends on the live position: which step is
+  // highlighted/scrolled-to in the sidebar list, and the bottom banner's
+  // upcoming-turn text and distance. Combined into one function since both
+  // need the same "nearest instruction point" calculation.
+  function updateNavigationUI(latlng){
+    if(!currentRoute || !currentRoute.instructions || !currentRoute.coordinates) return;
+    let bestIdx = 0, bestDist = Infinity;
+    currentRoute.instructions.forEach((instr, i) => {
+      const pt = currentRoute.coordinates[instr.index];
+      if(!pt) return;
+      const d = distanceMeters(latlng, { lat: pt.lat, lng: pt.lng });
+      if(d < bestDist){ bestDist = d; bestIdx = i; }
+    });
+    [...document.querySelectorAll('.step')].forEach((el) => {
+      const i = parseInt(el.dataset.idx);
+      el.classList.toggle('active', i === bestIdx);
+      el.classList.toggle('done', i < bestIdx);
+    });
+    const activeEl = document.querySelector(`.step[data-idx="${bestIdx}"]`);
+    if(activeEl) activeEl.scrollIntoView({ block:'nearest', behavior:'smooth' });
+
+    // The banner should describe the UPCOMING maneuver: once we're right on
+    // top of the current one, switch to the next so it reads as "what to do
+    // next" rather than "what you just did".
+    let bannerIdx = bestIdx;
+    if(bestDist < 15 && bestIdx < currentRoute.instructions.length - 1) bannerIdx = bestIdx + 1;
+    const bannerInstr = currentRoute.instructions[bannerIdx];
+    const bannerPt = currentRoute.coordinates[bannerInstr.index];
+    const distToManeuver = bannerPt ? distanceMeters(latlng, { lat: bannerPt.lat, lng: bannerPt.lng }) : bannerInstr.distance;
+    document.getElementById('nav-banner-instr').textContent = buildHebrewInstruction(bannerInstr);
+    document.getElementById('nav-banner-dist').textContent = formatDistance(distToManeuver);
+  }
+
+  // ---- Compass (device orientation) — updates rotation far more often than
+  // GPS fixes arrive (many times a second vs. every few seconds), which is
+  // what makes the arrow's heading feel continuous rather than jumping in
+  // steps. Falls back to a bearing calculated between GPS fixes if the
+  // device/browser has no compass (e.g. most desktops).
+  function applyNavRotation(deg){
+    navHeadingDeg = deg;
+    if(navArrowEl) navArrowEl.style.transform = `rotate(${deg}deg)`;
+  }
+
+  function handleOrientation(event){
+    let heading = null;
+    if(typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)){
+      heading = event.webkitCompassHeading; // iOS: already degrees clockwise from north
+    } else if(event.absolute && event.alpha !== null){
+      heading = (360 - event.alpha) % 360; // rough compensation; good enough in portrait orientation
     }
+    if(heading !== null && !isNaN(heading)){
+      navOrientationActive = true;
+      applyNavRotation(heading);
+    }
+  }
 
-    document.getElementById('stop-btn').addEventListener('click', stopNavigation);
+  function enableCompass(){
+    const request = (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')
+      ? DeviceOrientationEvent.requestPermission()  // iOS 13+: must be requested from a user-gesture handler, which startNavigation() is
+      : Promise.resolve('granted');
+    request.then((state) => {
+      if(state !== 'denied'){
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        window.addEventListener('deviceorientation', handleOrientation, true);
+      }
+    }).catch(() => { /* no compass available — GPS-bearing fallback below still works */ });
+  }
+
+  function disableCompass(){
+    window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+    window.removeEventListener('deviceorientation', handleOrientation, true);
+    navOrientationActive = false;
+  }
+
+  function startNavigation(){
+    if(!currentRoute){
+      alert('יש לחשב מסלול קודם');
+      return;
+    }
+    if(!navigator.geolocation){
+      alert('הדפדפן לא תומך באיתור מיקום');
+      return;
+    }
+    document.getElementById('nav-start-row').classList.remove('show');
+    document.getElementById('nav-stop-row').classList.add('show');
+    document.getElementById('nav-banner').classList.add('show');
+    navLastFixTime = null;
+    enableCompass();
+
+    navWatchId = navigator.geolocation.watchPosition((pos) => {
+      const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const now = performance.now();
+      // How long since the last real GPS fix — used so the marker's glide
+      // duration always matches the actual update interval. GPS fixes on
+      // phones typically land every 1–5s (desktops/IP-based location can be
+      // far less often); rather than the marker jumping the instant each fix
+      // arrives, it continuously glides toward it over that same span, which
+      // is what makes movement look smooth regardless of the raw fix rate.
+      const dt = navLastFixTime ? Math.min(Math.max(now - navLastFixTime, 300), 8000) : 800;
+      navLastFixTime = now;
+
+      // Compass drives rotation when available (updates continuously); GPS
+      // heading/bearing is only a fallback for devices without one.
+      if(!navOrientationActive){
+        const heading = (pos.coords.heading !== null && pos.coords.heading !== undefined && !isNaN(pos.coords.heading))
+          ? pos.coords.heading
+          : (navLastLatLng ? bearingBetween(navLastLatLng, latlng) : navHeadingDeg);
+        applyNavRotation(heading);
+      }
+
+      if(!navMarker){
+        navMarker = L.marker(latlng, { icon: makeNavIcon(), zIndexOffset:1000 }).addTo(map);
+        navMarkerEl = navMarker.getElement();
+        navArrowEl = navMarkerEl.querySelector('.nav-marker-arrow');
+        applyNavRotation(navHeadingDeg);
+      } else {
+        navMarkerEl.style.transition = `transform ${dt}ms linear`;
+        navMarker.setLatLng(latlng);
+      }
+
+      // Pan the map over the same duration as the marker's glide so the
+      // whole view moves together rather than the marker sliding while the
+      // map itself jumps.
+      map.panTo(latlng, { animate:true, duration: dt/1000, easeLinearity:1 });
+      updateNavigationUI(latlng);
+      navLastLatLng = latlng;
+    }, () => {
+      alert('לא ניתן היה לאתר את המיקום שלך. ודאו ששיתוף המיקום פעיל.');
+      stopNavigation();
+    }, { enableHighAccuracy:true, maximumAge:0, timeout:8000 });
+  }
+
+  function stopNavigation(){
+    if(navWatchId !== null){
+      navigator.geolocation.clearWatch(navWatchId);
+      navWatchId = null;
+    }
+    disableCompass();
+    if(navMarker){ map.removeLayer(navMarker); navMarker = null; navMarkerEl = null; navArrowEl = null; }
+    navLastLatLng = null;
+    navLastFixTime = null;
+    document.getElementById('nav-stop-row').classList.remove('show');
+    document.getElementById('nav-banner').classList.remove('show');
+    if(currentRoute) document.getElementById('nav-start-row').classList.add('show');
+    [...document.querySelectorAll('.step')].forEach(el => {
+      el.classList.remove('active', 'done');
+    });
+  }
+
+
+  document.getElementById('nav-start-btn').addEventListener('click', startNavigation);
+  document.getElementById('nav-stop-btn').addEventListener('click', stopNavigation);
+
+  // Builds a fully-Hebrew instruction from the STRUCTURED maneuver data (instr.type,
+  // instr.direction, instr.exit, instr.road) rather than parsing the library's
+  // pre-formatted English sentence. This version is built against the actual
+  // conversion logic in leaflet-routing-machine's osrm-v1.js: the "type" field
+  // for a plain turn is the modifier itself, camel-cased (e.g. "Left", "SlightRight",
+  // "Uturn"), the first step of a route is type "Head" (not "StartAt"), continuing
+  // under a new road name is "Continue", and merge/fork/ramp/end-of-road maneuvers
+  // get their own types with a separate left/right "modifier" field. The previous
+  // version guessed at these names instead of checking the source, so several of
+  // the most common step types silently fell through untranslated.
+  const HE_DIR = {
+    N:'צפון', NE:'צפון-מזרח', E:'מזרח', SE:'דרום-מזרח',
+    S:'דרום', SW:'דרום-מערב', W:'מערב', NW:'צפון-מערב'
+  };
+  const HE_SIDE = { Left:'שמאל', Right:'ימין' };
+
+  function heOrdinal(n){
+    const names = ['ראשונה','שנייה','שלישית','רביעית','חמישית','שישית','שביעית','שמינית','תשיעית','עשירית'];
+    if(n >= 1 && n <= 10) return names[n-1];
+    return `מספר ${n}`;
+  }
+
+  function withRoadHe(base, road){
+    return road ? `${base} אל ${road}` : base;
+  }
+
+  function buildHebrewInstruction(instr){
+    const road = instr.road && instr.road.trim() ? instr.road.trim() : '';
+    const dir = instr.direction ? HE_DIR[instr.direction] : '';
+    const side = instr.modifier ? HE_SIDE[instr.modifier] : '';
+
+    switch(instr.type){
+      case 'Head':
+        return dir ? withRoadHe(`התחילו לכיוון ${dir}`, road) : withRoadHe('התחילו את הנסיעה', road);
+      case 'Continue':
+        return withRoadHe('המשיכו', road);
+      case 'Straight':
+        return withRoadHe('המשיכו ישר', road);
+      case 'SlightRight':
+        return withRoadHe('פנו מעט ימינה', road);
+      case 'Right':
+        return withRoadHe('פנו ימינה', road);
+      case 'SharpRight':
+        return withRoadHe('פנו חדות ימינה', road);
+      case 'SlightLeft':
+        return withRoadHe('פנו מעט שמאלה', road);
+      case 'Left':
+        return withRoadHe('פנו שמאלה', road);
+      case 'SharpLeft':
+        return withRoadHe('פנו חדות שמאלה', road);
+      case 'Uturn':
+        return withRoadHe('בצעו פניית פרסה', road);
+      case 'Roundabout': {
+        const exitTxt = instr.exit ? `וצאו ביציאה ה${heOrdinal(instr.exit)}` : 'וצאו מהכיכר';
+        return withRoadHe(`היכנסו לכיכר ${exitTxt}`, road);
+      }
+      case 'Merge':
+        return withRoadHe(side ? `התמזגו ${side === 'שמאל' ? 'שמאלה' : 'ימינה'}` : 'התמזגו לנתיב', road);
+      case 'Fork':
+        return withRoadHe(side ? `בפיצול הדרך המשיכו ${side === 'שמאל' ? 'שמאלה' : 'ימינה'}` : 'בפיצול הדרך בחרו נתיב', road);
+      case 'OnRamp':
+        return withRoadHe(side ? `עלו לכביש המהיר מצד ${side}` : 'עלו לכביש המהיר', road);
+      case 'OffRamp':
+        return withRoadHe(side ? `רדו מהכביש המהיר מצד ${side}` : 'רדו מהכביש המהיר', road);
+      case 'EndOfRoad':
+        return withRoadHe(side ? `בסוף הדרך פנו ${side === 'שמאל' ? 'שמאלה' : 'ימינה'}` : 'המשיכו בסוף הדרך', road);
+      case 'WaypointReached':
+        return 'הגעתם לנקודת ביניים';
+      case 'DestinationReached':
+        return 'הגעתם ליעד';
+      case 'EnterAgainstAllowedDirection':
+        return withRoadHe('היכנסו (כיוון נגדי לתנועה המותרת)', road);
+      case 'LeaveAgainstAllowedDirection':
+        return withRoadHe('צאו (כיוון נגדי לתנועה המותרת)', road);
+      default:
+        // Unknown/rare maneuver type — fall back to whatever text is available
+        // rather than showing nothing.
+        return instr.text || 'המשיכו במסלול';
+    }
+  }
+
+  // ---------------- Sidebar toggle ----------------
+  document.getElementById('toggle-sidebar').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  });
 </script>
-
 </body>
 </html>
