@@ -344,6 +344,53 @@
     box-shadow:0 4px 14px rgba(0,0,0,0.35);
   }
 
+  /* ---------- Bottom navigation banner ---------- */
+  /* Sits on the map itself (not the sidebar) so the current turn is always
+     visible during navigation, even with the sidebar collapsed on mobile. */
+  #nav-banner{
+    display:none;
+    position:absolute;
+    left:16px; right:16px; bottom:28px;
+    z-index:1100;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:16px;
+    padding:14px 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.45);
+    align-items:center;
+    gap:14px;
+    font-family:'Assistant', sans-serif;
+  }
+  #nav-banner.show{ display:flex; }
+  #nav-banner-arrow{
+    font-size:26px;
+    color:var(--amber);
+    flex-shrink:0;
+    width:36px;height:36px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--ink-2);
+    border-radius:10px;
+  }
+  #nav-banner-dist{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;
+    font-weight:700;
+  }
+  #nav-banner-instr{
+    font-size:13.5px;
+    color:var(--text-dim);
+    margin-top:2px;
+    line-height:1.4;
+  }
+
+  /* Live position marker: Leaflet applies its own transform for position to
+     the outer icon element, and we apply rotation separately to an inner
+     div, so the two can animate independently. The position transition's
+     duration is set dynamically in JS (matched to the real GPS fix
+     interval) so movement glides continuously instead of snapping. */
+  .nav-marker-icon{ transition: transform 800ms linear; }
+  .nav-marker-arrow{ transition: transform 150ms linear; transform-origin:center center; }
+
   .leaflet-routing-container{ display:none !important; }
 
   ::-webkit-scrollbar{ width:6px; }
@@ -431,6 +478,13 @@
     <div id="toggle-sidebar">☰</div>
     <div id="map"></div>
     <button id="locate-btn" title="המיקום שלי">🎯</button>
+    <div id="nav-banner">
+      <div id="nav-banner-arrow">➜</div>
+      <div id="nav-banner-text">
+        <div id="nav-banner-dist">--</div>
+        <div id="nav-banner-instr">--</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -457,12 +511,16 @@
     iconSize:[16,16], iconAnchor:[8,8]
   });
 
-  // Arrow marker used only while live navigation is active; rotated via CSS
-  // transform to point in the direction of travel.
-  function makeNavIcon(headingDeg){
+  // Live-navigation marker. The outer container (className 'nav-marker-icon')
+  // is what Leaflet moves via its own CSS transform when we call setLatLng —
+  // giving that class a transition lets position glide smoothly. The inner
+  // 'nav-marker-arrow' div is rotated separately and independently (via the
+  // compass or a bearing fallback) so heading can update far more often than
+  // GPS fixes arrive, without fighting Leaflet's position transform.
+  function makeNavIcon(){
     return L.divIcon({
-      className:'',
-      html:`<div style="width:26px;height:26px;transform:rotate(${headingDeg}deg);display:flex;align-items:center;justify-content:center;">
+      className:'nav-marker-icon',
+      html:`<div class="nav-marker-arrow" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;">
               <div style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:20px solid #2f6fed;filter:drop-shadow(0 0 3px rgba(0,0,0,.5));"></div>
             </div>`,
       iconSize:[26,26], iconAnchor:[13,13]
@@ -488,7 +546,19 @@
   // Live navigation state
   let navWatchId = null;
   let navMarker = null;
+  let navMarkerEl = null;      // cached outer marker DOM node (position, via Leaflet's own transform)
+  let navArrowEl = null;       // cached inner arrow DOM node (rotation, set independently of position)
   let navLastLatLng = null;
+  let navLastFixTime = null;
+  let navHeadingDeg = 0;
+  let navOrientationActive = false;
+
+  // Guards against stale async responses: if the user clicks "נווט" again
+  // before a previous request finishes, that older request's routesfound/
+  // routingerror could otherwise still fire afterwards and silently overwrite
+  // the newer, correct state (this was the likely cause of the nav-start
+  // button sometimes failing to appear).
+  let buildSeq = 0;
 
   // Public OSRM demo server (router.project-osrm.org) only supports the "driving" profile,
   // so walking/cycling requests were silently failing and leaving the old car route on screen.
@@ -686,6 +756,7 @@
     currentRoute = null;
 
     const cfg = routerConfig[currentMode];
+    const mySeq = ++buildSeq;
 
     routingControl = L.Routing.control({
       waypoints: [
@@ -712,12 +783,18 @@
     }).addTo(map);
 
     routingControl.on('routesfound', (e) => {
+      if(mySeq !== buildSeq) return; // a newer buildRoute() call has since started; ignore this stale response
+      if(!e.routes || e.routes.length === 0 || !e.routes[0]){
+        document.getElementById('directions').innerHTML = '<div class="empty">לא נמצא מסלול תקין. נסו נקודות אחרות.</div>';
+        return;
+      }
       lastRoutes = e.routes;
       renderRouteOptions(lastRoutes);
       selectRoute(0);
     });
 
     routingControl.on('routingerror', () => {
+      if(mySeq !== buildSeq) return;
       document.getElementById('directions').innerHTML = '<div class="empty">לא ניתן היה למצוא מסלול עבור מצב הנסיעה שנבחר בין הנקודות שנבחרו. נסו נקודות אחרות או מצב נסיעה אחר.</div>';
       document.getElementById('summary').classList.remove('show');
     });
@@ -849,7 +926,11 @@
     return 2 * R * Math.asin(Math.sqrt(s));
   }
 
-  function highlightActiveStep(latlng){
+  // Updates everything that depends on the live position: which step is
+  // highlighted/scrolled-to in the sidebar list, and the bottom banner's
+  // upcoming-turn text and distance. Combined into one function since both
+  // need the same "nearest instruction point" calculation.
+  function updateNavigationUI(latlng){
     if(!currentRoute || !currentRoute.instructions || !currentRoute.coordinates) return;
     let bestIdx = 0, bestDist = Infinity;
     currentRoute.instructions.forEach((instr, i) => {
@@ -865,6 +946,58 @@
     });
     const activeEl = document.querySelector(`.step[data-idx="${bestIdx}"]`);
     if(activeEl) activeEl.scrollIntoView({ block:'nearest', behavior:'smooth' });
+
+    // The banner should describe the UPCOMING maneuver: once we're right on
+    // top of the current one, switch to the next so it reads as "what to do
+    // next" rather than "what you just did".
+    let bannerIdx = bestIdx;
+    if(bestDist < 15 && bestIdx < currentRoute.instructions.length - 1) bannerIdx = bestIdx + 1;
+    const bannerInstr = currentRoute.instructions[bannerIdx];
+    const bannerPt = currentRoute.coordinates[bannerInstr.index];
+    const distToManeuver = bannerPt ? distanceMeters(latlng, { lat: bannerPt.lat, lng: bannerPt.lng }) : bannerInstr.distance;
+    document.getElementById('nav-banner-instr').textContent = buildHebrewInstruction(bannerInstr);
+    document.getElementById('nav-banner-dist').textContent = formatDistance(distToManeuver);
+  }
+
+  // ---- Compass (device orientation) — updates rotation far more often than
+  // GPS fixes arrive (many times a second vs. every few seconds), which is
+  // what makes the arrow's heading feel continuous rather than jumping in
+  // steps. Falls back to a bearing calculated between GPS fixes if the
+  // device/browser has no compass (e.g. most desktops).
+  function applyNavRotation(deg){
+    navHeadingDeg = deg;
+    if(navArrowEl) navArrowEl.style.transform = `rotate(${deg}deg)`;
+  }
+
+  function handleOrientation(event){
+    let heading = null;
+    if(typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)){
+      heading = event.webkitCompassHeading; // iOS: already degrees clockwise from north
+    } else if(event.absolute && event.alpha !== null){
+      heading = (360 - event.alpha) % 360; // rough compensation; good enough in portrait orientation
+    }
+    if(heading !== null && !isNaN(heading)){
+      navOrientationActive = true;
+      applyNavRotation(heading);
+    }
+  }
+
+  function enableCompass(){
+    const request = (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')
+      ? DeviceOrientationEvent.requestPermission()  // iOS 13+: must be requested from a user-gesture handler, which startNavigation() is
+      : Promise.resolve('granted');
+    request.then((state) => {
+      if(state !== 'denied'){
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        window.addEventListener('deviceorientation', handleOrientation, true);
+      }
+    }).catch(() => { /* no compass available — GPS-bearing fallback below still works */ });
+  }
+
+  function disableCompass(){
+    window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+    window.removeEventListener('deviceorientation', handleOrientation, true);
+    navOrientationActive = false;
   }
 
   function startNavigation(){
@@ -878,26 +1011,51 @@
     }
     document.getElementById('nav-start-row').classList.remove('show');
     document.getElementById('nav-stop-row').classList.add('show');
+    document.getElementById('nav-banner').classList.add('show');
+    navLastFixTime = null;
+    enableCompass();
 
     navWatchId = navigator.geolocation.watchPosition((pos) => {
       const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      const heading = (pos.coords.heading !== null && pos.coords.heading !== undefined && !isNaN(pos.coords.heading))
-        ? pos.coords.heading
-        : (navLastLatLng ? bearingBetween(navLastLatLng, latlng) : 0);
+      const now = performance.now();
+      // How long since the last real GPS fix — used so the marker's glide
+      // duration always matches the actual update interval. GPS fixes on
+      // phones typically land every 1–5s (desktops/IP-based location can be
+      // far less often); rather than the marker jumping the instant each fix
+      // arrives, it continuously glides toward it over that same span, which
+      // is what makes movement look smooth regardless of the raw fix rate.
+      const dt = navLastFixTime ? Math.min(Math.max(now - navLastFixTime, 300), 8000) : 800;
+      navLastFixTime = now;
+
+      // Compass drives rotation when available (updates continuously); GPS
+      // heading/bearing is only a fallback for devices without one.
+      if(!navOrientationActive){
+        const heading = (pos.coords.heading !== null && pos.coords.heading !== undefined && !isNaN(pos.coords.heading))
+          ? pos.coords.heading
+          : (navLastLatLng ? bearingBetween(navLastLatLng, latlng) : navHeadingDeg);
+        applyNavRotation(heading);
+      }
 
       if(!navMarker){
-        navMarker = L.marker(latlng, { icon: makeNavIcon(heading), zIndexOffset:1000 }).addTo(map);
+        navMarker = L.marker(latlng, { icon: makeNavIcon(), zIndexOffset:1000 }).addTo(map);
+        navMarkerEl = navMarker.getElement();
+        navArrowEl = navMarkerEl.querySelector('.nav-marker-arrow');
+        applyNavRotation(navHeadingDeg);
       } else {
+        navMarkerEl.style.transition = `transform ${dt}ms linear`;
         navMarker.setLatLng(latlng);
-        navMarker.setIcon(makeNavIcon(heading));
       }
-      map.setView(latlng, 17, { animate:true });
-      highlightActiveStep(latlng);
+
+      // Pan the map over the same duration as the marker's glide so the
+      // whole view moves together rather than the marker sliding while the
+      // map itself jumps.
+      map.panTo(latlng, { animate:true, duration: dt/1000, easeLinearity:1 });
+      updateNavigationUI(latlng);
       navLastLatLng = latlng;
     }, () => {
       alert('לא ניתן היה לאתר את המיקום שלך. ודאו ששיתוף המיקום פעיל.');
       stopNavigation();
-    }, { enableHighAccuracy:true, maximumAge:1000 });
+    }, { enableHighAccuracy:true, maximumAge:0, timeout:8000 });
   }
 
   function stopNavigation(){
@@ -905,14 +1063,18 @@
       navigator.geolocation.clearWatch(navWatchId);
       navWatchId = null;
     }
-    if(navMarker){ map.removeLayer(navMarker); navMarker = null; }
+    disableCompass();
+    if(navMarker){ map.removeLayer(navMarker); navMarker = null; navMarkerEl = null; navArrowEl = null; }
     navLastLatLng = null;
+    navLastFixTime = null;
     document.getElementById('nav-stop-row').classList.remove('show');
+    document.getElementById('nav-banner').classList.remove('show');
     if(currentRoute) document.getElementById('nav-start-row').classList.add('show');
     [...document.querySelectorAll('.step')].forEach(el => {
       el.classList.remove('active', 'done');
     });
   }
+
 
   document.getElementById('nav-start-btn').addEventListener('click', startNavigation);
   document.getElementById('nav-stop-btn').addEventListener('click', stopNavigation);
