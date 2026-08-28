@@ -434,13 +434,49 @@ function updateProgressUI() {
   if (durEl) durEl.textContent = fmtTime(dur);
 }
 
-async function searchYoutubeVideoId(query) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
-  const res = await fetch(url);
+function parseIso8601Duration(iso) {
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return null;
+  const h = parseInt(m[1]||'0',10);
+  const mnt = parseInt(m[2]||'0',10);
+  const s = parseInt(m[3]||'0',10);
+  return h*3600 + mnt*60 + s;
+}
+
+async function searchYoutubeVideoId(query, targetDurationSec) {
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
+  const res = await fetch(searchUrl);
   const data = await res.json();
   if (data.error) throw new Error(data.error.message || 'YouTube API error');
-  const item = (data.items||[])[0];
-  return item ? item.id.videoId : null;
+  const items = data.items || [];
+  if (!items.length) return null;
+
+  if (!targetDurationSec) return items[0].id.videoId;
+
+  const ids = items.map(it => it.id.videoId).join(',');
+  const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids}&key=${YT_API_KEY}`;
+  const detailsRes = await fetch(detailsUrl);
+  const detailsData = await detailsRes.json();
+  if (detailsData.error) return items[0].id.videoId;
+
+  const durations = {};
+  (detailsData.items || []).forEach(v => {
+    durations[v.id] = parseIso8601Duration(v.contentDetails.duration);
+  });
+
+  let best = items[0].id.videoId;
+  let bestDiff = Infinity;
+  for (const it of items) {
+    const vid = it.id.videoId;
+    const dur = durations[vid];
+    if (dur == null) continue;
+    const diff = Math.abs(dur - targetDurationSec);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = vid;
+    }
+  }
+  return best;
 }
 
 const audioUnused = null;
@@ -763,7 +799,7 @@ async function playQueue(queue, index) {
   renderPlayerBar();
   renderMain();
   try {
-    const videoId = await searchYoutubeVideoId(`${track.artist} ${track.title} audio`);
+    const videoId = await searchYoutubeVideoId(`${track.artist} ${track.title} official audio`, track.duration);
     state.loadingTrack = null;
     if (!videoId) {
       alert('לא נמצא סרטון מתאים ביוטיוב עבור השיר הזה');
