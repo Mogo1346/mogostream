@@ -372,12 +372,14 @@ let state = {
   queue: [],
   queueIndex: -1,
   isPlaying: false,
-  loadingTrack: null
+  loadingTrack: null,
+  candidates: [],
+  candidateIndex: 0
 };
 
 let ytPlayer = null;
 let ytReady = false;
-let pendingVideoId = null;
+let pendingPlayRequested = false;
 let progressInterval = null;
 
 function onYouTubeIframeAPIReady() {
@@ -388,11 +390,33 @@ function onYouTubeIframeAPIReady() {
     events: {
       onReady: function() {
         ytReady = true;
-        if (pendingVideoId) { ytPlayer.loadVideoById(pendingVideoId); pendingVideoId = null; }
+        if (pendingPlayRequested) {
+          pendingPlayRequested = false;
+          tryLoadCandidate();
+        }
       },
-      onStateChange: onPlayerStateChange
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError
     }
   });
+}
+
+function tryLoadCandidate() {
+  const vid = state.candidates[state.candidateIndex];
+  if (!vid) {
+    alert('לא נמצאה גרסה של השיר הזה שאפשר להטמיע באתר. אפשר לחפש אותו ישירות ביוטיוב.');
+    state.queueIndex = -1;
+    renderPlayerBar();
+    renderMain();
+    return;
+  }
+  ytPlayer.loadVideoById(vid);
+}
+
+function onPlayerError(e) {
+  console.warn('YouTube playback error, trying next candidate', e.data);
+  state.candidateIndex++;
+  tryLoadCandidate();
 }
 
 function onPlayerStateChange(e) {
@@ -443,40 +467,32 @@ function parseIso8601Duration(iso) {
   return h*3600 + mnt*60 + s;
 }
 
-async function searchYoutubeVideoId(query, targetDurationSec) {
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
+async function searchYoutubeCandidates(query, targetDurationSec) {
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
   const res = await fetch(searchUrl);
   const data = await res.json();
   if (data.error) throw new Error(data.error.message || 'YouTube API error');
   const items = data.items || [];
-  if (!items.length) return null;
+  if (!items.length) return [];
+  const ids = items.map(it => it.id.videoId);
+  if (!targetDurationSec) return ids;
 
-  if (!targetDurationSec) return items[0].id.videoId;
-
-  const ids = items.map(it => it.id.videoId).join(',');
-  const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids}&key=${YT_API_KEY}`;
+  const detailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids.join(',')}&key=${YT_API_KEY}`;
   const detailsRes = await fetch(detailsUrl);
   const detailsData = await detailsRes.json();
-  if (detailsData.error) return items[0].id.videoId;
+  if (detailsData.error) return ids;
 
   const durations = {};
   (detailsData.items || []).forEach(v => {
     durations[v.id] = parseIso8601Duration(v.contentDetails.duration);
   });
 
-  let best = items[0].id.videoId;
-  let bestDiff = Infinity;
-  for (const it of items) {
-    const vid = it.id.videoId;
-    const dur = durations[vid];
-    if (dur == null) continue;
-    const diff = Math.abs(dur - targetDurationSec);
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      best = vid;
-    }
-  }
-  return best;
+  const withDiff = ids.map(id => ({
+    id,
+    diff: durations[id] != null ? Math.abs(durations[id] - targetDurationSec) : Infinity
+  }));
+  withDiff.sort((a, b) => a.diff - b.diff);
+  return withDiff.map(x => x.id);
 }
 
 const audioUnused = null;
@@ -799,17 +815,20 @@ async function playQueue(queue, index) {
   renderPlayerBar();
   renderMain();
   try {
-    const videoId = await searchYoutubeVideoId(`${track.artist} ${track.title} official audio`, track.duration);
+    const candidates = await searchYoutubeCandidates(`${track.artist} ${track.title} official audio`, track.duration);
     state.loadingTrack = null;
-    if (!videoId) {
+    if (!candidates.length) {
       alert('לא נמצא סרטון מתאים ביוטיוב עבור השיר הזה');
+      state.queueIndex = -1;
       renderPlayerBar();
       return;
     }
+    state.candidates = candidates;
+    state.candidateIndex = 0;
     if (ytPlayer && ytReady) {
-      ytPlayer.loadVideoById(videoId);
+      tryLoadCandidate();
     } else {
-      pendingVideoId = videoId;
+      pendingPlayRequested = true;
     }
     renderPlayerBar();
   } catch (e) {
