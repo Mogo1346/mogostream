@@ -287,6 +287,35 @@
 
   .placeholder-player { color: var(--text-muted); font-size: 13px; }
   a { color: var(--accent); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(8,9,12,0.62);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-box {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px; width: 320px; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .modal-box h3 { font-family: 'Fraunces', serif; font-size: 18px; margin: 0 0 10px; font-weight: 600; }
+  .modal-box p { font-size: 13px; color: var(--text-muted); margin: 0 0 20px; line-height: 1.5; }
+  .modal-actions { display: flex; justify-content: flex-start; gap: 10px; }
+  .modal-actions button {
+    padding: 9px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; border: none; font-family: inherit; font-weight: 600;
+  }
+  .modal-cancel { background: var(--surface); color: var(--text); border: 1px solid var(--border) !important; }
+  .modal-confirm { background: var(--danger); color: #fff; }
+
+  .play-all-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #1a1200; border: none; border-radius: 999px;
+    padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .shuffle-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 999px; padding: 9px 16px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .shuffle-btn:hover, .play-all-btn:hover { filter: brightness(1.08); }
 </style>
 </head>
 <body>
@@ -318,6 +347,17 @@
       <div class="placeholder-player">בחר שיר כדי לנגן את השיר המלא ביוטיוב</div>
     </div>
   </footer>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <h3 id="modal-title"></h3>
+    <p id="modal-message"></p>
+    <div class="modal-actions">
+      <button class="modal-confirm" id="modal-confirm-btn">מחק</button>
+      <button class="modal-cancel" onclick="closeModal()">ביטול</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -405,11 +445,14 @@ async function searchYoutubeVideoId(query) {
 
 const audioUnused = null;
 
+const CRATES_STORAGE_KEY = 'groove_crates_v1';
+
 async function loadCrates() {
   try {
-    const res = await window.storage.get('crates', false);
-    state.crates = res && res.value ? JSON.parse(res.value) : [];
+    const raw = localStorage.getItem(CRATES_STORAGE_KEY);
+    state.crates = raw ? JSON.parse(raw) : [];
   } catch (e) {
+    console.error('טעינת הכספות נכשלה', e);
     state.crates = [];
   }
   renderCratesList();
@@ -417,7 +460,7 @@ async function loadCrates() {
 
 async function saveCrates() {
   try {
-    await window.storage.set('crates', JSON.stringify(state.crates), false);
+    localStorage.setItem(CRATES_STORAGE_KEY, JSON.stringify(state.crates));
   } catch (e) {
     console.error('שמירת הכספות נכשלה', e);
   }
@@ -460,6 +503,60 @@ async function deleteCrate(id) {
   await saveCrates();
   renderCratesList();
   if (state.view.type === 'crate' && state.view.id === id) setView({type:'home'});
+}
+
+let modalConfirmCallback = null;
+
+function showConfirmModal(title, message, onConfirm) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-message').textContent = message;
+  modalConfirmCallback = onConfirm;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  modalConfirmCallback = null;
+}
+
+document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+  if (modalConfirmCallback) modalConfirmCallback();
+  closeModal();
+});
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') closeModal();
+});
+
+function confirmDeleteCrate(id) {
+  const crate = state.crates.find(c => c.id === id);
+  if (!crate) return;
+  showConfirmModal(
+    `למחוק את "${crate.name}"?`,
+    'הפעולה תמחק את הכספת ואת כל השירים שבתוכה לצמיתות. לא ניתן לבטל את זה.',
+    () => deleteCrate(id)
+  );
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function playAllCrate(id) {
+  const crate = state.crates.find(c => c.id === id);
+  if (!crate || !crate.tracks.length) return;
+  playQueue(crate.tracks, 0);
+}
+
+function shufflePlayCrate(id) {
+  const crate = state.crates.find(c => c.id === id);
+  if (!crate || !crate.tracks.length) return;
+  playQueue(shuffleArray(crate.tracks), 0);
 }
 
 async function addToCrate(crateId, track) {
@@ -575,9 +672,14 @@ function renderMain() {
     main.innerHTML = `
       <div class="topbar">
         <h1 class="view-title" style="margin:0;">${escapeHtml(crate.name)}</h1>
-        <button class="chip" style="margin-right:auto;color:var(--danger);" onclick='deleteCrate("${crate.id}")'>מחק כספת</button>
+        <button class="chip" style="margin-right:auto;color:var(--danger);" onclick='confirmDeleteCrate("${crate.id}")'>מחק כספת</button>
       </div>
       <p class="view-sub">${crate.tracks.length} שירים</p>
+      ${crate.tracks.length ? `
+      <div style="display:flex;gap:10px;margin-bottom:22px;">
+        <button class="play-all-btn" onclick='playAllCrate("${crate.id}")'>▶ נגן הכל</button>
+        <button class="shuffle-btn" onclick='shufflePlayCrate("${crate.id}")'>🔀 ניגון אקראי</button>
+      </div>` : ''}
       <div id="crate-tracks"></div>
     `;
     const list = document.getElementById('crate-tracks');
