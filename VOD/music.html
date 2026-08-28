@@ -1,536 +1,757 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>נגן Jamendo - כל השירים</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groove — הכספת שלך למוזיקה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12151b;
+    --surface: #1b202a;
+    --surface-2: #232b38;
+    --accent: #e8a33d;
+    --accent-dark: #a86f22;
+    --accent-2: #4fd1c5;
+    --text: #f2efe9;
+    --text-muted: #8890a0;
+    --border: rgba(255,255,255,0.08);
+    --danger: #e2504f;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+  ::selection { background: var(--accent); color: #1a1200; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-            padding-bottom: 120px;
-        }
+  .app {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: 1fr auto;
+    height: 100vh;
+  }
 
-        .header {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+  .sidebar {
+    grid-row: 1;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo .dot { color: var(--accent); }
+  .tagline {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 0 28px;
+  }
+  .nav-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 2px;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: right;
+    font-family: inherit;
+  }
+  .nav-item:hover { background: var(--surface-2); }
+  .nav-item.active { background: var(--surface-2); color: var(--accent); }
+  .nav-item .icon { width: 18px; text-align: center; opacity: 0.85; font-size: 15px; }
+  .crate-count {
+    margin-right: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .new-crate-btn {
+    margin-top: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+  }
+  .new-crate-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .new-crate-form { display: flex; gap: 6px; margin-top: 8px; }
+  .new-crate-form input {
+    flex: 1; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 7px 9px; font-size: 13px; font-family: inherit;
+  }
+  .new-crate-form button {
+    background: var(--accent); border: none; color: #1a1200; border-radius: 8px;
+    padding: 0 12px; font-weight: 600; cursor: pointer; font-size: 13px;
+  }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  .main {
+    grid-row: 1;
+    overflow-y: auto;
+    padding: 28px 36px 40px;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .search-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 6px 4px 18px;
+    max-width: 520px;
+  }
+  .search-box input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 14px; padding: 8px 0; font-family: inherit;
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-box button {
+    background: var(--accent); border: none; color: #1a1200;
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+    font-size: 15px; display: flex; align-items: center; justify-content: center;
+  }
+  .view-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    margin: 0 0 4px;
+  }
+  .view-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 22px; }
 
-        .title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+  .chip {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 18px; border-radius: 999px; font-size: 13px; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
 
-        .search-bar {
-            display: flex;
-            gap: 10px;
-        }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+  }
+  .track-card {
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .track-card:hover { border-color: var(--accent-dark); transform: translateY(-2px); }
+  .art-wrap { position: relative; width: 100%; aspect-ratio: 1/1; background: var(--surface-2); }
+  .art-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .play-overlay {
+    position: absolute; inset: 0; background: rgba(10,12,16,0.35);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .track-card:hover .play-overlay { opacity: 1; }
+  .play-overlay .play-btn {
+    width: 42px; height: 42px; border-radius: 50%; background: var(--accent);
+    color: #1a1200; border: none; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .track-card.playing .art-wrap::after {
+    content: ''; position: absolute; inset: 0; border: 2px solid var(--accent-2); border-radius: 12px 12px 0 0;
+  }
+  .card-body { padding: 10px 12px 12px; }
+  .card-title {
+    font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-artist {
+    font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;
+  }
+  .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .add-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .no-preview-tag { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
 
-        .search-input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 16px;
-            outline: none;
-        }
+  .crate-dropdown {
+    position: absolute; bottom: 30px; left: 12px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 20;
+    min-width: 150px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .crate-dropdown-item {
+    padding: 7px 10px; font-size: 13px; border-radius: 6px; cursor: pointer; text-align: right;
+  }
+  .crate-dropdown-item:hover { background: var(--surface); color: var(--accent); }
 
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
+  .list-row {
+    display: flex; align-items: center; gap: 14px; padding: 9px 10px; border-radius: 8px; cursor: pointer;
+  }
+  .list-row:hover { background: var(--surface); }
+  .list-row.playing { background: var(--surface); }
+  .list-row .idx { width: 22px; text-align: center; color: var(--text-muted); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .list-row img { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; }
+  .list-row .meta { flex: 1; min-width: 0; }
+  .list-row .meta .t { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-row .meta .a { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-row .remove-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 15px; padding: 6px; }
+  .list-row .remove-btn:hover { color: var(--danger); }
 
-        .search-input:focus {
-            border-color: #a78bfa;
-            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3);
-        }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty-state .big { font-size: 40px; margin-bottom: 12px; }
 
-        .search-btn {
-            padding: 12px 24px;
-            background: #8b5cf6;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
+  .player-bar {
+    grid-column: 1 / 3;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 22px;
+    height: 84px;
+  }
+  .yt-mini {
+    width: 120px; height: 68px; border-radius: 8px; overflow: hidden;
+    background: #000; flex-shrink: 0; display: none; border: 1px solid var(--border);
+  }
+  .yt-mini.active { display: block; }
+  .yt-mini #yt-player, .yt-mini iframe { width: 100% !important; height: 100% !important; display: block; }
 
-        .search-btn:hover {
-            background: #7c3aed;
-        }
+  .now-playing-meta { width: 170px; flex-shrink: 0; min-width: 0; }
+  .now-playing-meta .t { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .now-playing-meta .a { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  .transport { display: flex; align-items: center; gap: 14px; }
+  .transport button {
+    background: none; border: none; color: var(--text); cursor: pointer; font-size: 17px;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  }
+  .transport .play-pause {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: #1a1200; font-size: 15px;
+  }
+  .transport button:disabled { opacity: 0.3; cursor: default; }
 
-        .track-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+  .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 120px; }
+  .progress-wrap span { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; width: 34px; }
+  .progress-track {
+    flex: 1; height: 4px; background: var(--surface-2); border-radius: 4px; cursor: pointer; position: relative;
+  }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; }
 
-        .track {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+  .volume-wrap { display: flex; align-items: center; gap: 6px; width: 100px; flex-shrink: 0; }
+  .volume-wrap input[type=range] { width: 80px; accent-color: var(--accent); }
 
-        .track:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .track.active {
-            background: rgba(139, 92, 246, 0.5);
-        }
-
-        .track-image-container {
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .track-image {
-            width: 64px;
-            height: 64px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .playing-indicator {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pulse-dot {
-            width: 12px;
-            height: 12px;
-            background: #a78bfa;
-            border-radius: 50%;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
-        .track-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .track-name {
-            font-weight: 600;
-            font-size: 16px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-artist {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 4px;
-        }
-
-        .track-album {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 2px;
-        }
-
-        .track-duration {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #a78bfa;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .load-more-btn {
-            width: 100%;
-            padding: 16px;
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .load-more-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .player-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 16px;
-            display: none;
-        }
-
-        .player-bar.active {
-            display: block;
-        }
-
-        .player-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .player-image {
-            width: 56px;
-            height: 56px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .player-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .player-track-name {
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .player-artist {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .control-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .play-btn {
-            background: #8b5cf6;
-            padding: 12px;
-        }
-
-        .play-btn:hover {
-            background: #7c3aed;
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
+  .placeholder-player { color: var(--text-muted); font-size: 13px; }
+  a { color: var(--accent); }
+</style>
 </head>
 <body>
-    <audio id="audio"></audio>
 
-    <div class="header">
-        <div class="header-content">
-            <div class="title">
-                <i data-lucide="music"></i>
-                <h1>ספריית Jamendo</h1>
-            </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" class="search-input" placeholder="חפש שירים, אמנים...">
-                <button class="search-btn" onclick="handleSearch()">
-                    <i data-lucide="search"></i>
-                    חפש
-                </button>
-            </div>
-        </div>
+<div class="app">
+  <aside class="sidebar">
+    <p class="logo">GROOVE<span class="dot">•</span></p>
+    <p class="tagline">חפש שיר ונגן אותו במלואו דרך יוטיוב</p>
+
+    <button class="nav-item active" id="nav-home" onclick="setView({type:'home'})">
+      <span class="icon">⌂</span> בית
+    </button>
+
+    <p class="nav-label" style="margin-top:22px;">הכספות שלך</p>
+    <div id="crates-list"></div>
+    <button class="new-crate-btn" onclick="toggleNewCrateForm()">+ כספת חדשה</button>
+    <div class="new-crate-form" id="new-crate-form" style="display:none;">
+      <input id="new-crate-input" placeholder="שם הכספת" onkeydown="if(event.key==='Enter')createCrate()">
+      <button onclick="createCrate()">צור</button>
     </div>
+  </aside>
 
-    <div class="content">
-        <div id="trackList" class="track-list"></div>
-        <div id="loading" class="loading hidden">
-            <div class="spinner"></div>
-        </div>
-        <button id="loadMoreBtn" class="load-more-btn hidden" onclick="loadMore()">טען עוד שירים</button>
+  <main class="main" id="main">
+  </main>
+
+  <footer class="player-bar" id="player-bar">
+    <div class="yt-mini" id="yt-mini"><div id="yt-player"></div></div>
+    <div id="player-bar-controls" style="display:flex;align-items:center;gap:16px;flex:1;">
+      <div class="placeholder-player">בחר שיר כדי לנגן את השיר המלא ביוטיוב</div>
     </div>
+  </footer>
+</div>
 
-    <div id="playerBar" class="player-bar">
-        <div class="player-content">
-            <img id="playerImage" class="player-image" src="" alt="">
-            <div class="player-info">
-                <div id="playerTrackName" class="player-track-name"></div>
-                <div id="playerArtist" class="player-artist"></div>
-            </div>
-            <div class="player-controls">
-                <button class="control-btn" onclick="playPrevious()">
-                    <i data-lucide="skip-back"></i>
-                </button>
-                <button class="control-btn play-btn" onclick="togglePlay()">
-                    <i id="playIcon" data-lucide="play"></i>
-                </button>
-                <button class="control-btn" onclick="playNext()">
-                    <i data-lucide="skip-forward"></i>
-                </button>
-            </div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+const YT_API_KEY = "AIzaSyCaOTvkOfD9drrlteSpb6WwTpjnBbJS0CY";
+const GENRES = ["Lo-fi", "מיינסטרים ישראלי", "Hip Hop", "Indie Rock", "Jazz", "K-Pop", "Latin Pop", "Electronic", "Classical", "R&B"];
+
+let state = {
+  crates: [],
+  view: { type: 'home' },
+  results: [],
+  queue: [],
+  queueIndex: -1,
+  isPlaying: false,
+  loadingTrack: null
+};
+
+let ytPlayer = null;
+let ytReady = false;
+let pendingVideoId = null;
+let progressInterval = null;
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('yt-player', {
+    height: '68',
+    width: '120',
+    playerVars: { autoplay: 0, controls: 1, modestbranding: 1, rel: 0 },
+    events: {
+      onReady: function() {
+        ytReady = true;
+        if (pendingVideoId) { ytPlayer.loadVideoById(pendingVideoId); pendingVideoId = null; }
+      },
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerStateChange(e) {
+  if (e.data === YT.PlayerState.PLAYING) {
+    state.isPlaying = true;
+    startProgressPoll();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    state.isPlaying = false;
+    stopProgressPoll();
+  } else if (e.data === YT.PlayerState.ENDED) {
+    state.isPlaying = false;
+    stopProgressPoll();
+    renderPlayerBar();
+    renderMain();
+    playNext();
+    return;
+  }
+  renderPlayerBar();
+  renderMain();
+}
+
+function startProgressPoll() {
+  stopProgressPoll();
+  progressInterval = setInterval(updateProgressUI, 500);
+}
+function stopProgressPoll() {
+  if (progressInterval) clearInterval(progressInterval);
+  progressInterval = null;
+}
+function updateProgressUI() {
+  if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+  const cur = ytPlayer.getCurrentTime();
+  const dur = ytPlayer.getDuration();
+  const fill = document.getElementById('progress-fill');
+  const curEl = document.getElementById('cur-time');
+  const durEl = document.getElementById('dur-time');
+  if (fill && dur) fill.style.width = (cur/dur*100) + '%';
+  if (curEl) curEl.textContent = fmtTime(cur);
+  if (durEl) durEl.textContent = fmtTime(dur);
+}
+
+async function searchYoutubeVideoId(query) {
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || 'YouTube API error');
+  const item = (data.items||[])[0];
+  return item ? item.id.videoId : null;
+}
+
+const audioUnused = null;
+
+async function loadCrates() {
+  try {
+    const res = await window.storage.get('crates', false);
+    state.crates = res && res.value ? JSON.parse(res.value) : [];
+  } catch (e) {
+    state.crates = [];
+  }
+  renderCratesList();
+}
+
+async function saveCrates() {
+  try {
+    await window.storage.set('crates', JSON.stringify(state.crates), false);
+  } catch (e) {
+    console.error('שמירת הכספות נכשלה', e);
+  }
+}
+
+function renderCratesList() {
+  const el = document.getElementById('crates-list');
+  if (!state.crates.length) {
+    el.innerHTML = '<p style="font-size:12px;color:var(--text-muted);padding:4px 10px;">עוד אין כספות</p>';
+    return;
+  }
+  el.innerHTML = state.crates.map(c => `
+    <button class="nav-item ${state.view.type==='crate' && state.view.id===c.id ? 'active':''}" onclick='setView({type:"crate",id:"${c.id}"})'>
+      <span class="icon">▤</span> ${escapeHtml(c.name)}
+      <span class="crate-count">${c.tracks.length}</span>
+    </button>
+  `).join('');
+}
+
+function toggleNewCrateForm() {
+  const f = document.getElementById('new-crate-form');
+  f.style.display = f.style.display === 'none' ? 'flex' : 'none';
+  if (f.style.display === 'flex') document.getElementById('new-crate-input').focus();
+}
+
+async function createCrate() {
+  const input = document.getElementById('new-crate-input');
+  const name = input.value.trim();
+  if (!name) return;
+  const crate = { id: 'c' + Date.now(), name, tracks: [] };
+  state.crates.push(crate);
+  input.value = '';
+  document.getElementById('new-crate-form').style.display = 'none';
+  await saveCrates();
+  renderCratesList();
+}
+
+async function deleteCrate(id) {
+  state.crates = state.crates.filter(c => c.id !== id);
+  await saveCrates();
+  renderCratesList();
+  if (state.view.type === 'crate' && state.view.id === id) setView({type:'home'});
+}
+
+async function addToCrate(crateId, track) {
+  const crate = state.crates.find(c => c.id === crateId);
+  if (!crate) return;
+  if (crate.tracks.some(t => t.trackId === track.trackId)) return;
+  crate.tracks.push(track);
+  await saveCrates();
+  renderCratesList();
+  if (state.view.type === 'crate' && state.view.id === crateId) renderMain();
+}
+
+async function removeFromCrate(crateId, trackId) {
+  const crate = state.crates.find(c => c.id === crateId);
+  if (!crate) return;
+  crate.tracks = crate.tracks.filter(t => t.trackId !== trackId);
+  await saveCrates();
+  renderCratesList();
+  renderMain();
+}
+
+function escapeHtml(str) {
+  return (str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function fmtTime(sec) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec/60);
+  const s = Math.floor(sec%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+async function searchItunes(term) {
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=28`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return (data.results||[]).map(r => ({
+    trackId: String(r.trackId),
+    title: r.trackName,
+    artist: r.artistName,
+    artwork: (r.artworkUrl100||'').replace('100x100bb','300x300bb'),
+    duration: r.trackTimeMillis ? Math.round(r.trackTimeMillis/1000) : null
+  }));
+}
+
+function setView(v) {
+  state.view = v;
+  document.getElementById('nav-home').classList.toggle('active', v.type === 'home');
+  renderCratesList();
+  renderMain();
+}
+
+async function doSearch(term) {
+  if (!term || !term.trim()) return;
+  setView({type:'search', term, loading:true});
+  try {
+    const tracks = await searchItunes(term);
+    state.results = tracks;
+    setView({type:'search', term, loading:false});
+  } catch(e) {
+    state.results = [];
+    setView({type:'search', term, loading:false, error:true});
+  }
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+  const v = state.view;
+
+  if (v.type === 'home') {
+    main.innerHTML = `
+      <div class="topbar">
+        <div class="search-box">
+          <input id="search-input" placeholder="חפש שיר, אמן או אלבום..." onkeydown="if(event.key==='Enter')doSearch(this.value)">
+          <button onclick="doSearch(document.getElementById('search-input').value)">→</button>
         </div>
+      </div>
+      <h1 class="view-title">מה מנגנים היום?</h1>
+      <p class="view-sub">בחר ז'אנר כדי לגלות, או חפש שיר ספציפי</p>
+      <div class="chip-row">
+        ${GENRES.map(g => `<button class="chip" onclick='doSearch("${g}")'>${g}</button>`).join('')}
+      </div>
+    `;
+    return;
+  }
+
+  if (v.type === 'search') {
+    main.innerHTML = `
+      <div class="topbar">
+        <div class="search-box">
+          <input id="search-input" value="${escapeHtml(v.term)}" placeholder="חפש שיר, אמן או אלבום..." onkeydown="if(event.key==='Enter')doSearch(this.value)">
+          <button onclick="doSearch(document.getElementById('search-input').value)">→</button>
+        </div>
+      </div>
+      <h1 class="view-title">תוצאות עבור "${escapeHtml(v.term)}"</h1>
+      <p class="view-sub">${v.loading ? 'מחפש...' : (state.results.length + ' שירים נמצאו · לחץ כדי לנגן את השיר המלא')}</p>
+      <div class="grid" id="results-grid"></div>
+    `;
+    if (!v.loading) {
+      const grid = document.getElementById('results-grid');
+      if (!state.results.length) {
+        grid.innerHTML = '<div class="empty-state"><div class="big">♪</div>לא נמצאו שירים</div>';
+      } else {
+        grid.innerHTML = state.results.map((t, i) => trackCardHtml(t, i)).join('');
+      }
+    }
+    return;
+  }
+
+  if (v.type === 'crate') {
+    const crate = state.crates.find(c => c.id === v.id);
+    if (!crate) { setView({type:'home'}); return; }
+    main.innerHTML = `
+      <div class="topbar">
+        <h1 class="view-title" style="margin:0;">${escapeHtml(crate.name)}</h1>
+        <button class="chip" style="margin-right:auto;color:var(--danger);" onclick='deleteCrate("${crate.id}")'>מחק כספת</button>
+      </div>
+      <p class="view-sub">${crate.tracks.length} שירים</p>
+      <div id="crate-tracks"></div>
+    `;
+    const list = document.getElementById('crate-tracks');
+    if (!crate.tracks.length) {
+      list.innerHTML = '<div class="empty-state"><div class="big">▤</div>הכספת עדיין ריקה. חפש שירים והוסף אותם כאן.</div>';
+    } else {
+      list.innerHTML = crate.tracks.map((t, i) => `
+        <div class="list-row ${isCurrentTrack(t) ? 'playing':''}" onclick='playQueue(${JSON.stringify(crate.tracks).replace(/'/g,"&#39;")}, ${i})'>
+          <span class="idx">${i+1}</span>
+          <img src="${t.artwork}" alt="">
+          <div class="meta">
+            <div class="t">${escapeHtml(t.title)}</div>
+            <div class="a">${escapeHtml(t.artist)}</div>
+          </div>
+          <button class="remove-btn" onclick='event.stopPropagation();removeFromCrate("${crate.id}","${t.trackId}")'>✕</button>
+        </div>
+      `).join('');
+    }
+    return;
+  }
+}
+
+function trackCardHtml(t, i) {
+  const playing = isCurrentTrack(t);
+  return `
+    <div class="track-card ${playing?'playing':''}" onclick='playQueue(${JSON.stringify(state.results).replace(/'/g,"&#39;")}, ${i})'>
+      <div class="art-wrap">
+        <img src="${t.artwork}" alt="" loading="lazy">
+        <div class="play-overlay"><button class="play-btn">${playing && state.isPlaying ? '❚❚' : '▶'}</button></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${escapeHtml(t.title)}</div>
+        <div class="card-artist">${escapeHtml(t.artist)}</div>
+        <div class="card-actions">
+          <span class="no-preview-tag">${t.duration ? fmtTime(t.duration) : ''}</span>
+          <button class="add-btn" onclick='event.stopPropagation();toggleDropdown(event,"${t.trackId}")'>+</button>
+        </div>
+      </div>
     </div>
+  `;
+}
 
-    <script>
-        const CLIENT_ID = 'f7882618';
-        let tracks = [];
-        let currentTrack = null;
-        let isPlaying = false;
-        let page = 0;
-        let hasMore = true;
-        let searchQuery = '';
+function toggleDropdown(ev, trackId) {
+  document.querySelectorAll('.crate-dropdown').forEach(d => d.remove());
+  if (!state.crates.length) {
+    alert('צור קודם כספת מהסיידבר');
+    return;
+  }
+  const btn = ev.currentTarget;
+  const track = state.results.find(t => t.trackId === trackId) ||
+    (state.view.type==='crate' ? state.crates.find(c=>c.id===state.view.id)?.tracks.find(t=>t.trackId===trackId) : null);
+  const dd = document.createElement('div');
+  dd.className = 'crate-dropdown';
+  dd.innerHTML = state.crates.map(c => `<div class="crate-dropdown-item" data-crate="${c.id}">${escapeHtml(c.name)}</div>`).join('');
+  btn.parentElement.style.position = 'relative';
+  btn.parentElement.appendChild(dd);
+  dd.querySelectorAll('.crate-dropdown-item').forEach(item => {
+    item.onclick = (e) => {
+      e.stopPropagation();
+      addToCrate(item.dataset.crate, track);
+      dd.remove();
+    };
+  });
+  setTimeout(() => {
+    document.addEventListener('click', function closeDd(e) {
+      if (!dd.contains(e.target)) { dd.remove(); document.removeEventListener('click', closeDd); }
+    });
+  }, 0);
+}
 
-        const audio = document.getElementById('audio');
-        const trackList = document.getElementById('trackList');
-        const loading = document.getElementById('loading');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
-        const playerBar = document.getElementById('playerBar');
-        const searchInput = document.getElementById('searchInput');
+function isCurrentTrack(t) {
+  return state.queueIndex >= 0 && state.queue[state.queueIndex] && state.queue[state.queueIndex].trackId === t.trackId;
+}
 
-        async function loadTracks(search = '', pageNum = 0) {
-            loading.classList.remove('hidden');
-            loadMoreBtn.classList.add('hidden');
+async function playQueue(queue, index) {
+  state.queue = queue;
+  state.queueIndex = index;
+  const track = queue[index];
+  state.loadingTrack = track;
+  document.getElementById('yt-mini').classList.add('active');
+  renderPlayerBar();
+  renderMain();
+  try {
+    const videoId = await searchYoutubeVideoId(`${track.artist} ${track.title} audio`);
+    state.loadingTrack = null;
+    if (!videoId) {
+      alert('לא נמצא סרטון מתאים ביוטיוב עבור השיר הזה');
+      renderPlayerBar();
+      return;
+    }
+    if (ytPlayer && ytReady) {
+      ytPlayer.loadVideoById(videoId);
+    } else {
+      pendingVideoId = videoId;
+    }
+    renderPlayerBar();
+  } catch (e) {
+    state.loadingTrack = null;
+    console.error(e);
+    alert('שגיאה בחיפוש ביוטיוב: ' + (e.message||e));
+    renderPlayerBar();
+  }
+}
 
-            try {
-                const limit = 50;
-                const offset = pageNum * limit;
-                let url = `https://api.jamendo.com/v3.0/tracks/?client_id=${CLIENT_ID}&format=json&limit=${limit}&offset=${offset}&audioformat=mp32&include=musicinfo&order=popularity_total`;
-                
-                if (search) {
-                    url += `&search=${encodeURIComponent(search)}`;
-                }
+function togglePlayPause() {
+  if (!ytPlayer || state.queueIndex < 0) return;
+  const s = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
+  if (s === 1) ytPlayer.pauseVideo();
+  else ytPlayer.playVideo();
+}
 
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.results) {
-                    if (pageNum === 0) {
-                        tracks = data.results;
-                        trackList.innerHTML = '';
-                    } else {
-                        tracks = [...tracks, ...data.results];
-                    }
-                    hasMore = data.results.length === limit;
-                    renderTracks(data.results);
-                    
-                    if (data.results.length === 0 && pageNum === 0) {
-                        trackList.innerHTML = '<div style="text-align:center; padding:40px; font-size:18px;">לא נמצאו שירים. נסה חיפוש אחר...</div>';
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading tracks:', error);
-                trackList.innerHTML = '<div style="text-align:center; padding:40px; font-size:18px; color:#ff6b6b;">שגיאה בטעינת השירים. נסה שוב מאוחר יותר.</div>';
-            }
+function playNext() {
+  if (state.queueIndex < 0 || state.queueIndex+1 >= state.queue.length) return;
+  playQueue(state.queue, state.queueIndex+1);
+}
 
-            loading.classList.add('hidden');
-            if (hasMore && tracks.length > 0) {
-                loadMoreBtn.classList.remove('hidden');
-            }
-        }
+function playPrev() {
+  if (state.queueIndex <= 0) return;
+  playQueue(state.queue, state.queueIndex-1);
+}
 
-        function renderTracks(newTracks) {
-            newTracks.forEach(track => {
-                const trackEl = document.createElement('div');
-                trackEl.className = 'track';
-                trackEl.onclick = () => playTrack(track);
-                
-                trackEl.innerHTML = `
-                    <div class="track-image-container">
-                        <img src="${track.image}" alt="${track.name}" class="track-image">
-                        <div class="playing-indicator hidden" id="indicator-${track.id}">
-                            <div class="pulse-dot"></div>
-                        </div>
-                    </div>
-                    <div class="track-info">
-                        <div class="track-name">${track.name}</div>
-                        <div class="track-artist">${track.artist_name}</div>
-                        <div class="track-album">${track.album_name}</div>
-                    </div>
-                    <div class="track-duration">${formatDuration(track.duration)}</div>
-                `;
-                
-                trackList.appendChild(trackEl);
-            });
-            
-            lucide.createIcons();
-        }
+function seek(ev) {
+  const track = document.getElementById('progress-track');
+  const rect = track.getBoundingClientRect();
+  const pct = (ev.clientX - rect.left) / rect.width;
+  if (ytPlayer && ytPlayer.getDuration) {
+    const dur = ytPlayer.getDuration();
+    if (dur) ytPlayer.seekTo(pct * dur, true);
+  }
+}
 
-        function playTrack(track) {
-            // Remove active class from all tracks
-            document.querySelectorAll('.track').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.playing-indicator').forEach(el => el.classList.add('hidden'));
-            
-            // Set current track
-            currentTrack = track;
-            isPlaying = true;
-            
-            // Update UI
-            const trackElements = document.querySelectorAll('.track');
-            const trackIndex = tracks.findIndex(t => t.id === track.id);
-            if (trackElements[trackIndex]) {
-                trackElements[trackIndex].classList.add('active');
-            }
-            document.getElementById(`indicator-${track.id}`)?.classList.remove('hidden');
-            
-            // Update player bar
-            document.getElementById('playerImage').src = track.image;
-            document.getElementById('playerTrackName').textContent = track.name;
-            document.getElementById('playerArtist').textContent = track.artist_name;
-            playerBar.classList.add('active');
-            
-            // Play audio
-            audio.src = track.audio;
-            audio.play();
-            updatePlayIcon();
-        }
+function renderPlayerBar() {
+  const controls = document.getElementById('player-bar-controls');
+  if (state.queueIndex < 0 && !state.loadingTrack) {
+    controls.innerHTML = '<div class="placeholder-player">בחר שיר כדי לנגן את השיר המלא ביוטיוב</div>';
+    return;
+  }
+  if (state.loadingTrack) {
+    controls.innerHTML = `
+      <div class="now-playing-meta">
+        <div class="t">${escapeHtml(state.loadingTrack.title)}</div>
+        <div class="a">מחפש ביוטיוב...</div>
+      </div>
+    `;
+    return;
+  }
+  const t = state.queue[state.queueIndex];
+  controls.innerHTML = `
+    <div class="now-playing-meta">
+      <div class="t">${escapeHtml(t.title)}</div>
+      <div class="a">${escapeHtml(t.artist)}</div>
+    </div>
+    <div class="transport">
+      <button onclick="playPrev()" ${state.queueIndex<=0?'disabled':''}>⏮</button>
+      <button class="play-pause" onclick="togglePlayPause()">${state.isPlaying ? '❚❚' : '▶'}</button>
+      <button onclick="playNext()" ${state.queueIndex+1>=state.queue.length?'disabled':''}>⏭</button>
+    </div>
+    <div class="progress-wrap">
+      <span id="cur-time">0:00</span>
+      <div class="progress-track" id="progress-track" onclick="seek(event)">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <span id="dur-time">0:00</span>
+    </div>
+    <div class="volume-wrap">
+      <span style="font-size:13px;">🔊</span>
+      <input type="range" min="0" max="100" step="5" value="100" oninput="ytPlayer && ytPlayer.setVolume && ytPlayer.setVolume(this.value)">
+    </div>
+  `;
+}
 
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
-            } else {
-                audio.play();
-                isPlaying = true;
-            }
-            updatePlayIcon();
-        }
-
-        function playNext() {
-            if (currentTrack) {
-                const currentIndex = tracks.findIndex(t => t.id === currentTrack.id);
-                if (currentIndex < tracks.length - 1) {
-                    playTrack(tracks[currentIndex + 1]);
-                }
-            }
-        }
-
-        function playPrevious() {
-            if (currentTrack) {
-                const currentIndex = tracks.findIndex(t => t.id === currentTrack.id);
-                if (currentIndex > 0) {
-                    playTrack(tracks[currentIndex - 1]);
-                }
-            }
-        }
-
-        function updatePlayIcon() {
-            const playIcon = document.getElementById('playIcon');
-            playIcon.setAttribute('data-lucide', isPlaying ? 'pause' : 'play');
-            lucide.createIcons();
-        }
-
-        function formatDuration(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function handleSearch() {
-            searchQuery = searchInput.value;
-            page = 0;
-            loadTracks(searchQuery, 0);
-        }
-
-        function loadMore() {
-            page++;
-            loadTracks(searchQuery, page);
-        }
-
-        // Auto play next track
-        audio.addEventListener('ended', playNext);
-
-        // Handle Enter key in search
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSearch();
-            }
-        });
-
-        // Load initial tracks
-        loadTracks();
-        
-        // Initialize Lucide icons
-        lucide.createIcons();
-    </script>
+loadCrates();
+renderMain();
+renderPlayerBar();
+</script>
 </body>
 </html>
