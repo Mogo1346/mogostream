@@ -257,9 +257,17 @@
   .yt-mini {
     width: 120px; height: 68px; border-radius: 8px; overflow: hidden;
     background: #000; flex-shrink: 0; display: none; border: 1px solid var(--border);
+    position: relative;
   }
   .yt-mini.active { display: block; }
   .yt-mini #yt-player, .yt-mini iframe { width: 100% !important; height: 100% !important; display: block; }
+
+  /* Shown in place of the video while a YouTube ad is detected as playing */
+  .yt-ad-overlay {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background: var(--surface-2); z-index: 5;
+  }
+  .yt-ad-overlay img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .now-playing-meta { width: 170px; flex-shrink: 0; min-width: 0; }
   .now-playing-meta .t { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -279,8 +287,25 @@
   .progress-wrap span { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; width: 34px; }
   .progress-track {
     flex: 1; height: 4px; background: var(--surface-2); border-radius: 4px; cursor: pointer; position: relative;
+    /* Force LTR box geometry here regardless of the page's RTL direction.
+       Without this, a plain block child anchors its width from the inline-start
+       edge, which under dir="rtl" is the RIGHT edge — so the fill (and the math
+       in getBoundingClientRect-based click handling) end up mirrored, which is
+       why clicking a point used to seek to the opposite side of the bar. */
+    direction: ltr;
+    touch-action: none;
   }
-  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; pointer-events: none; }
+  .progress-track::after {
+    content: '';
+    position: absolute; top: 50%; left: 0; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); transform: translate(-50%, -50%);
+    margin-left: var(--progress-pct, 0%);
+    opacity: 0; transition: opacity 0.15s;
+    pointer-events: none;
+  }
+  .progress-track:hover::after,
+  .progress-track.dragging::after { opacity: 1; }
 
   .volume-wrap { display: flex; align-items: center; gap: 6px; width: 100px; flex-shrink: 0; }
   .volume-wrap input[type=range] { width: 80px; accent-color: var(--accent); }
@@ -342,7 +367,10 @@
   </main>
 
   <footer class="player-bar" id="player-bar">
-    <div class="yt-mini" id="yt-mini"><div id="yt-player"></div></div>
+    <div class="yt-mini" id="yt-mini">
+      <div id="yt-player"></div>
+      <div class="yt-ad-overlay" id="yt-ad-overlay"><img id="yt-ad-overlay-img" src="" alt=""></div>
+    </div>
     <div id="player-bar-controls" style="display:flex;align-items:center;gap:16px;flex:1;">
       <div class="placeholder-player">בחר שיר כדי לנגן את השיר המלא ביוטיוב</div>
     </div>
@@ -405,6 +433,7 @@ function onPlayerStateChange(e) {
   } else if (e.data === YT.PlayerState.ENDED) {
     state.isPlaying = false;
     stopProgressPoll();
+    setAdOverlay(false);
     renderPlayerBar();
     renderMain();
     playNext();
@@ -412,6 +441,36 @@ function onPlayerStateChange(e) {
   }
   renderPlayerBar();
   renderMain();
+}
+
+/* ---------- Ad detection ----------
+   The public IFrame API does not officially expose whether a mid/pre-roll ad
+   is currently playing. YouTube's embed internally posts window "message"
+   events back to the parent page (used by its own UI); one of these,
+   "infoDelivery", occasionally carries an "adState" field while an ad is
+   active. This is NOT a documented, guaranteed API — YouTube can change or
+   drop it without notice — so it's used here as a best-effort signal only.
+   When it fires, we swap the video for the track artwork so at least the
+   video portion of the ad isn't shown; the audio of the ad itself still
+   plays, since that isn't something a page embedding the player can control. */
+let isAdPlaying = false;
+
+window.addEventListener('message', handleYoutubeMessage);
+
+function handleYoutubeMessage(e) {
+  if (!e.origin || e.origin.indexOf('youtube.com') === -1) return;
+  let data;
+  try { data = JSON.parse(e.data); } catch (err) { return; }
+  if (data && data.event === 'infoDelivery' && data.info && typeof data.info.adState !== 'undefined') {
+    // Observed values: 0 = ad playing, 1 = ad paused. Anything else -> no ad.
+    setAdOverlay(data.info.adState === 0 || data.info.adState === 1);
+  }
+}
+
+function setAdOverlay(show) {
+  isAdPlaying = show;
+  const overlay = document.getElementById('yt-ad-overlay');
+  if (overlay) overlay.style.display = show ? 'flex' : 'none';
 }
 
 function startProgressPoll() {
@@ -423,13 +482,14 @@ function stopProgressPoll() {
   progressInterval = null;
 }
 function updateProgressUI() {
+  if (isDraggingProgress) return; // don't fight the user's drag
   if (!ytPlayer || !ytPlayer.getCurrentTime) return;
   const cur = ytPlayer.getCurrentTime();
   const dur = ytPlayer.getDuration();
-  const fill = document.getElementById('progress-fill');
+  const pct = dur ? (cur/dur) : 0;
+  setProgressFillPct(pct);
   const curEl = document.getElementById('cur-time');
   const durEl = document.getElementById('dur-time');
-  if (fill && dur) fill.style.width = (cur/dur*100) + '%';
   if (curEl) curEl.textContent = fmtTime(cur);
   if (durEl) durEl.textContent = fmtTime(dur);
 }
@@ -760,6 +820,13 @@ async function playQueue(queue, index) {
   const track = queue[index];
   state.loadingTrack = track;
   document.getElementById('yt-mini').classList.add('active');
+
+  // Prime the ad-overlay image with this track's artwork and reset it to hidden;
+  // it will be shown automatically if/when an ad is detected (see handleYoutubeMessage).
+  const overlayImg = document.getElementById('yt-ad-overlay-img');
+  if (overlayImg) overlayImg.src = track.artwork;
+  setAdOverlay(false);
+
   renderPlayerBar();
   renderMain();
   try {
@@ -801,14 +868,78 @@ function playPrev() {
   playQueue(state.queue, state.queueIndex-1);
 }
 
-function seek(ev) {
+/* ---------- Progress bar: click + drag seeking ----------
+   getBoundingClientRect() returns viewport-relative coordinates regardless of
+   text direction, so the math below (distance from the left edge / width) is
+   correct as long as the element itself is laid out LTR — which is now forced
+   via `.progress-track { direction: ltr }` in the CSS. That's what fixes the
+   "clicking a point seeks the mirrored point" bug: previously the fill (and
+   effectively the bar's start edge) was being anchored from the right because
+   the page is dir="rtl", while this click math always assumed a left start. */
+let isDraggingProgress = false;
+
+function getPctFromClientX(clientX) {
   const track = document.getElementById('progress-track');
   const rect = track.getBoundingClientRect();
-  const pct = (ev.clientX - rect.left) / rect.width;
+  const raw = (clientX - rect.left) / rect.width;
+  return Math.min(1, Math.max(0, raw));
+}
+
+function setProgressFillPct(pct) {
+  const fill = document.getElementById('progress-fill');
+  const trackEl = document.getElementById('progress-track');
+  if (fill) fill.style.width = (pct * 100) + '%';
+  if (trackEl) trackEl.style.setProperty('--progress-pct', (pct * 100) + '%');
+}
+
+function clientXFromEvent(ev) {
+  if (ev.touches && ev.touches.length) return ev.touches[0].clientX;
+  if (ev.changedTouches && ev.changedTouches.length) return ev.changedTouches[0].clientX;
+  return ev.clientX;
+}
+
+function onProgressPointerDown(ev) {
+  if (!ytPlayer || state.queueIndex < 0) return;
+  isDraggingProgress = true;
+  document.getElementById('progress-track')?.classList.add('dragging');
+  const pct = getPctFromClientX(clientXFromEvent(ev));
+  setProgressFillPct(pct);
+  updateDraggedTimeLabel(pct);
+  document.addEventListener('mousemove', onProgressPointerMove);
+  document.addEventListener('mouseup', onProgressPointerUp);
+  document.addEventListener('touchmove', onProgressPointerMove, { passive: false });
+  document.addEventListener('touchend', onProgressPointerUp);
+}
+
+function onProgressPointerMove(ev) {
+  if (!isDraggingProgress) return;
+  if (ev.cancelable) ev.preventDefault();
+  const pct = getPctFromClientX(clientXFromEvent(ev));
+  setProgressFillPct(pct);
+  updateDraggedTimeLabel(pct);
+}
+
+function onProgressPointerUp(ev) {
+  if (!isDraggingProgress) return;
+  isDraggingProgress = false;
+  document.getElementById('progress-track')?.classList.remove('dragging');
+  const pct = getPctFromClientX(clientXFromEvent(ev));
+  setProgressFillPct(pct);
   if (ytPlayer && ytPlayer.getDuration) {
     const dur = ytPlayer.getDuration();
     if (dur) ytPlayer.seekTo(pct * dur, true);
   }
+  document.removeEventListener('mousemove', onProgressPointerMove);
+  document.removeEventListener('mouseup', onProgressPointerUp);
+  document.removeEventListener('touchmove', onProgressPointerMove);
+  document.removeEventListener('touchend', onProgressPointerUp);
+}
+
+function updateDraggedTimeLabel(pct) {
+  if (!ytPlayer || !ytPlayer.getDuration) return;
+  const dur = ytPlayer.getDuration();
+  const curEl = document.getElementById('cur-time');
+  if (curEl && dur) curEl.textContent = fmtTime(pct * dur);
 }
 
 function renderPlayerBar() {
@@ -839,7 +970,9 @@ function renderPlayerBar() {
     </div>
     <div class="progress-wrap">
       <span id="cur-time">0:00</span>
-      <div class="progress-track" id="progress-track" onclick="seek(event)">
+      <div class="progress-track" id="progress-track"
+           onmousedown="onProgressPointerDown(event)"
+           ontouchstart="onProgressPointerDown(event)">
         <div class="progress-fill" id="progress-fill"></div>
       </div>
       <span id="dur-time">0:00</span>
