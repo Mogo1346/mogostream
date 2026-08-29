@@ -892,6 +892,12 @@ function renderPlayerBar() {
     return;
   }
   const t = state.queue[state.queueIndex];
+  let curSec = 0, durSec = 0;
+  if (ytPlayer && ytPlayer.getCurrentTime && ytPlayer.getDuration) {
+    curSec = ytPlayer.getCurrentTime() || 0;
+    durSec = ytPlayer.getDuration() || 0;
+  }
+  const initialPct = durSec ? (curSec / durSec * 100) : 0;
   controls.innerHTML = `
     <div class="now-playing-meta">
       <div class="t">${escapeHtml(t.title)}</div>
@@ -903,12 +909,12 @@ function renderPlayerBar() {
       <button onclick="playNext()" ${state.queueIndex+1>=state.queue.length?'disabled':''}>⏭</button>
     </div>
     <div class="progress-wrap">
-      <span id="cur-time">0:00</span>
+      <span id="cur-time">${fmtTime(curSec)}</span>
       <div class="progress-track" id="progress-track">
-        <div class="progress-fill" id="progress-fill"></div>
-        <div class="progress-thumb" id="progress-thumb"></div>
+        <div class="progress-fill" id="progress-fill" style="width:${initialPct}%"></div>
+        <div class="progress-thumb" id="progress-thumb" style="right:${initialPct}%"></div>
       </div>
-      <span id="dur-time">0:00</span>
+      <span id="dur-time">${fmtTime(durSec)}</span>
     </div>
     <div class="volume-wrap">
       <span style="font-size:13px;">🔊</span>
