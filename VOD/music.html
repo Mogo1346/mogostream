@@ -337,11 +337,11 @@
       <span class="icon">⌂</span> בית
     </button>
 
-    <p class="nav-label" style="margin-top:22px;">הכספות שלך</p>
+    <p class="nav-label" style="margin-top:22px;">הפלייליסטים שלך</p>
     <div id="crates-list"></div>
-    <button class="new-crate-btn" onclick="toggleNewCrateForm()">+ כספת חדשה</button>
+    <button class="new-crate-btn" onclick="toggleNewCrateForm()">+ פלייליסט חדש</button>
     <div class="new-crate-form" id="new-crate-form" style="display:none;">
-      <input id="new-crate-input" placeholder="שם הכספת" onkeydown="if(event.key==='Enter')createCrate()">
+      <input id="new-crate-input" placeholder="שם הפלייליסט" onkeydown="if(event.key==='Enter')createCrate()">
       <button onclick="createCrate()">צור</button>
     </div>
   </aside>
@@ -465,7 +465,7 @@ async function loadCrates() {
     const raw = localStorage.getItem(CRATES_STORAGE_KEY);
     state.crates = raw ? JSON.parse(raw) : [];
   } catch (e) {
-    console.error('טעינת הכספות נכשלה', e);
+    console.error('טעינת הפלייליסטים נכשלה', e);
     state.crates = [];
   }
   renderCratesList();
@@ -475,14 +475,14 @@ async function saveCrates() {
   try {
     localStorage.setItem(CRATES_STORAGE_KEY, JSON.stringify(state.crates));
   } catch (e) {
-    console.error('שמירת הכספות נכשלה', e);
+    console.error('שמירת הפלייליסטים נכשלה', e);
   }
 }
 
 function renderCratesList() {
   const el = document.getElementById('crates-list');
   if (!state.crates.length) {
-    el.innerHTML = '<p style="font-size:12px;color:var(--text-muted);padding:4px 10px;">עוד אין כספות</p>';
+    el.innerHTML = '<p style="font-size:12px;color:var(--text-muted);padding:4px 10px;">עוד אין פלייליסטים</p>';
     return;
   }
   el.innerHTML = state.crates.map(c => `
@@ -546,7 +546,7 @@ function confirmDeleteCrate(id) {
   if (!crate) return;
   showConfirmModal(
     `למחוק את "${crate.name}"?`,
-    'הפעולה תמחק את הכספת ואת כל השירים שבתוכה לצמיתות. לא ניתן לבטל את זה.',
+    'הפעולה תמחק את הפלייליסט ואת כל השירים שבתוכו לצמיתות. לא ניתן לבטל את זה.',
     () => deleteCrate(id)
   );
 }
@@ -685,7 +685,7 @@ function renderMain() {
     main.innerHTML = `
       <div class="topbar">
         <h1 class="view-title" style="margin:0;">${escapeHtml(crate.name)}</h1>
-        <button class="chip" style="margin-right:auto;color:var(--danger);" onclick='confirmDeleteCrate("${crate.id}")'>מחק כספת</button>
+        <button class="chip" style="margin-right:auto;color:var(--danger);" onclick='confirmDeleteCrate("${crate.id}")'>מחק פלייליסט</button>
       </div>
       <p class="view-sub">${crate.tracks.length} שירים</p>
       ${crate.tracks.length ? `
@@ -697,7 +697,7 @@ function renderMain() {
     `;
     const list = document.getElementById('crate-tracks');
     if (!crate.tracks.length) {
-      list.innerHTML = '<div class="empty-state"><div class="big">▤</div>הכספת עדיין ריקה. חפש שירים והוסף אותם כאן.</div>';
+      list.innerHTML = '<div class="empty-state"><div class="big">▤</div>הפלייליסט עדיין ריק. חפש שירים והוסף אותם כאן.</div>';
     } else {
       list.innerHTML = crate.tracks.map((t, i) => `
         <div class="list-row ${isCurrentTrack(t) ? 'playing':''}" onclick='playQueue(${JSON.stringify(crate.tracks).replace(/'/g,"&#39;")}, ${i})'>
@@ -738,7 +738,7 @@ function trackCardHtml(t, i) {
 function toggleDropdown(ev, trackId) {
   document.querySelectorAll('.crate-dropdown').forEach(d => d.remove());
   if (!state.crates.length) {
-    alert('צור קודם כספת מהסיידבר');
+    alert('צור קודם פלייליסט מהסיידבר');
     return;
   }
   const btn = ev.currentTarget;
