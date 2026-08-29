@@ -262,11 +262,15 @@
   .yt-mini.active { display: block; }
   .yt-mini #yt-player, .yt-mini iframe { width: 100% !important; height: 100% !important; display: block; }
 
-  /* Shown in place of the video while a YouTube ad is detected as playing */
+  /* Permanently covers the actual YouTube video frame with the track artwork —
+     the iframe still plays audio underneath, but no video (song or ad) is
+     ever visible. This is simpler and 100% reliable, unlike trying to detect
+     "is an ad playing right now" via undocumented signals. */
   .yt-ad-overlay {
     position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
     background: var(--surface-2); z-index: 5;
   }
+  .yt-mini.active .yt-ad-overlay { display: flex; }
   .yt-ad-overlay img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .now-playing-meta { width: 170px; flex-shrink: 0; min-width: 0; }
@@ -369,6 +373,7 @@
   <footer class="player-bar" id="player-bar">
     <div class="yt-mini" id="yt-mini">
       <div id="yt-player"></div>
+      <!-- Always-on artwork cover: the video frame itself is never shown, only its audio -->
       <div class="yt-ad-overlay" id="yt-ad-overlay"><img id="yt-ad-overlay-img" src="" alt=""></div>
     </div>
     <div id="player-bar-controls" style="display:flex;align-items:center;gap:16px;flex:1;">
@@ -433,7 +438,6 @@ function onPlayerStateChange(e) {
   } else if (e.data === YT.PlayerState.ENDED) {
     state.isPlaying = false;
     stopProgressPoll();
-    setAdOverlay(false);
     renderPlayerBar();
     renderMain();
     playNext();
@@ -441,36 +445,6 @@ function onPlayerStateChange(e) {
   }
   renderPlayerBar();
   renderMain();
-}
-
-/* ---------- Ad detection ----------
-   The public IFrame API does not officially expose whether a mid/pre-roll ad
-   is currently playing. YouTube's embed internally posts window "message"
-   events back to the parent page (used by its own UI); one of these,
-   "infoDelivery", occasionally carries an "adState" field while an ad is
-   active. This is NOT a documented, guaranteed API — YouTube can change or
-   drop it without notice — so it's used here as a best-effort signal only.
-   When it fires, we swap the video for the track artwork so at least the
-   video portion of the ad isn't shown; the audio of the ad itself still
-   plays, since that isn't something a page embedding the player can control. */
-let isAdPlaying = false;
-
-window.addEventListener('message', handleYoutubeMessage);
-
-function handleYoutubeMessage(e) {
-  if (!e.origin || e.origin.indexOf('youtube.com') === -1) return;
-  let data;
-  try { data = JSON.parse(e.data); } catch (err) { return; }
-  if (data && data.event === 'infoDelivery' && data.info && typeof data.info.adState !== 'undefined') {
-    // Observed values: 0 = ad playing, 1 = ad paused. Anything else -> no ad.
-    setAdOverlay(data.info.adState === 0 || data.info.adState === 1);
-  }
-}
-
-function setAdOverlay(show) {
-  isAdPlaying = show;
-  const overlay = document.getElementById('yt-ad-overlay');
-  if (overlay) overlay.style.display = show ? 'flex' : 'none';
 }
 
 function startProgressPoll() {
@@ -821,11 +795,9 @@ async function playQueue(queue, index) {
   state.loadingTrack = track;
   document.getElementById('yt-mini').classList.add('active');
 
-  // Prime the ad-overlay image with this track's artwork and reset it to hidden;
-  // it will be shown automatically if/when an ad is detected (see handleYoutubeMessage).
+  // Set the artwork that permanently covers the video frame for this track.
   const overlayImg = document.getElementById('yt-ad-overlay-img');
   if (overlayImg) overlayImg.src = track.artwork;
-  setAdOverlay(false);
 
   renderPlayerBar();
   renderMain();
