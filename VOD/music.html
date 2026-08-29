@@ -279,16 +279,8 @@
   .progress-wrap span { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; width: 34px; }
   .progress-track {
     flex: 1; height: 4px; background: var(--surface-2); border-radius: 4px; cursor: pointer; position: relative;
-    touch-action: none;
   }
-  .progress-fill { position: absolute; top: 0; right: 0; height: 100%; background: var(--accent); border-radius: 4px; width: 0%; }
-  .progress-thumb {
-    position: absolute; top: 50%; right: 0%; width: 12px; height: 12px; border-radius: 50%;
-    background: var(--accent); transform: translate(50%, -50%);
-    box-shadow: 0 0 0 3px rgba(232,163,61,0.25); opacity: 0; transition: opacity 0.15s; pointer-events: none;
-  }
-  .progress-track:hover .progress-thumb, .progress-track.dragging .progress-thumb { opacity: 1; }
-  .progress-track.dragging { cursor: grabbing; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; }
 
   .volume-wrap { display: flex; align-items: center; gap: 6px; width: 100px; flex-shrink: 0; }
   .volume-wrap input[type=range] { width: 80px; accent-color: var(--accent); }
@@ -387,7 +379,6 @@ let ytPlayer = null;
 let ytReady = false;
 let pendingVideoId = null;
 let progressInterval = null;
-let isDraggingProgress = false;
 
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('yt-player', {
@@ -432,17 +423,13 @@ function stopProgressPoll() {
   progressInterval = null;
 }
 function updateProgressUI() {
-  if (isDraggingProgress) return;
   if (!ytPlayer || !ytPlayer.getCurrentTime) return;
   const cur = ytPlayer.getCurrentTime();
   const dur = ytPlayer.getDuration();
-  const pct = dur ? (cur/dur*100) : 0;
   const fill = document.getElementById('progress-fill');
-  const thumb = document.getElementById('progress-thumb');
   const curEl = document.getElementById('cur-time');
   const durEl = document.getElementById('dur-time');
-  if (fill && dur) fill.style.width = pct + '%';
-  if (thumb && dur) thumb.style.right = pct + '%';
+  if (fill && dur) fill.style.width = (cur/dur*100) + '%';
   if (curEl) curEl.textContent = fmtTime(cur);
   if (durEl) durEl.textContent = fmtTime(dur);
 }
@@ -814,66 +801,14 @@ function playPrev() {
   playQueue(state.queue, state.queueIndex-1);
 }
 
-function pctFromPointerEvent(ev, trackEl) {
-  const rect = trackEl.getBoundingClientRect();
-  // הבר מוצג ב-RTL: הקצה הימני = תחילת השיר (0%), הקצה השמאלי = סוף השיר (100%).
-  // חישוב האחוז חייב להתבסס על rect.right ולא rect.left, אחרת נקודת הלחיצה
-  // לא תואמת לנקודה שבה מוצג הסמן (זה היה הבאג).
-  let pct = (rect.right - ev.clientX) / rect.width;
-  if (pct < 0) pct = 0;
-  if (pct > 1) pct = 1;
-  return pct;
-}
-
-function setProgressVisual(pct) {
-  const fill = document.getElementById('progress-fill');
-  const thumb = document.getElementById('progress-thumb');
-  if (fill) fill.style.width = (pct * 100) + '%';
-  if (thumb) thumb.style.right = (pct * 100) + '%';
-  if (ytPlayer && ytPlayer.getDuration) {
-    const dur = ytPlayer.getDuration();
-    const curEl = document.getElementById('cur-time');
-    if (curEl && dur) curEl.textContent = fmtTime(pct * dur);
-  }
-}
-
-function commitSeek(pct) {
+function seek(ev) {
+  const track = document.getElementById('progress-track');
+  const rect = track.getBoundingClientRect();
+  const pct = (ev.clientX - rect.left) / rect.width;
   if (ytPlayer && ytPlayer.getDuration) {
     const dur = ytPlayer.getDuration();
     if (dur) ytPlayer.seekTo(pct * dur, true);
   }
-}
-
-function attachProgressTrackEvents() {
-  const track = document.getElementById('progress-track');
-  if (!track || track.dataset.dragBound) return;
-  track.dataset.dragBound = '1';
-
-  track.addEventListener('pointerdown', (ev) => {
-    isDraggingProgress = true;
-    track.classList.add('dragging');
-    stopProgressPoll();
-    try { track.setPointerCapture(ev.pointerId); } catch (e) {}
-    const pct = pctFromPointerEvent(ev, track);
-    setProgressVisual(pct);
-    commitSeek(pct);
-    ev.preventDefault();
-  });
-  track.addEventListener('pointermove', (ev) => {
-    if (!isDraggingProgress) return;
-    const pct = pctFromPointerEvent(ev, track);
-    setProgressVisual(pct);
-  });
-  const endDrag = (ev) => {
-    if (!isDraggingProgress) return;
-    isDraggingProgress = false;
-    track.classList.remove('dragging');
-    const pct = pctFromPointerEvent(ev, track);
-    commitSeek(pct);
-    if (state.isPlaying) startProgressPoll();
-  };
-  track.addEventListener('pointerup', endDrag);
-  track.addEventListener('pointercancel', endDrag);
 }
 
 function renderPlayerBar() {
@@ -904,9 +839,8 @@ function renderPlayerBar() {
     </div>
     <div class="progress-wrap">
       <span id="cur-time">0:00</span>
-      <div class="progress-track" id="progress-track">
+      <div class="progress-track" id="progress-track" onclick="seek(event)">
         <div class="progress-fill" id="progress-fill"></div>
-        <div class="progress-thumb" id="progress-thumb"></div>
       </div>
       <span id="dur-time">0:00</span>
     </div>
@@ -915,7 +849,6 @@ function renderPlayerBar() {
       <input type="range" min="0" max="100" step="5" value="100" oninput="ytPlayer && ytPlayer.setVolume && ytPlayer.setVolume(this.value)">
     </div>
   `;
-  attachProgressTrackEvents();
 }
 
 loadCrates();
