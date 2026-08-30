@@ -1,150 +1,1567 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>מוגו סטרים</title>
-    <style>
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 5px;
-            row-gap: 5px;
-            margin-top: 8px;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        button {
-            position: relative; /* מאפשר למקם את הטקסט בתוך הכפתור */
-            border: none;
-            background: none;
-            padding: 0;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-        }
-        button:hover {
-            transform: scale(1.1);
-        }
-        button img {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .button-label {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            color: white;       /* אפשר לשנות ל־black אם התמונה בהירה */
-            font-size: 1.5em;     /* תגדיל לפי הצורך: 1.2em או 1.5em */
-            font-weight: bold;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6); /* כדי שייראה גם על רקעים בהירים */
-            pointer-events: none; /* שלא יתפוס קליקים */
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        summary {
-            cursor: pointer;
-            padding: 25px 14px;
-            border-bottom: 1px solid #ddd;
-            user-select: none;
-            width: 100%;
-            box-sizing: border-box;
-            font-weight: bold;
-            font-size: 1.5em;
-            background: rgb(227, 237, 247);
-            transition: background 0.2s;
-            text-align: right;
-        }
-        summary:hover {
-            background: #f0f0f0;
-        }
-        .summary-subtext {
-            font-size: 0.85em;
-            font-weight: normal;
-            color: #666;
-            margin-top: 4px;
-        }
-        details {
-            width: 100%;
-            margin: 8px auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-    </style>
+  <title>StudyHub | סיכומים</title>
+
+  <style>
+    /* =========================
+       בסיס
+    ========================= */
+
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --card-hover: #fafaff;
+      --text: #172033;
+      --muted: #788195;
+      --border: #e5e8f0;
+      --primary: #5b5ce2;
+      --primary-dark: #4748c9;
+      --primary-light: #eeeeff;
+      --sidebar: #ffffff;
+      --shadow: 0 12px 35px rgba(35, 45, 80, 0.07);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family:
+        Arial,
+        "Segoe UI",
+        sans-serif;
+
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================
+       Layout
+    ========================= */
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* =========================
+       Sidebar
+    ========================= */
+
+    .sidebar {
+      width: 255px;
+      background: var(--sidebar);
+      border-left: 1px solid var(--border);
+
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+
+      padding: 25px 18px;
+
+      display: flex;
+      flex-direction: column;
+
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 5px 7px 35px;
+    }
+
+    .brand-icon {
+      width: 45px;
+      height: 45px;
+
+      border-radius: 14px;
+
+      display: grid;
+      place-items: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #6264ed,
+          #8868ef
+        );
+
+      color: white;
+      font-size: 21px;
+      font-weight: 800;
+
+      box-shadow:
+        0 8px 20px rgba(91, 92, 226, 0.25);
+    }
+
+    .brand-name {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .navigation {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-button {
+      width: 100%;
+
+      border: 0;
+      background: transparent;
+
+      padding: 13px 14px;
+
+      border-radius: 12px;
+
+      color: var(--muted);
+
+      display: flex;
+      align-items: center;
+
+      gap: 11px;
+
+      text-align: right;
+
+      transition: 0.2s;
+    }
+
+    .nav-button:hover {
+      background: #f2f3f8;
+      color: var(--text);
+    }
+
+    .nav-button.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .nav-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+
+      padding-top: 25px;
+
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-info {
+      background: linear-gradient(
+        135deg,
+        #f0efff,
+        #f8f5ff
+      );
+
+      border-radius: 16px;
+
+      padding: 15px;
+
+      margin-top: 12px;
+    }
+
+    .sidebar-info strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .sidebar-info p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* =========================
+       Main
+    ========================= */
+
+    .main {
+      width: calc(100% - 255px);
+      margin-right: 255px;
+      min-width: 0;
+    }
+
+    /* =========================
+       Topbar
+    ========================= */
+
+    .topbar {
+      height: 82px;
+
+      background: rgba(255,255,255,0.9);
+
+      border-bottom: 1px solid var(--border);
+
+      display: flex;
+      align-items: center;
+
+      gap: 15px;
+
+      padding: 0 38px;
+
+      position: sticky;
+      top: 0;
+
+      z-index: 5;
+
+      backdrop-filter: blur(12px);
+    }
+
+    .search-wrapper {
+      flex: 1;
+      max-width: 650px;
+
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+
+      right: 15px;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      color: var(--muted);
+
+      font-size: 19px;
+    }
+
+    .search {
+      width: 100%;
+
+      border: 1px solid transparent;
+
+      background: #f1f3f7;
+
+      border-radius: 13px;
+
+      padding: 13px 44px 13px 15px;
+
+      outline: none;
+
+      color: var(--text);
+
+      transition: 0.2s;
+    }
+
+    .search:focus {
+      background: white;
+
+      border-color: #c8c9f5;
+
+      box-shadow:
+        0 0 0 4px rgba(91,92,226,.08);
+    }
+
+    .result-count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* =========================
+       Content
+    ========================= */
+
+    .content {
+      max-width: 1250px;
+
+      margin: 0 auto;
+
+      padding: 38px;
+    }
+
+    /* =========================
+       Hero
+    ========================= */
+
+    .hero {
+      background:
+        radial-gradient(
+          circle at 10% 20%,
+          rgba(255,255,255,.16),
+          transparent 28%
+        ),
+        linear-gradient(
+          120deg,
+          #5658e7,
+          #7963ec
+        );
+
+      border-radius: 25px;
+
+      color: white;
+
+      padding: 38px;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 30px;
+
+      margin-bottom: 35px;
+
+      overflow: hidden;
+    }
+
+    .hero-small {
+      opacity: .72;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      letter-spacing: .5px;
+    }
+
+    .hero h1 {
+      font-size: 34px;
+
+      margin: 7px 0;
+
+      line-height: 1.2;
+    }
+
+    .hero p {
+      opacity: .86;
+
+      line-height: 1.6;
+    }
+
+    .hero-decoration {
+      width: 140px;
+      height: 140px;
+
+      border-radius: 35px;
+
+      background: rgba(255,255,255,.1);
+
+      display: grid;
+      place-items: center;
+
+      font-size: 58px;
+
+      transform: rotate(8deg);
+
+      flex-shrink: 0;
+    }
+
+    /* =========================
+       Section
+    ========================= */
+
+    .section-header {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: end;
+
+      margin-bottom: 17px;
+    }
+
+    .section-header h2 {
+      font-size: 21px;
+    }
+
+    .section-header p {
+      color: var(--muted);
+
+      font-size: 13px;
+
+      margin-top: 4px;
+    }
+
+    /* =========================
+       Subjects
+    ========================= */
+
+    .subjects {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+      gap: 15px;
+
+      margin-bottom: 38px;
+    }
+
+    .subject-card {
+      background: var(--card);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius);
+
+      padding: 19px;
+
+      cursor: pointer;
+
+      transition:
+        transform .2s,
+        box-shadow .2s,
+        border-color .2s;
+    }
+
+    .subject-card:hover {
+      transform: translateY(-3px);
+
+      box-shadow: var(--shadow);
+
+      border-color: #d2d3fa;
+    }
+
+    .subject-icon {
+      width: 45px;
+      height: 45px;
+
+      border-radius: 13px;
+
+      background: var(--primary-light);
+
+      display: grid;
+      place-items: center;
+
+      font-size: 21px;
+
+      margin-bottom: 14px;
+    }
+
+    .subject-card h3 {
+      font-size: 16px;
+    }
+
+    .subject-card p {
+      color: var(--muted);
+
+      font-size: 12px;
+
+      margin-top: 4px;
+    }
+
+    /* =========================
+       Summary Cards
+    ========================= */
+
+    .summary-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+      gap: 17px;
+    }
+
+    .summary-card {
+      background: var(--card);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius);
+
+      padding: 20px;
+
+      min-height: 215px;
+
+      display: flex;
+      flex-direction: column;
+
+      transition:
+        transform .2s,
+        box-shadow .2s,
+        border-color .2s;
+    }
+
+    .summary-card:hover {
+      transform: translateY(-3px);
+
+      box-shadow: var(--shadow);
+
+      border-color: #d2d3fa;
+    }
+
+    .card-top {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-flex;
+
+      align-items: center;
+
+      background: var(--primary-light);
+
+      color: var(--primary);
+
+      padding: 5px 10px;
+
+      border-radius: 50px;
+
+      font-size: 11px;
+
+      font-weight: 700;
+    }
+
+    .file-type {
+      color: var(--muted);
+
+      font-size: 11px;
+    }
+
+    .summary-card h3 {
+      font-size: 18px;
+
+      margin: 17px 0 7px;
+    }
+
+    .summary-topic {
+      color: var(--primary);
+
+      font-size: 12px;
+
+      font-weight: 600;
+
+      margin-bottom: 8px;
+    }
+
+    .summary-description {
+      color: var(--muted);
+
+      font-size: 13px;
+
+      line-height: 1.6;
+
+      display: -webkit-box;
+
+      -webkit-line-clamp: 3;
+
+      -webkit-box-orient: vertical;
+
+      overflow: hidden;
+    }
+
+    .card-bottom {
+      margin-top: auto;
+
+      padding-top: 17px;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+    }
+
+    .open-button {
+      border: 0;
+
+      background: var(--primary);
+
+      color: white;
+
+      border-radius: 10px;
+
+      padding: 9px 14px;
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+      text-decoration: none;
+
+      transition: .2s;
+    }
+
+    .open-button:hover {
+      background: var(--primary-dark);
+    }
+
+    .tags {
+      display: flex;
+
+      gap: 5px;
+
+      overflow: hidden;
+    }
+
+    .tag {
+      color: var(--muted);
+
+      background: #f1f3f7;
+
+      border-radius: 50px;
+
+      padding: 4px 7px;
+
+      font-size: 10px;
+
+      white-space: nowrap;
+    }
+
+    /* =========================
+       Empty
+    ========================= */
+
+    .empty {
+      background: var(--card);
+
+      border: 1px dashed #d7dbe5;
+
+      border-radius: var(--radius);
+
+      text-align: center;
+
+      padding: 55px 20px;
+
+      grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+      font-size: 42px;
+
+      margin-bottom: 10px;
+    }
+
+    .empty h3 {
+      margin-bottom: 6px;
+    }
+
+    .empty p {
+      color: var(--muted);
+
+      font-size: 13px;
+    }
+
+    /* =========================
+       Mobile
+    ========================= */
+
+    @media (max-width: 1050px) {
+
+      .subjects {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .summary-grid {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+    }
+
+    @media (max-width: 750px) {
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        width: 100%;
+        margin-right: 0;
+      }
+
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .content {
+        padding: 22px 16px;
+      }
+
+      .result-count {
+        display: none;
+      }
+
+      .hero {
+        padding: 27px;
+
+        display: block;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+
+      .hero-decoration {
+        display: none;
+      }
+
+      .subjects,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card {
+        min-height: 200px;
+      }
+
+    }
+  </style>
 </head>
+
+
 <body>
 
-<h1>כל הסטרימים של מוגו!</h1>
+<div class="app">
 
-<div class="buttons">
-    <button onclick="window.location.href='studies/bagrut_exams/citizenship.html'">
-        <img src="">
-        <span class="button-label">אזרחות</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/english.html'">
-        <img src="">
-        <span class="button-label">אנגלית</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/biology.html'">
-        <img src="">
-        <span class="button-label">ביולוגיה</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/geography.html'">
-        <img src="">
-        <span class="button-label">גאוגרפיה</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/history.html'">
-        <img src="">
-        <span class="button-label">היסטוריה</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/chemistry.html'">
-        <img src="">
-        <span class="button-label">כימיה</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/computer_science.html'">
-        <img src="">
-        <span class="button-label">מדעי המחשב</span>
-    </button>
-    <button onclick="window.location.href='studies/math.html'">
-        <img src="https://cdn-icons-png.flaticon.com/128/12056/12056894.png">
-        <span class="button-label">מתמטיקה</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/literature.html'">
-        <img src="">
-        <span class="button-label">ספרות</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/hebrew.html'">
-        <img src="">
-        <span class="button-label">עברית</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/arabic.html'">
-        <img src="">
-        <span class="button-label">ערבית</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/physics.html'">
-        <img src="">
-        <span class="button-label">פיזיקה</span>
-    </button>
-    <button onclick="window.location.href='studies/bagrut_exams/psychology.html'">
-        <img src="">
-        <span class="button-label">פסיכולוגיה</span>
-    </button>
-    <button onclick="window.location.href='studies/bible.html'">
-        <img src="https://cdn-icons-png.flaticon.com/128/9936/9936573.png">
-        <span class="button-label">תנך</span>
-    </button>
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        S
+      </div>
+
+      <div>
+        <div class="brand-name">
+          StudyHub
+        </div>
+
+        <div class="brand-subtitle">
+          מרכז הסיכומים שלך
+        </div>
+      </div>
+
+    </div>
+
+
+    <nav class="navigation">
+
+      <button
+        class="nav-button active"
+        id="homeButton"
+        onclick="showHome()"
+      >
+        <span class="nav-icon">⌂</span>
+        דף הבית
+      </button>
+
+
+      <button
+        class="nav-button"
+        onclick="showAll()"
+      >
+        <span class="nav-icon">▤</span>
+        כל הסיכומים
+      </button>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+      <div class="sidebar-info">
+
+        <strong>
+          💡 איך מוסיפים סיכום?
+        </strong>
+
+        <p>
+          מעלים את הקובץ לשירות אחסון (למשל
+          Google Drive) ומוסיפים בקוד קישור
+          לקובץ במקום נתיב מקומי.
+        </p>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main class="main">
+
+
+    <header class="topbar">
+
+      <div class="search-wrapper">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          id="search"
+          class="search"
+          type="search"
+          placeholder="חיפוש סיכומים, מקצועות ונושאים..."
+          oninput="render()"
+        >
+
+      </div>
+
+
+      <span
+        id="resultCount"
+        class="result-count"
+      ></span>
+
+    </header>
+
+
+    <div
+      id="content"
+      class="content"
+    ></div>
+
+
+  </main>
+
 </div>
 
+
 <script>
-function goToChannel(url) {
-    // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
-    window.location.href = 'player.html?src=' + encodeURIComponent(url);
+
+/* ==========================================================
+   כאן מוסיפים סיכומים חדשים
+   ==========================================================
+
+   1. מעלים את הקובץ לשירות אחסון בענן
+      (Google Drive, Dropbox וכו') ומוודאים
+      שהקישור פתוח לצפייה/הורדה.
+
+   2. מוסיפים אובייקט חדש לרשימה, כאשר
+      השדה "file" הוא קישור מלא (URL)
+      לקובץ ולא נתיב מקומי.
+
+   לדוגמה:
+
+   {
+     title: "חוקי ניוטון",
+     subject: "פיזיקה",
+     topic: "מכניקה",
+     description: "סיכום של חוקי ניוטון...",
+     file: "https://drive.google.com/file/d/XXXXXXXX/view",
+     tags: ["כוחות", "תנועה"]
+   }
+
+   ========================================================== */
+
+
+const summaries = [
+
+  {
+    title: "זמנים באנגלית",
+    subject: "אנגלית",
+    topic: "זמנים",
+    description:
+      '',
+    file:
+      "https://school.walla.co.il/documents/%D7%A1%D7%99%D7%9B%D7%95%D7%9D%20%D7%96%D7%9E%D7%A0%D7%99%D7%9D%20%D7%91%D7%90%D7%A0%D7%92%D7%9C%D7%99%D7%AA%20-%20%D7%91%D7%92%D7%A8%D7%95%D7%AA%20%D7%91%D7%90%D7%A0%D7%92%D7%9C%D7%99%D7%AA.pdf",
+    tags:
+      ["וואלה!"]
+  },
+
+  {
+    title: "נוסחאון מתמטיקה",
+    subject: "מתמטיקה",
+    topic: "כללי",
+    description:
+      'נספח לכל בחינות הבגרות ברמה של 5 יח"ל',
+    file:
+      "https://meyda.education.gov.il/files/Pop/0files/matmatika/Chativa-Elyona/new-curriculum/5-MATH-Formula_NEW.pdf",
+    tags:
+      ["משרדהחינוך", "35571", "35572"]
+  },
+
+  {
+    title: "אוצר מילים",
+    subject: "ערבית",
+    topic: "כללי",
+    description:
+      "מאגר המילים הכולל מילים משכבות ז-יב",
+    file:
+      "https://meyda.education.gov.il/files/Mazkirut_Pedagogit/ArabSafa/MaagarMilim.pdf",
+    tags:
+      ["משרדהחינוך", "22381"]
+  },
+
+  {
+    title: "נוסחאות ונתונים בפיזיקה",
+    subject: "פיזיקה",
+    topic: "כללי",
+    description:
+      'נספח לכל בחינות הבגרות ברמה של 5 יח"ל',
+    file:
+      "https://meyda.education.gov.il/files/mazkirut_pedagogit/phizika/2019/noschaonphizika2020he.pdf",
+    tags:
+      ["משרדהחינוך", "36361", "36371"]
+  },
+
+  {
+    title: "ספר בראשית",
+    subject: "תנך",
+    topic: "סיפורי ראשית העולם והאנושות",
+    description:
+      "מצגת בנושא: בראשית",
+    file:
+      "https://docs.google.com/viewerng/viewer?url=https://bagrutbetanach.co.il/wp-content/uploads/2022/07/%D7%91%D7%A8%D7%90%D7%A9%D7%99%D7%AA-1.pdf&hl=en",
+    tags:
+      ["תנךבקליק", "1262"]
+  },
+
+  {
+    title: "סיפורי אבות",
+    subject: "תנך",
+    topic: "בראשית",
+    description:
+      "מצגת בנושא: אבות",
+    file:
+      "https://docs.google.com/viewerng/viewer?url=https://bagrutbetanach.co.il/wp-content/uploads/2022/05/%D7%90%D7%91%D7%95%D7%AA.pdf&hl=en",
+    tags:
+      ["תנךבקליק", "1261"]
+  },
+
+  {
+    title: "יוסף",
+    subject: "תנך",
+    topic: "בראשית",
+    description:
+      "מצגת בנושא: יוסף",
+    file:
+      "https://docs.google.com/viewerng/viewer?url=https://bagrutbetanach.co.il/wp-content/uploads/2022/05/%D7%9E%D7%A6%D7%92%D7%AA-%D7%99%D7%95%D7%A1%D7%A3-%D7%9E%D7%A2%D7%95%D7%A6%D7%91.pdf&hl=en",
+    tags:
+      ["תנךבקליק", "1261"]
+  },
+
+  {
+    title: "ספר שמות",
+    subject: "תנך",
+    topic: "שמות",
+    description:
+      "מצגת בנושא: שמות",
+    file:
+      "https://docs.google.com/viewerng/viewer?url=https://bagrutbetanach.co.il/wp-content/uploads/2022/05/%D7%9E%D7%A6%D7%92%D7%AA-%D7%A9%D7%9E%D7%95%D7%AA-%D7%9E%D7%A2%D7%95%D7%A6%D7%91%D7%AA-%D7%AA%D7%A0%D7%9A-%D7%91%D7%A7%D7%9C%D7%99%D7%A7.pdf&hl=en",
+    tags:
+      ["תנךבקליק", "1261"]
+  },
+
+  {
+    title: "חוק ומשפט",
+    subject: "תנך",
+    topic: "נושאי הבחירה",
+    description:
+      "מצגת בנושא: חוק ומשפט",
+    file:
+      "https://docs.google.com/viewerng/viewer?url=https://bagrutbetanach.co.il/wp-content/uploads/2022/08/%D7%9E%D7%A6%D7%92%D7%AA-%D7%97%D7%95%D7%A7-%D7%9E%D7%A2%D7%95%D7%A6%D7%91.pdf&hl=en",
+    tags:
+      ["תנךבקליק", "1261"]
+  }
+
+];
+
+
+/* ==========================================================
+   משתנים
+   ========================================================== */
+
+let currentView = "home";
+
+let selectedSubject = null;
+
+
+/* ==========================================================
+   Render ראשי
+   ========================================================== */
+
+function render() {
+
+  const content =
+    document.getElementById("content");
+
+  const search =
+    document
+      .getElementById("search")
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  let filtered =
+    summaries.filter(summary => {
+
+      const searchableText = [
+
+        summary.title,
+
+        summary.subject,
+
+        summary.topic,
+
+        summary.description,
+
+        ...(summary.tags || [])
+
+      ]
+      .join(" ")
+      .toLowerCase();
+
+
+      return searchableText.includes(search);
+
+    });
+
+
+  if (selectedSubject) {
+
+    filtered =
+      filtered.filter(
+        summary =>
+          summary.subject === selectedSubject
+      );
+
+  }
+
+
+  document.getElementById("resultCount")
+    .textContent =
+      `${filtered.length} סיכומים`;
+
+
+  if (currentView === "home") {
+
+    renderHome(filtered);
+
+  } else {
+
+    renderAll(filtered);
+
+  }
+
 }
+
+
+/* ==========================================================
+   דף הבית
+   ========================================================== */
+
+function renderHome(filtered) {
+
+  const content =
+    document.getElementById("content");
+
+
+  content.innerHTML = `
+
+    <section class="hero">
+
+      <div>
+
+        <div class="hero-small">
+          STUDYHUB · מרכז הלמידה
+        </div>
+
+        <h1>
+          לומדים חכם יותר.
+        </h1>
+
+        <p>
+          כל הסיכומים שלך במקום אחד,
+          מסודרים ונגישים.
+        </p>
+
+      </div>
+
+
+      <div class="hero-decoration">
+        📚
+      </div>
+
+    </section>
+
+
+    <div class="section-header">
+
+      <div>
+
+        <h2>
+          מקצועות
+        </h2>
+
+        <p>
+          בחרו מקצוע כדי לראות את הסיכומים שלו
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="subjects">
+
+      ${createSubjects()}
+
+    </div>
+
+
+    <div class="section-header">
+
+      <div>
+
+        <h2>
+          כל הסיכומים
+        </h2>
+
+        <p>
+          ${filtered.length} סיכומים זמינים
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="summary-grid">
+
+      ${createCards(filtered)}
+
+    </div>
+
+  `;
+
+}
+
+
+/* ==========================================================
+   כל הסיכומים
+   ========================================================== */
+
+function renderAll(filtered) {
+
+  const content =
+    document.getElementById("content");
+
+
+  content.innerHTML = `
+
+    <div class="section-header">
+
+      <div>
+
+        <h2>
+          ${selectedSubject || "כל הסיכומים"}
+        </h2>
+
+        <p>
+          ${filtered.length} סיכומים
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="summary-grid">
+
+      ${createCards(filtered)}
+
+    </div>
+
+  `;
+
+}
+
+
+/* ==========================================================
+   יצירת מקצועות
+   ========================================================== */
+
+function createSubjects() {
+
+  const subjectMap = {};
+
+
+  summaries.forEach(summary => {
+
+    if (!subjectMap[summary.subject]) {
+
+      subjectMap[summary.subject] = 0;
+
+    }
+
+    subjectMap[summary.subject]++;
+
+  });
+
+
+  if (
+    Object.keys(subjectMap).length === 0
+  ) {
+
+    return `
+
+      <div class="empty">
+
+        <div class="empty-icon">
+          📚
+        </div>
+
+        <h3>
+          עדיין אין סיכומים
+        </h3>
+
+        <p>
+          הוסיפו סיכומים לרשימה בקוד.
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+
+  return Object
+    .entries(subjectMap)
+    .map(([subject, count]) => {
+
+      return `
+
+        <div
+          class="subject-card"
+          onclick='openSubject(${JSON.stringify(subject)})'
+        >
+
+          <div class="subject-icon">
+            ${getSubjectIcon(subject)}
+          </div>
+
+          <h3>
+            ${escapeHTML(subject)}
+          </h3>
+
+          <p>
+            ${count} סיכומים
+          </p>
+
+        </div>
+
+      `;
+
+    })
+    .join("");
+
+}
+
+
+/* ==========================================================
+   יצירת כרטיסי סיכומים
+   ========================================================== */
+
+function createCards(list) {
+
+  if (list.length === 0) {
+
+    return `
+
+      <div class="empty">
+
+        <div class="empty-icon">
+          🔎
+        </div>
+
+        <h3>
+          לא נמצאו סיכומים
+        </h3>
+
+        <p>
+          נסו מילת חיפוש אחרת.
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+
+  return list.map(summary => {
+
+    return `
+
+      <article class="summary-card">
+
+        <div class="card-top">
+
+          <span class="badge">
+            ${escapeHTML(summary.subject)}
+          </span>
+
+          <span class="file-type">
+            PDF
+          </span>
+
+        </div>
+
+
+        <h3>
+          ${escapeHTML(summary.title)}
+        </h3>
+
+
+        ${
+          summary.topic
+          ?
+          `
+            <div class="summary-topic">
+              ${escapeHTML(summary.topic)}
+            </div>
+          `
+          :
+          ""
+        }
+
+
+        <p class="summary-description">
+
+          ${escapeHTML(
+            summary.description || ""
+          )}
+
+        </p>
+
+
+        <div class="card-bottom">
+
+          <div class="tags">
+
+            ${(summary.tags || [])
+              .slice(0, 3)
+              .map(tag => `
+                <span class="tag">
+                  #${escapeHTML(tag)}
+                </span>
+              `)
+              .join("")
+            }
+
+          </div>
+
+
+          <a
+            class="open-button"
+            href="${escapeAttribute(summary.file)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            פתיחת הסיכום
+          </a>
+
+        </div>
+
+      </article>
+
+    `;
+
+  }).join("");
+
+}
+
+
+/* ==========================================================
+   פתיחת מקצוע
+   ========================================================== */
+
+function openSubject(subject) {
+
+  selectedSubject = subject;
+
+  currentView = "all";
+
+  updateNavigation();
+
+  render();
+
+}
+
+
+/* ==========================================================
+   דף הבית
+   ========================================================== */
+
+function showHome() {
+
+  currentView = "home";
+
+  selectedSubject = null;
+
+  updateNavigation();
+
+  render();
+
+}
+
+
+/* ==========================================================
+   כל הסיכומים
+   ========================================================== */
+
+function showAll() {
+
+  currentView = "all";
+
+  selectedSubject = null;
+
+  updateNavigation();
+
+  render();
+
+}
+
+
+/* ==========================================================
+   ניווט
+   ========================================================== */
+
+function updateNavigation() {
+
+  document
+    .querySelectorAll(".nav-button")
+    .forEach(button => {
+
+      button.classList.remove("active");
+
+    });
+
+
+  if (currentView === "home") {
+
+    document
+      .getElementById("homeButton")
+      .classList.add("active");
+
+  }
+
+}
+
+
+/* ==========================================================
+   אייקונים למקצועות
+   ========================================================== */
+
+function getSubjectIcon(subject) {
+
+  const icons = {
+
+    "מתמטיקה": "∑",
+
+    "פיזיקה": "⚛",
+
+    "ביולוגיה": "🧬",
+
+    "כימיה": "⚗",
+
+    "היסטוריה": "🏛",
+
+    "אנגלית": "A",
+
+    "עברית": "א",
+
+    "מדעי המחשב": "💻",
+
+    "גיאוגרפיה": "🌍",
+
+    "תנך": "📘",
+
+    "ערבית": "ع"
+
+  };
+
+
+  return icons[subject] || "📘";
+
+}
+
+
+/* ==========================================================
+   אבטחת HTML
+   ========================================================== */
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function escapeAttribute(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+}
+
+
+/* ==========================================================
+   טעינה ראשונית
+   ========================================================== */
+
+render();
+
 </script>
 
 </body>

@@ -223,13 +223,33 @@ header {
     font-size: 13px;
 }
 
+/* ========================= COOLDOWN BANNER ========================= */
+.cooldown-banner {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--secondary);
+    max-width: 760px;
+    margin: 0 auto;
+}
+.cooldown-banner.active { display: flex; }
+.cooldown-banner strong { color: var(--accent); }
+
 /* ========================= INPUT BAR ========================= */
 .input-bar {
     flex-shrink: 0;
     border-top: 1px solid var(--border);
     padding: 16px 20px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
 }
 
 .input-inner {
@@ -243,6 +263,8 @@ header {
     border-radius: 20px;
     padding: 10px 10px 10px 16px;
 }
+
+.input-inner.locked { opacity: 0.55; }
 
 #messageInput {
     flex: 1;
@@ -314,7 +336,11 @@ header {
 </div>
 
 <div class="input-bar">
-    <div class="input-inner">
+    <div class="cooldown-banner" id="cooldownBanner">
+        ⏳ הגעת למכסת הבקשות. אפשר לשלוח שוב בעוד <strong id="cooldownSeconds">60</strong> שניות.
+    </div>
+
+    <div class="input-inner" id="inputInner">
         <textarea
             id="messageInput"
             rows="1"
@@ -328,12 +354,18 @@ header {
 
 <script>
 
-
 /* =====================================================
    STATE
 ===================================================== */
 let conversation = [];
 let isWaiting = false;
+
+/* FIX: מנעול קירור אמיתי - כשמגיעה שגיאת "יותר מדי בקשות",
+   נועלים לגמרי את השליחה עד שהטיימר מגיע לאפס. בלי זה, כל
+   ניסיון נוסף בזמן ההמתנה בעצם מאריך את החלון מחדש אצל גוגל,
+   וזו הסיבה שהטיימר "חוזר ל-60 שניות" שוב ושוב. */
+let cooldownInterval = null;
+let cooldownRemaining = 0;
 
 /* =====================================================
    INIT
@@ -377,6 +409,59 @@ function sendSuggestion(text) {
 }
 
 /* =====================================================
+   COOLDOWN LOCK
+
+   FIX: מנתח את הודעת השגיאה של גוגל ("Please retry in 27.5s")
+   ונועל את התיבה + הכפתור עם טיימר חי, כדי שלא יהיה אפשרי
+   לשלוח שוב לפני שהזמן באמת נגמר.
+===================================================== */
+function startCooldown(seconds) {
+    clearInterval(cooldownInterval);
+
+    cooldownRemaining = Math.ceil(seconds);
+
+    const banner = document.getElementById("cooldownBanner");
+    const inputInner = document.getElementById("inputInner");
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("messageInput");
+
+    banner.classList.add("active");
+    inputInner.classList.add("locked");
+    sendBtn.disabled = true;
+    messageInput.disabled = true;
+
+    updateCooldownDisplay();
+
+    cooldownInterval = setInterval(() => {
+        cooldownRemaining -= 1;
+
+        if (cooldownRemaining <= 0) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+
+            banner.classList.remove("active");
+            inputInner.classList.remove("locked");
+            sendBtn.disabled = false;
+            messageInput.disabled = false;
+            messageInput.focus();
+            return;
+        }
+
+        updateCooldownDisplay();
+    }, 1000);
+}
+
+function updateCooldownDisplay() {
+    document.getElementById("cooldownSeconds").textContent = cooldownRemaining;
+}
+
+function extractRetrySeconds(message) {
+    const match = /retry in ([\d.]+)\s*s/i.exec(message || "");
+    if (match) return parseFloat(match[1]);
+    return 60;
+}
+
+/* =====================================================
    CLEAR CHAT
 ===================================================== */
 function clearChat() {
@@ -398,7 +483,7 @@ function clearChat() {
    SEND MESSAGE
 ===================================================== */
 async function sendMessage() {
-    if (isWaiting) return;
+    if (isWaiting || cooldownInterval) return;
 
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
@@ -435,15 +520,24 @@ async function sendMessage() {
         console.error(error);
         appendError(error.message);
 
+        /* FIX: אם זו שגיאת מכסה, ננעל את השליחה עד שהזמן נגמר -
+           במקום לתת למשתמש להזין שוב מיד ולאפס את החלון. */
+        if (/quota|429|resource_exhausted/i.test(error.message)) {
+            const seconds = extractRetrySeconds(error.message);
+            startCooldown(seconds);
+        }
+
     } finally {
         isWaiting = false;
-        document.getElementById("sendBtn").disabled = false;
+        if (!cooldownInterval) {
+            document.getElementById("sendBtn").disabled = false;
+        }
         input.focus();
     }
 }
 
 /* =====================================================
-   GEMINI API CALL
+   GEMINI API CALL (via Cloudflare Worker proxy)
 ===================================================== */
 async function callGemini() {
     const contents = conversation.map((msg) => ({

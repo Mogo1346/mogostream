@@ -2,10 +2,8 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#ffffff">
-    <link rel="manifest" href="/mogostream/manifest.webmanifest">
     <title>מוגו סטרים</title>
+    <link rel="icon" href="https://i.ibb.co/yTDpnx1/logo.jpg">
     <style>
         .buttons {
             display: grid;
@@ -61,12 +59,6 @@
 function goToChannel(url) {
     // מעביר לדף הנגן עם כתובת ה-M3U8 בפרמטר
     window.location.href = 'player.html?src=' + encodeURIComponent(url);
-}
-</script>
-
-<script>
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/mogostream/sw.js");
 }
 </script>
 
