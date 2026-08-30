@@ -389,6 +389,9 @@ let pendingVideoId = null;
 let progressInterval = null;
 let isDraggingProgress = false;
 
+// קאש פשוט בזיכרון כדי לא לבזבז קריאות API על אותו שיר פעמיים באותה הפעלה
+const videoIdCache = {};
+
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('yt-player', {
     height: '68',
@@ -447,13 +450,63 @@ function updateProgressUI() {
   if (durEl) durEl.textContent = fmtTime(dur);
 }
 
-async function searchYoutubeVideoId(query) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message || 'YouTube API error');
-  const item = (data.items||[])[0];
-  return item ? item.id.videoId : null;
+// ---- התאמת סרטון יוטיוב משופרת ----
+// במקום לקחת בעיוורון את התוצאה הראשונה (maxResults=1), אנחנו מביאים כמה
+// מועמדים, מביאים את פרטי המשך שלהם, ומנקדים אותם לפי כותרת/ערוץ/משך זמן,
+// כדי להגדיל את הסיכוי שיימצא בדיוק הסרטון עם השיר המבוקש.
+async function searchYoutubeVideoId(query, targetDurationSec) {
+  const cacheKey = query + '|' + (targetDurationSec || '');
+  if (videoIdCache[cacheKey] !== undefined) return videoIdCache[cacheKey];
+
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&type=video&videoCategoryId=10&q=${encodeURIComponent(query)}&key=${YT_API_KEY}`;
+  const searchRes = await fetch(searchUrl);
+  const searchData = await searchRes.json();
+  if (searchData.error) throw new Error(searchData.error.message || 'YouTube API error');
+
+  const items = searchData.items || [];
+  if (!items.length) {
+    videoIdCache[cacheKey] = null;
+    return null;
+  }
+
+  const ids = items.map(i => i.id.videoId).join(',');
+  const detailsRes = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${ids}&key=${YT_API_KEY}`
+  );
+  const detailsData = await detailsRes.json();
+  if (detailsData.error) throw new Error(detailsData.error.message || 'YouTube API error');
+
+  const scored = (detailsData.items || []).map(v => {
+    let score = 0;
+    const title = (v.snippet.title || '').toLowerCase();
+    const channel = (v.snippet.channelTitle || '').toLowerCase();
+    const durSec = parseISODuration(v.contentDetails.duration);
+
+    if (/official audio|official video|official music video/.test(title)) score += 3;
+    if (channel.endsWith('- topic')) score += 4; // ערוצי "Topic" הם ערוצי מטא-דאטה רשמיים של יוטיוב מיוזיק
+    if (/live|cover|remix|reaction|lyrics|karaoke|8d audio|slowed|sped up/.test(title)) score -= 3;
+
+    if (targetDurationSec && durSec) {
+      const diff = Math.abs(durSec - targetDurationSec);
+      if (diff <= 5) score += 5;
+      else if (diff <= 15) score += 2;
+      else if (diff > 60) score -= 5;
+    }
+
+    return { videoId: v.id, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  const best = scored[0] ? scored[0].videoId : items[0].id.videoId;
+  videoIdCache[cacheKey] = best;
+  return best;
+}
+
+function parseISODuration(iso) {
+  const m = (iso || '').match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+  if (!m) return 0;
+  const h = parseInt(m[1]) || 0, min = parseInt(m[2]) || 0, s = parseInt(m[3]) || 0;
+  return h * 3600 + min * 60 + s;
 }
 
 const audioUnused = null;
@@ -776,7 +829,7 @@ async function playQueue(queue, index) {
   renderPlayerBar();
   renderMain();
   try {
-    const videoId = await searchYoutubeVideoId(`${track.artist} ${track.title} audio`);
+    const videoId = await searchYoutubeVideoId(`${track.artist} - ${track.title} audio`, track.duration);
     state.loadingTrack = null;
     if (!videoId) {
       alert('לא נמצא סרטון מתאים ביוטיוב עבור השיר הזה');
