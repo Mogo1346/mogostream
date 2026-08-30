@@ -471,20 +471,26 @@ async function searchYoutubeVideoId(query, targetDurationSec) {
 
   const ids = items.map(i => i.id.videoId).join(',');
   const detailsRes = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${ids}&key=${YT_API_KEY}`
+    `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,topicDetails&id=${ids}&key=${YT_API_KEY}`
   );
   const detailsData = await detailsRes.json();
   if (detailsData.error) throw new Error(detailsData.error.message || 'YouTube API error');
 
+  // מילות מפתח שמעידות על גרסה שאינה השיר המקורי המלא (אינסטרומנטל, קריוקי וכו').
+  // נבדקות גם בכותרת וגם בתיאור, כי לא כל יוצר תוכן מציין את זה בכותרת עצמה.
+  const NON_ORIGINAL_PATTERN = /live|cover|remix|reaction|lyrics(?!\s*video)|karaoke|8d audio|slowed|sped up|instrumental|no vocals|backing track|minus one|acapella|a cappella|tutorial|piano version|guitar version/;
+
   const scored = (detailsData.items || []).map(v => {
     let score = 0;
     const title = (v.snippet.title || '').toLowerCase();
+    const description = (v.snippet.description || '').toLowerCase();
     const channel = (v.snippet.channelTitle || '').toLowerCase();
     const durSec = parseISODuration(v.contentDetails.duration);
+    const combinedText = title + ' ' + description.slice(0, 300); // רק תחילת התיאור, מספיק לרוב היוצרים
 
     if (/official audio|official video|official music video/.test(title)) score += 3;
-    if (channel.endsWith('- topic')) score += 4; // ערוצי "Topic" הם ערוצי מטא-דאטה רשמיים של יוטיוב מיוזיק
-    if (/live|cover|remix|reaction|lyrics|karaoke|8d audio|slowed|sped up/.test(title)) score -= 3;
+    if (channel.endsWith('- topic')) score += 4; // ערוצי "Topic" הם ערוצי מטא-דאטה רשמיים של יוטיוב מיוזיק, כמעט לעולם לא גרסאות אינסטרומנטליות
+    if (NON_ORIGINAL_PATTERN.test(combinedText)) score -= 6;
 
     if (targetDurationSec && durSec) {
       const diff = Math.abs(durSec - targetDurationSec);
