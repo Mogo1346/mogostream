@@ -452,10 +452,8 @@ function updateProgressUI() {
 
 // ---- התאמת סרטון יוטיוב משופרת ----
 // במקום לקחת בעיוורון את התוצאה הראשונה (maxResults=1), אנחנו מביאים כמה
-// מועמדים, מביאים את פרטי המשך שלהם (כולל סטטיסטיקת צפיות), ומנקדים אותם
-// לפי כותרת/ערוץ/משך זמן/כמות צפיות, כדי להגדיל את הסיכוי שיימצא בדיוק
-// הסרטון עם השיר המבוקש, ומתוך הגרסאות הסבירות - זו שנחשבת הכי "רשמית"
-// ופופולרית.
+// מועמדים, מביאים את פרטי המשך שלהם, ומנקדים אותם לפי כותרת/ערוץ/משך זמן,
+// כדי להגדיל את הסיכוי שיימצא בדיוק הסרטון עם השיר המבוקש.
 async function searchYoutubeVideoId(query, targetDurationSec) {
   const cacheKey = query + '|' + (targetDurationSec || '');
   if (videoIdCache[cacheKey] !== undefined) return videoIdCache[cacheKey];
@@ -472,9 +470,8 @@ async function searchYoutubeVideoId(query, targetDurationSec) {
   }
 
   const ids = items.map(i => i.id.videoId).join(',');
-  // הוספנו "statistics" ל-part כדי לקבל גם את viewCount לכל מועמד.
   const detailsRes = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,topicDetails,statistics&id=${ids}&key=${YT_API_KEY}`
+    `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,topicDetails&id=${ids}&key=${YT_API_KEY}`
   );
   const detailsData = await detailsRes.json();
   if (detailsData.error) throw new Error(detailsData.error.message || 'YouTube API error');
@@ -489,7 +486,6 @@ async function searchYoutubeVideoId(query, targetDurationSec) {
     const description = (v.snippet.description || '').toLowerCase();
     const channel = (v.snippet.channelTitle || '').toLowerCase();
     const durSec = parseISODuration(v.contentDetails.duration);
-    const viewCount = parseInt((v.statistics && v.statistics.viewCount) || '0', 10);
     const combinedText = title + ' ' + description.slice(0, 300); // רק תחילת התיאור, מספיק לרוב היוצרים
 
     if (/official audio|official video|official music video/.test(title)) score += 3;
@@ -501,15 +497,6 @@ async function searchYoutubeVideoId(query, targetDurationSec) {
       if (diff <= 5) score += 5;
       else if (diff <= 15) score += 2;
       else if (diff > 60) score -= 5;
-    }
-
-    // בונוס לפי כמות צפיות, בסולם לוגריתמי (base 10) כדי שהפרש בין
-    // 1K ל-10K צפיות ישקול כמו הפרש בין 1M ל-10M, ולא שסרטון ויראלי
-    // אחד ינצח אוטומטית כל שיקול אחר. תקרה של +6 כדי לא לתת לפופולריות
-    // לגבור על סימני "לא-מקורי" (למשל קאבר ויראלי עם המון צפיות).
-    if (viewCount > 0) {
-      const viewScore = Math.log10(viewCount) - 3; // 1K צפיות = 0, 1M = +3, 1B = +6
-      score += Math.max(0, Math.min(6, viewScore));
     }
 
     return { videoId: v.id, score };

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sidetrack — search and listen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12181c;
+    --ink-2:#1a2228;
+    --paper:#f2ede4;
+    --paper-dim:#c9c2b3;
+    --amber:#e8a33d;
+    --teal:#3e6e67;
+    --line:rgba(242,237,228,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:48px 20px 80px;
+  }
+  .wrap{width:100%;max-width:640px;}
+
+  header{text-align:left;margin-bottom:36px;}
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:2.4rem;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--paper-dim);
+    font-size:0.95rem;
+    line-height:1.5;
+    max-width:46ch;
+  }
+
+  .key-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:28px;
+    padding:14px 16px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    align-items:center;
+  }
+  .key-row.set{border-color:var(--teal);}
+  .key-row input{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--paper);
+    font-family:'Inter',monospace;
+    font-size:0.85rem;
+    outline:none;
+  }
+  .key-row input::placeholder{color:var(--paper-dim);}
+  .key-row button{
+    background:var(--amber);
+    color:var(--ink);
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    font-weight:600;
+    font-size:0.85rem;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .key-row button:hover{opacity:0.9;}
+  .key-note{
+    font-size:0.78rem;
+    color:var(--paper-dim);
+    margin:-18px 0 28px;
+    line-height:1.5;
+  }
+  .key-note a{color:var(--amber);}
+
+  form.search{
+    display:flex;
+    border-bottom:2px solid var(--paper);
+    margin-bottom:8px;
+    padding-bottom:10px;
+  }
+  form.search input{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--paper);
+    font-family:'Fraunces',serif;
+    font-size:1.3rem;
+    outline:none;
+  }
+  form.search input::placeholder{color:var(--paper-dim);}
+  form.search button{
+    background:none;
+    border:none;
+    color:var(--amber);
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    cursor:pointer;
+    padding:0 4px;
+  }
+
+  .status{
+    font-size:0.85rem;
+    color:var(--paper-dim);
+    margin:14px 2px 0;
+    min-height:1.2em;
+  }
+  .status.error{color:#e0776a;}
+
+  .results{
+    list-style:none;
+    margin:20px 0 0;
+    padding:0;
+  }
+  .result{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    padding:12px 8px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .result:hover{background:var(--ink-2);}
+  .result img{
+    width:64px;
+    height:48px;
+    object-fit:cover;
+    border-radius:6px;
+    flex-shrink:0;
+  }
+  .result .meta{min-width:0;}
+  .result .title{
+    font-size:0.95rem;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .result .channel{
+    font-size:0.8rem;
+    color:var(--paper-dim);
+    margin-top:2px;
+  }
+
+  .player-dock{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--ink-2);
+    border-top:1px solid var(--line);
+    display:none;
+    padding:14px 20px;
+    align-items:center;
+    gap:16px;
+  }
+  .player-dock.active{display:flex;}
+  .disc{
+    width:44px;height:44px;border-radius:50%;
+    background:radial-gradient(circle at center, var(--ink) 0 6px, var(--amber) 6px 8px, var(--ink) 8px 100%);
+    flex-shrink:0;
+    animation:spin 3s linear infinite;
+    animation-play-state:paused;
+  }
+  .disc.spinning{animation-play-state:running;}
+  @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  .now-playing{
+    flex:1;
+    min-width:0;
+  }
+  .now-playing .title{
+    font-size:0.9rem;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .now-playing .sub{
+    font-size:0.75rem;
+    color:var(--paper-dim);
+  }
+  #yt-player-holder{
+    width:200px;
+    max-width:40vw;
+    aspect-ratio:16/9;
+    border-radius:6px;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  #yt-player-holder iframe{width:100%;height:100%;border:0;}
+
+  @media (max-width:480px){
+    #yt-player-holder{width:120px;}
+    .now-playing{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sidetrack</h1>
+    <p>Search plays through YouTube's own player below — nothing hidden, nothing downloaded. You'll need a free YouTube Data API key to search.</p>
+  </header>
+
+  <div class="key-row" id="keyRow">
+    <input id="apiKey" type="password" placeholder="Paste your YouTube Data API v3 key" autocomplete="off">
+    <button id="saveKey">Use key</button>
+  </div>
+  <div class="key-note">
+    Get a free key from the <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Google Cloud Console</a> (enable "YouTube Data API v3", then create an API key under Credentials). The key stays in this browser tab only — it's never sent anywhere but Google, and it's forgotten when you close the page.
+  </div>
+
+  <form class="search" id="searchForm">
+    <input id="q" type="text" placeholder="Search for a song or artist…" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+  <div class="status" id="status"></div>
+
+  <ul class="results" id="results"></ul>
+</div>
+
+<div class="player-dock" id="playerDock">
+  <div class="disc" id="disc"></div>
+  <div class="now-playing">
+    <div class="title" id="npTitle">—</div>
+    <div class="sub" id="npChannel"></div>
+  </div>
+  <div id="yt-player-holder"><div id="yt-player"></div></div>
+</div>
+
+<script>
+let apiKey = '';
+let player = null;
+let ytApiReady = false;
+
+const keyInput = document.getElementById('apiKey');
+const keyRow = document.getElementById('keyRow');
+document.getElementById('saveKey').addEventListener('click', () => {
+  apiKey = keyInput.value.trim();
+  if (apiKey) {
+    keyRow.classList.add('set');
+    setStatus('Key set for this session. Try a search.');
+  }
+});
+
+const statusEl = document.getElementById('status');
+function setStatus(msg, isError) {
+  statusEl.textContent = msg || '';
+  statusEl.classList.toggle('error', !!isError);
+}
+
+document.getElementById('searchForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const q = document.getElementById('q').value.trim();
+  if (!q) return;
+  if (!apiKey) {
+    setStatus('Add your API key above first.', true);
+    return;
+  }
+  setStatus('Searching…');
+  document.getElementById('results').innerHTML = '';
+  try {
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=12&q=${encodeURIComponent(q)}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) {
+      setStatus(data.error.message || 'Search failed.', true);
+      return;
+    }
+    renderResults(data.items || []);
+    setStatus(data.items && data.items.length ? '' : 'No results.');
+  } catch (err) {
+    setStatus('Network error while searching.', true);
+  }
+});
+
+function renderResults(items) {
+  const list = document.getElementById('results');
+  list.innerHTML = '';
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.className = 'result';
+    const thumb = item.snippet.thumbnails.default.url;
+    li.innerHTML = `
+      <img src="${thumb}" alt="">
+      <div class="meta">
+        <div class="title">${escapeHtml(item.snippet.title)}</div>
+        <div class="channel">${escapeHtml(item.snippet.channelTitle)}</div>
+      </div>`;
+    li.addEventListener('click', () => play(item.id.videoId, item.snippet.title, item.snippet.channelTitle));
+    list.appendChild(li);
+  });
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// YouTube IFrame Player API
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+document.body.appendChild(tag);
+
+function onYouTubeIframeAPIReady() {
+  ytApiReady = true;
+  player = new YT.Player('yt-player', {
+    height: '100%',
+    width: '100%',
+    events: {
+      'onStateChange': onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerStateChange(e) {
+  const disc = document.getElementById('disc');
+  disc.classList.toggle('spinning', e.data === YT.PlayerState.PLAYING);
+}
+
+function play(videoId, title, channel) {
+  document.getElementById('playerDock').classList.add('active');
+  document.getElementById('npTitle').textContent = title;
+  document.getElementById('npChannel').textContent = channel;
+  if (ytApiReady && player && player.loadVideoById) {
+    player.loadVideoById(videoId);
+  } else {
+    // API not ready yet — retry shortly
+    setTimeout(() => play(videoId, title, channel), 400);
+  }
+}
+</script>
+</body>
+</html>
