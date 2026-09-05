@@ -4,16 +4,50 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const UPSTREAM_URL = process.env.UPSTREAM_URL;
 
-app.get("/stream", async (req, res) => {
+function safeUrl(raw) {
   try {
-    const response = await fetch(UPSTREAM_URL);
+    const u = new URL(raw);
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return "(invalid URL)";
+  }
+}
+
+app.get("/", (req, res) => {
+  res.send("HLS Proxy is running");
+});
+
+app.get("/stream", async (req, res) => {
+  console.log("=== /stream requested ===");
+  console.log("Upstream:", safeUrl(UPSTREAM_URL));
+
+  try {
+    const response = await fetch(UPSTREAM_URL, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/vnd.apple.mpegurl, application/x-mpegURL, */*"
+      },
+      redirect: "follow"
+    });
+
+    console.log(
+      "Upstream status:",
+      response.status,
+      response.statusText
+    );
+
+    console.log(
+      "Content-Type:",
+      response.headers.get("content-type")
+    );
 
     if (!response.ok) {
-      return res.status(response.status).send("Upstream error");
+      return res
+        .status(response.status)
+        .send(`Upstream HTTP ${response.status}`);
     }
 
     const playlist = await response.text();
-
     const base = new URL(UPSTREAM_URL);
 
     const rewritten = playlist
@@ -25,9 +59,12 @@ app.get("/stream", async (req, res) => {
           return line;
         }
 
-        const absoluteUrl = new URL(trimmed, base).href;
-
-        return `/proxy?url=${encodeURIComponent(absoluteUrl)}`;
+        try {
+          const absoluteUrl = new URL(trimmed, base).href;
+          return `/proxy?url=${encodeURIComponent(absoluteUrl)}`;
+        } catch {
+          return line;
+        }
       })
       .join("\n");
 
@@ -40,8 +77,11 @@ app.get("/stream", async (req, res) => {
     res.send(rewritten);
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Proxy error");
+    console.error("FETCH ERROR:", error.stack || error);
+
+    res
+      .status(502)
+      .send("Proxy connection error");
   }
 });
 
@@ -53,7 +93,18 @@ app.get("/proxy", async (req, res) => {
       return res.status(400).send("Invalid URL");
     }
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      },
+      redirect: "follow"
+    });
+
+    console.log(
+      "Segment status:",
+      response.status,
+      url.origin + url.pathname
+    );
 
     if (!response.ok) {
       return res.status(response.status).send("Upstream error");
@@ -72,13 +123,9 @@ app.get("/proxy", async (req, res) => {
     res.send(data);
 
   } catch (error) {
-    console.error(error);
+    console.error("PROXY ERROR:", error.stack || error);
     res.status(500).send("Proxy error");
   }
-});
-
-app.get("/", (req, res) => {
-  res.send("HLS Proxy is running");
 });
 
 app.listen(PORT, "0.0.0.0", () => {
