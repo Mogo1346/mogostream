@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ערוצים</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/7733/7733346.png">
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -155,30 +156,99 @@
                     }
                 });
 
+                // מחיקת ערוצים לפי שם - פשוט להוסיף שם לרשימה
+                const channelsToDelete = [
+                    '5Sport (1080p)',
+                    'Angel TV Hebrew (720p)',
+                    'RTG int.',
+                    'TeenNick (Israel) [Not 24/7]',
+                    'Zoom (Israel) (576p)'
+                ];
+
+                for (const country in groupedByCountry) {
+                    groupedByCountry[country] = groupedByCountry[country].filter(
+                        c => !channelsToDelete.includes(c.name)
+                    );
+                }                
+
                 // הוספת ערוצים ידנית לישראל
                 if (!groupedByCountry['Israel']) {
                     groupedByCountry['Israel'] = [];
                 }
 
-                groupedByCountry['Israel'].splice(2, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Big Brother (1080p) [Not 24/7]',
-                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/13952b55e055494d8866f8dc5241baf1/version/10/width/320/height/180/quality/70',
-                        url: ''
-                    }
-                );
-                
-                groupedByCountry['Israel'].splice(6, 0,
-                    {
-                        country: 'Israel',
-                        name: 'Comedy Channel (1080p)',
-                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Comedy_e.jpg',
-                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_comedy/hdntl=exp=1787170656~acl=%2f*~data=hdntl~hmac=0353d34da70200d13d53d2e2e7fff2c947c4511a03e74c3ad68fc999e6f461b9/video_5761024_p_0.m3u8'
+                        name: '5Gold (1080p)',
+                        logo: 'https://iptv-epg.org/images/2QrFjYTL1_zj_t8jNHEi7pG95Z6WupYKzASJj9DSbIr5DDnqeLHVgRHF8lcj7NJUPxa8OAty1Ze-OByCMGNm9_IBuMrSbZa5rRFBsSzd',
+                        url: 'http://str2.iptvhd.ru:8080/sport5gold/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(7, 0,
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: '5Live (1080p)',
+                        logo: 'https://iptv-epg.org/images/n4zDDF6RcBT1DNrrzPzPWkAHcaxXhh80c1JSsnIAmPg4SOn2w_hfq0BKimWuhY1rBOeY3P2h87-KugnKwPS74u9ydU_aEqLy2WvhL_teZFo',
+                        url: 'http://str2.iptvhd.ru:8080/5live/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: '5Sport (1080p)',
+                        logo: 'https://iptv-epg.org/images/QjJHwTFo6n1Wpxw2kXWZsz837qO5wvQAyrMksstLx3GQ8gpnmtu7Fp5YMTCPN6eayiajW_pym3aO-lpqHUR3EuLvvVzFLkgKKrrV-HhD3Y5V',
+                        url: 'http://str2.iptvhd.ru:8080/5sport/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: '5Sport 4K (1080p)',
+                        logo: 'https://iptv-epg.org/images/oifhoMGddxpGAzNHtyOX3PpLHvP_fkolnntWDoNQ1FCXs3-VxdzvQSvhqfGbkGGaB88IWvtKLivWTUoYiq9tP45p-ew0J4Ycg9fN7STqNa4a',
+                        url: 'http://str2.iptvhd.ru:8080/5SPORT_4K/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Baby (1080p)',
+                        logo: 'https://cdn.epg.one/img2/2701.png',
+                        url: 'http://str2.iptvhd.ru:8080/baby/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Big Brother (1080p) [Not 24/7]',
+                        logo: 'https://images.open-epg.com/18748384.png',
+                        url: ''
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Bollywood (1080p)',
+                        logo: 'https://i.imgur.com/YLQRnXt.png',
+                        url: 'http://str2.iptvhd.ru:8080/bollywood/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Channel 16 (1080p)',
+                        logo: 'https://tse2.mm.bing.net/th/id/OIF.SFwECyG7fdvXdgcOtc151w?r=0&rs=1&pid=ImgDetMain&o=7&rm=3',
+                        url: 'https://ch16israel-cdn.encoders.immergo.tv/master.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
                         name: 'Comedy Channel (1080p)',
@@ -187,16 +257,7 @@
                     }
                 );
 
-                groupedByCountry['Israel'].splice(8, 0,
-                    {
-                        country: 'Israel',
-                        name: 'Drama Channel (1080p)',
-                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Drama_e.jpg',
-                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_drama/hdntl=exp=1787171130~acl=%2f*~data=hdntl~hmac=2623ed9cab7a97eb192bb7f9edcb13b07b81ee62b6787cdf57ec209c8ea7a1b8/video_5761024_p_0.m3u8'
-                    }
-                );
-
-                groupedByCountry['Israel'].splice(9, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
                         name: 'Economy Channel (1080p)',
@@ -205,25 +266,61 @@
                     }
                 );
 
-                groupedByCountry['Israel'].splice(10, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Eretz Nehederet Channel (1080p)',
-                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Eretz_e.jpg',
-                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/erets/hdntl=exp=1787171547~acl=%2f*~data=hdntl~hmac=70eddb9f0bbf8cc94cfc2c685f49c71ee7a0b42bd270bce665b44b7a9a5b5281/video_5761024_p_0.m3u8'
-                    }
-                );
-                
-                groupedByCountry['Israel'].splice(11, 0,
-                    {
-                        country: 'Israel',
-                        name: 'Food Channel (1080p)',
-                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_food_e.jpg',
-                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_food/hdntl=exp=1787171372~acl=%2f*~data=hdntl~hmac=d90ed560bad41f87632adc533f22f058aae1120d31435255a366678cd893a360/video_5761024_p_0.m3u8'
+                        name: 'Ego Total (1080p)',
+                        logo: '',
+                        url: 'http://str2.iptvhd.ru:8080/egototal/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(19, 0,
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Food Channel (1080p)',
+                        logo: 'https://images.open-epg.com/x1723.png',
+                        url: 'http://str2.iptvhd.ru:8080/FoodChannel/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Foody (1080p)',
+                        logo: 'https://images.open-epg.com/18748363.png',
+                        url: 'http://str2.iptvhd.ru:8080/Foody/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Health Channel (1080p)',
+                        logo: 'https://cdn.epg.one/img2/2709.png',
+                        url: 'http://str2.iptvhd.ru:8080/Health/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'History (1080p)',
+                        logo: 'https://images.open-epg.com/18748449.png',
+                        url: 'http://str2.iptvhd.ru:8080/history_hd/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Home + (1080p)',
+                        logo: 'https://cdn.epg.one/img2/2680.png',
+                        url: 'http://str2.iptvhd.ru:8080/home_plus/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
                         name: 'i24NEWS English (1080p)',
@@ -232,76 +329,143 @@
                     }
                 );
 
-                groupedByCountry['Israel'].splice(28, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Music Channel (1080p)',
-                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Music_e.jpg',
-                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/free_music/hdntl=exp=1787171225~acl=%2f*~data=hdntl~hmac=16fff2d42b0dadc0881aae8b232080e3159feb498c0237c60474ae87ef213dd0/video_5761024_p_0.m3u8',
+                        name: 'Junior (1080p)',
+                        logo: 'https://images.open-epg.com/x1725.png',
+                        url: 'http://str2.iptvhd.ru:8080/junior/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(30, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Reality Channel (1080p)',
-                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/8f1d7b6472ef4f679c12688c43829e44/version/4/width/320/height/180/quality/70',
-                        url: 'https://d2dffl3588mvfk.cloudfront.net/out/v1/d8e15050ca4148aab0ee387a5e2eb46b/index_1.m3u8'
+                        name: 'One (1080p)',
+                        logo: 'https://iptv-epg.org/images/d67d8ab4f4c10bf22aa353e27879133c/7LDwJO4U04mlGFhTiF1Yt1EkYO0ZujNzhT_RXoCrkMK8EeET-QjNVUT-WXbMzhhA2nTFCh5uLQ7HoQF0Kkftohnv8qQqjum1c0udww',
+                        url: 'http://str2.iptvhd.ru:8080/One/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(33, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Savri Maranan Channel (1080p)',
-                        logo: 'https://img.mako.co.il/2026/06/15/LinearChannel_Savri_e.jpg',
-                        url: 'https://mako-streaming.akamaized.net/evrideo/hls/live/20001278/savri/hdntl=exp=1787171632~acl=%2f*~data=hdntl~hmac=5f90522f63f916803999e1243e4948aa938bf1f28cb59a2c3567bed457e2acf8/video_5761024_p_0.m3u8'
+                        name: 'One Doco (1080p)',
+                        logo: 'https://images.open-epg.com/18748370.png',
+                        url: 'http://str2.iptvhd.ru:8080/ONE_DOCO/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(35, 0,
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'One Edge (1080p)',
+                        logo: 'https://images.open-epg.com/x1761.png',
+                        url: 'http://str2.iptvhd.ru:8080/EDGE_SPORT/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
                         name: 'Sport 1 (1080p)',
-                        logo: 'https://i.imgur.com/DqE1143.png',
-                        url: 'https://contact.gostreaming.tv/Con-12/index.m3u8'
+                        logo: 'https://sport1.maariv.co.il/app/themes/sport1/public/images/channels-logo/sport1-1-channel-logo.svg',
+                        url: 'http://str2.iptvhd.ru:8080/sport1/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(36, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Sport 3 (1080p) [Not 24/7]',
-                        logo: 'https://i.imgur.com/stSrBBh.png',
-                        url: 'https://contact.gostreaming.tv/Con-21/index.m3u8'
+                        name: 'Sport 2 (1080p)',
+                        logo: 'https://sport1.maariv.co.il/app/themes/sport1/public/images/channels-logo/sport1-3-channel-logo.svg',
+                        url: 'http://str2.iptvhd.ru:8080/Sport_2/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(38, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Vacation Channel (1080p)',
-                        logo: 'https://images.frp1.ott.kaltura.com/Service.svc/GetImage/p/5031/entry_id/f7f5a916948b4bd9a0db18be35ef3d3f/version/4/width/320/height/180/quality/70',
-                        url: 'https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index_2.m3u8'
+                        name: 'Sport 6 (1080p)',
+                        logo: 'https://sport1.maariv.co.il/app/themes/sport1/public/images/channels-logo/sport1-6-channel-logo.svg',
+                        url: 'http://str2.iptvhd.ru:8080/sport_6/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(39, 0,
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
-                        name: 'Viva Premium (1080p)',
-                        logo: 'https://cdn.epg.one/img2/9055.png',
-                        url: 'http://stream.mcquack.net/43/index.m3u8'
+                        name: 'TeenNick (1080p)',
+                        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/TeenNick_logo_2023_%28outline%29.svg/1280px-TeenNick_logo_2023_%28outline%29.svg.png',
+                        url: 'http://str2.iptvhd.ru:8080/TeenNick/index.m3u8'
                     }
                 );
 
-                groupedByCountry['Israel'].splice(40, 0,
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Travel Channel (1080p)',
+                        logo: 'https://images.open-epg.com/x1726.png',
+                        url: 'http://str2.iptvhd.ru:8080/travel/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Viva Istanbul (1080p)',
+                        logo: 'https://cdn.epg.one/img2/88006.png',
+                        url: 'http://str2.iptvhd.ru:8080/viva_plus/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Viva Telenovelas (1080p)',
+                        logo: 'https://static.g-cdn.app/streams/viva-il.png',
+                        url: 'http://str2.iptvhd.ru:8080/VIVA/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
                     {
                         country: 'Israel',
                         name: 'Walla (1080p)',
-                        logo: 'https://play-lh.googleusercontent.com/mR-rY1UKWjzwK2jukGPJNMSYf8u54FpqGGKDXgSOHJZmiZPXASFTaPLrn8A_s1Ji4g',
+                        logo: 'https://images.open-epg.com/18748386.png',
                         url: 'https://live.wcdn.co.il/ulpan/prog_index.m3u8'
                     }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Yaldut Israelit (1080p)',
+                        logo: 'https://cdn.epg.one/img2/2714.png',
+                        url: 'http://str2.iptvhd.ru:8080/Yaldut_Israelit/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Zoom (1080p)',
+                        logo: 'https://images.open-epg.com/18940396.png',
+                        url: 'http://str2.iptvhd.ru:8080/zoom/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].push(
+                    {
+                        country: 'Israel',
+                        name: 'Zoom Toon (1080p)',
+                        logo: 'https://iptv-epg.org/images/JK2Z1b0eufBU7fXXrHAjXQzSkrSklT9AwvvbeeRYDJRMg_7l85SQdcIr8r-134qlGaXNNauYXcSAnuy9X4Xh-oIzVCAXxgECGN_U_N1_tGOc',
+                        url: 'http://str2.iptvhd.ru:8080/ZOOM_TOON/index.m3u8'
+                    }
+                );
+
+                groupedByCountry['Israel'].sort((a, b) =>
+                    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
                 );
 
                 renderDOM(groupedByCountry);
@@ -365,6 +529,17 @@
         }
 
         fetchAndRenderData();
+
+        // Zoom
+
+        // ANIMAL_PLANET
+        // DISCOVERY_HD
+        // Eurosport_HD
+        // Eurosport_HD_2
+        // JimJam
+        // Nat_Geo_Wild
+        // National_Geographic
+        // Nickelodeon
     </script>
 </body>
 </html>

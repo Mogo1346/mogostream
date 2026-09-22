@@ -1,499 +1,767 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>משחקים</title>
-    <link rel="icon" type="image/png" href="https://www.kankids.org.il/favicon-kids/favicon-32x32.png">
-    <style>
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 5px;
-            row-gap: 5px;
-            margin-top: 8px;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        button {
-            position: relative; /* מאפשר למקם את הטקסט בתוך הכפתור */
-            border: none;
-            background: none;
-            padding: 0;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-        }
-        button:hover {
-            transform: scale(1.1);
-        }
-        button img {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .button-label {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            color: white;       /* אפשר לשנות ל־black אם התמונה בהירה */
-            font-size: 1.5em;     /* תגדיל לפי הצורך: 1.2em או 1.5em */
-            font-weight: bold;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6); /* כדי שייראה גם על רקעים בהירים */
-            pointer-events: none; /* שלא יתפוס קליקים */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פינת המשחקים</title>
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/10855/10855296.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#161129;
+    --bg-2:#1f1a3d;
+    --panel:#211a42;
+    --panel-2:#2a2154;
+    --ink:#f3f0ff;
+    --ink-dim:#b3aad6;
+    --line:rgba(255,255,255,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:'Rubik', Arial, sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 12% -10%, rgba(124,140,255,.30), transparent 45%),
+      radial-gradient(circle at 90% 0%, rgba(255,91,158,.22), transparent 40%),
+      radial-gradient(circle at 50% 120%, rgba(51,214,192,.18), transparent 45%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2) 60%, #120d24 100%);
+    background-attachment:fixed;
+    padding-bottom:60px;
+  }
 
-        summary {
-            cursor: pointer;
-            padding: 25px 14px;
-            border-bottom: 1px solid #ddd;
-            user-select: none;
-            width: 100%;
-            box-sizing: border-box;
-            font-weight: bold;
-            font-size: 1.5em;
-            background: rgb(227, 237, 247);
-            transition: background 0.2s;
-            text-align: right;
-        }
-        summary:hover {
-            background: #f0f0f0;
-        }
-        .summary-subtext {
-            font-size: 0.85em;
-            font-weight: normal;
-            color: #666;
-            margin-top: 4px;
-        }
-        details {
-            width: 100%;
-            margin: 8px auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-    </style>
+  /* ---------- header ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    backdrop-filter:blur(14px);
+    background:rgba(17,13,36,.72);
+    border-bottom:1px solid var(--line);
+    padding:22px 20px 16px;
+  }
+  .header-inner{max-width:1180px;margin:0 auto;}
+  .title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  h1{
+    font-family:'Suez One', 'Rubik', serif;
+    font-weight:400;
+    font-size:clamp(28px, 4vw, 42px);
+    margin:0;
+    letter-spacing:.5px;
+    background:linear-gradient(90deg,#7c8cff,#ff5b9e 45%,#ffd23f 85%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    line-height:1.15;
+  }
+  .subtitle{
+    color:var(--ink-dim);
+    font-size:14.5px;
+    margin-top:4px;
+  }
+  .game-count-pill{
+    font-size:13px;
+    color:var(--ink-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:6px 14px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  .search-row{
+    margin-top:16px;
+    display:flex;
+    gap:10px;
+  }
+  .search-box{
+    position:relative;
+    flex:1;
+    max-width:420px;
+  }
+  .search-box input{
+    width:100%;
+    padding:12px 44px 12px 16px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:15px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .search-box input::placeholder{color:var(--ink-dim);}
+  .search-box input:focus{
+    border-color:#7c8cff;
+    box-shadow:0 0 0 3px rgba(124,140,255,.25);
+  }
+  .search-box .icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:16px;
+    opacity:.6;
+    pointer-events:none;
+  }
+
+  /* ---------- games ---------- */
+  main{max-width:1180px;margin:0 auto;padding:28px 20px 0;}
+
+  .game-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(128px, 1fr));
+    gap:12px;
+  }
+
+  .game-card{
+    position:relative;
+    aspect-ratio:1/1;
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    padding:0;
+    cursor:pointer;
+    background:var(--panel);
+    transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  }
+  .game-card:hover, .game-card:focus-visible{
+    transform:translateY(-4px) scale(1.035);
+    border-color:var(--accent);
+    box-shadow:0 10px 24px -8px rgba(0,0,0,.55), 0 0 0 1px var(--accent), 0 0 22px -4px var(--accent);
+    outline:none;
+  }
+  .game-card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .game-card.no-img img{display:none;}
+  .game-card.no-img{
+    background:linear-gradient(135deg, var(--panel), var(--panel-2));
+  }
+  .game-card.no-img::before{
+    content:"🎲";
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    opacity:.5;
+  }
+  .card-shine{
+    position:absolute;
+    inset:auto 0 0 0;
+    height:56%;
+    background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,0));
+    pointer-events:none;
+  }
+  .card-label{
+    position:absolute;
+    right:8px;
+    bottom:7px;
+    left:8px;
+    font-size:12.5px;
+    font-weight:700;
+    line-height:1.25;
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.7);
+    pointer-events:none;
+  }
+
+  .empty-state{
+    display:none;
+    text-align:center;
+    color:var(--ink-dim);
+    padding:60px 20px;
+    font-size:15px;
+  }
+  .empty-state.show{display:block;}
+
+  footer{
+    max-width:1180px;
+    margin:40px auto 0;
+    padding:20px;
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--line);
+  }
+
+  @media (max-width:520px){
+    .game-grid{grid-template-columns:repeat(auto-fill, minmax(104px,1fr));}
+    h1{font-size:26px;}
+  }
+</style>
 </head>
-
 <body>
-<h1>משחקים</h1>
 
-<div class="buttons">
-    <!--nums-->
-    <button onclick="openGame('https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="">
-        <span class="button-label"></span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/ba08d794f5c84775b848781e70497849/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/ba08d794f5c84775b848781e70497849-512x384.jpg">
-        <span class="button-label">3Dash</span>
-    </button>
-    <!--a-->
-    <button onclick="openGame('https://html5.gamemonetize.co/n2294odux88zuqkl35s7rjoyns90cebj/')">
-        <img src="https://tse3.mm.bing.net/th/id/OIP.eMKr4WZ8Ua76OhcPNRnHOQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3">
-        <span class="button-label">Amoung Us</span>
-    </button>
-    <!--b-->
-    <button onclick="openGame('https://html5.gamedistribution.com/7e30875c404b442eb12597175bdb85dc/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/7e30875c404b442eb12597175bdb85dc-512x512.jpg">
-        <span class="button-label">Backgammon Multiplayer</span>
-    </button>
-    <button onclick="openGame('https://unblockeds-games.com/games/bad-ice-cream/index.html')">
-        <img src="https://unblockeds-games.com/images/bad-ice-cream.jpg">
-        <span class="button-label">Bad Icecream 1</span>
-    </button>
-    <button onclick="openGame('https://unblockeds-games.com/games/bad-ice-cream-2/index.html')">
-        <img src="https://unblockeds-games.com/images/bad-ice-cream-2.jpg">
-        <span class="button-label">Bad Icecream 2</span>
-    </button>
-    <button onclick="openGame('https://unblockeds-games.com/games/bad-ice-cream-3/index.html')">
-        <img src="https://unblockeds-games.com/images/bad-ice-cream-3.jpg">
-        <span class="button-label">Bad Icecream 3</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/4b89e6d06e474c0eb5d933a30972b36e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/4b89e6d06e474c0eb5d933a30972b36e-512x512.jpg">
-        <span class="button-label">Ball Jump Switch The Colors</span>
-    </button>
-    <button onclick="openGame('https://www.silvergames.com/en/bloons-tower-defense-5/gameframe#adtest')">
-        <img src="https://tse2.mm.bing.net/th/id/OIP.anGKO-VPEnNqktkejjIawwHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3">
-        <span class="button-label">Bloons Tower Defence 5</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=8908')">
-        <img src="https://img.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015-512x512.jpeg">
-        <span class="button-label">Block Blast</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/27673bc45d2e4b27b7cd24e422f7c257/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=345')">
-        <img src="https://img.gamedistribution.com/27673bc45d2e4b27b7cd24e422f7c257-512x512.jpg">
-        <span class="button-label">BUBBLES</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/0212ccaec99b48ef876abbc86c326eac/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/0212ccaec99b48ef876abbc86c326eac-512x512.jpg">
-        <span class="button-label">Bubbles 3D</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/24ecc6238cea434b8730609226d5f0c2/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/24ecc6238cea434b8730609226d5f0c2-512x512.jpg">
-        <span class="button-label">Bubble Around</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/1b3229bbbf6d4c519e216e8228b5d0a8/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/1b3229bbbf6d4c519e216e8228b5d0a8-512x512.jpg">
-        <span class="button-label">Bubble Plopper</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/f64448e3486a424eb60d72827083f05b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/f64448e3486a424eb60d72827083f05b-512x512.jpg">
-        <span class="button-label">Bubble Shooter Billiards & Pool</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/baa3715d0735443f9fe81631bb373f3d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/baa3715d0735443f9fe81631bb373f3d-512x512.jpg">
-        <span class="button-label">Bubble Shooter Free 3</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/6de7fe918ed24506a45f8047a16bff72/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/6de7fe918ed24506a45f8047a16bff72-512x512.jpg">
-        <span class="button-label">Bubble Shooter Neon</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/d8a7d775a22146d083177953a5f44f68/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/d8a7d775a22146d083177953a5f44f68-512x512.jpg">
-        <span class="button-label">Bubble Shooter Ultimate</span>
-    </button>
-    <!--c-->
-    <button onclick="openGame('https://html5.gamedistribution.com/6503629b90154938bf88cc4dd1abee77/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=3354')">
-        <img src="https://img.gamedistribution.com/6503629b90154938bf88cc4dd1abee77-512x512.jpeg">
-        <span class="button-label">Candy Crush</span>
-    </button>
-    <button onclick="openGame('https://play.famobi.com/circle-rush/A-4QBH7')">
-        <img src="https://img.cdn.famobi.com/portal/html5games/images/tmp/CircleRushTeaser.jpg">
-        <span class="button-label">CIRCLE RUSH</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/69953734f7b945618a0479a3db329c8e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/69953734f7b945618a0479a3db329c8e-512x384.jpg">
-        <span class="button-label">Color Hoop Sort</span>
-    </button>
-    <!--d-->
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/run_games/dadnme.swf')">
-        <img src="https://images.crazygames.com/games/dad-n-me/cover-1611918286048.png?auto=format,compress&q=75&cs=strip&ch=DPR&w=1200&h=630&fit=crop">
-        <span class="button-label">Dad n' Me</span>
-    </button>
-    <button onclick="openGame('https://mandalamaker.online/games/Fatherly Bonds_June_15th_2012.swf')">
-        <img src="https://www.popka.co.il/files/images/1160.jpg">
-        <span class="button-label">Dad n' Me 2</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/acc82d001dfa4471bde0818db2b7c1c4/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/acc82d001dfa4471bde0818db2b7c1c4-512x384.jpg">
-        <span class="button-label">Devil Dash</span>
-    </button>
-    <button onclick="openGame('https://games.monsteraplay.com/dino_run/index.html?client=ca-pub-7582061460326705&fullscreen=false')">
-        <img src="https://www.yo-yoo.co.il/uploads/gam5k3464343.jpg">
-        <span class="button-label">DINO RUN</span>
-    </button>
-    <!--f-->
-    <button onclick="openGame('https://html5.gamedistribution.com/a55c9cc9c21e4fc683c8c6857f3d0c75/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1836')">
-        <img src="https://img.gamedistribution.com/a55c9cc9c21e4fc683c8c6857f3d0c75-512x384.jpeg">
-        <span class="button-label">Fireboy and Watergirl 1</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/383ad09b92c7446b9113cccc29630517/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1420')">
-        <img src="https://img.gamedistribution.com/383ad09b92c7446b9113cccc29630517-512x384.jpeg">
-        <span class="button-label">Fireboy and Watergirl 2</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/f3a6e1ac0a77412289cbac47658b2b68/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2117')">
-        <img src="https://img.gamedistribution.com/f3a6e1ac0a77412289cbac47658b2b68-512x384.jpeg">
-        <span class="button-label">Fireboy and Watergirl 3</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/3790681b69584409b7f681a8e400102d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=3235')">
-        <img src="https://img.gamedistribution.com/3790681b69584409b7f681a8e400102d-512x384.jpeg">
-        <span class="button-label">Fireboy and Watergirl 4</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/03f124074b0049f89fdace0cacf8ead5/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5772')">
-        <img src="https://img.gamedistribution.com/03f124074b0049f89fdace0cacf8ead5-512x384.jpeg">
-        <span class="button-label">Fireboy and Watergirl 5</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/56da8a54fe204845b34ccff750d4a60b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=6932')">
-        <img src="https://img.gamedistribution.com/56da8a54fe204845b34ccff750d4a60b-512x512.jpeg">
-        <span class="button-label">Fireboy and Watergirl 6</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/3dfd7fcd9d7f4a16aadfa2b737cd4ac9/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=7909')">
-        <img src="https://img.gamedistribution.com/3dfd7fcd9d7f4a16aadfa2b737cd4ac9-512x512.jpeg">
-        <span class="button-label">Fish Eat Getting Big</span>
-    </button>
-    <!--h-->
-    <button onclick="openGame('https://html5.gamedistribution.com/544cf55c6ad44a3299099e813f7f5a9d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/544cf55c6ad44a3299099e813f7f5a9d-512x512.jpeg">
-        <span class="button-label">Helix Jump</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/c8f28089276c4d4eb8501a1f847843de/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/c8f28089276c4d4eb8501a1f847843de-512x512.jpeg">
-        <span class="button-label">Helix Jump 2</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/acb6678608a44d428072ca93d8a0d86c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/acb6678608a44d428072ca93d8a0d86c-512x512.jpeg">
-        <span class="button-label">Helix Jump 2020</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/515bcc383cbe46a5b61cf9c3b13a57ef/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/515bcc383cbe46a5b61cf9c3b13a57ef-512x384.jpeg">
-        <span class="button-label">Helix Jump Halloween</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/5ceab1b0d4e54246b793705ee7e00bbf/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/5ceab1b0d4e54246b793705ee7e00bbf-512x384.jpeg">
-        <span class="button-label">Helix Jump Piano</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/66fddb2022464fce86e045f78db3f46d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/66fddb2022464fce86e045f78db3f46d-512x512.jpg">
-        <span class="button-label">Hexa Sort Trick or Treat</span>
-    </button>
-    <!--i-->
-    <button onclick="openGame('https://html5.gamedistribution.com/fe3c5c9d90f24f10a9e01cca22f5243f/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/fe3c5c9d90f24f10a9e01cca22f5243f-512x512.jpg">
-        <span class="button-label">Italian Brainrot Baby Clicker</span>
-    </button>
-    <!--m-->
-    <button onclick="openGame('https://html5.gamedistribution.com/ae42ea5c4e0b4ff4b9eddf47fbd2cc5e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/ae42ea5c4e0b4ff4b9eddf47fbd2cc5e-512x384.jpg">
-        <span class="button-label">Marble Run - Ultimate Race!</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/b2a3398e327b4f6da665759d6730aab4/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/b2a3398e327b4f6da665759d6730aab4-512x512.jpeg">
-        <span class="button-label">Master Chess</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/f9ea5f1f746c492d8fa217c1998fd992/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/f9ea5f1f746c492d8fa217c1998fd992-512x512.jpeg">
-        <span class="button-label">Master Chess Multiplayer</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkeygohappy.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy.jpg?1448570826">
-        <span class="button-label">Monkey Go Happy 1</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/MonkeyGoHappy2.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-2.jpg?1448748143">
-        <span class="button-label">Monkey Go Happy 2</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/Monkey_GO_Happy_3.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-3.jpg?1448748530">
-        <span class="button-label">Monkey Go Happy 3</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/MonkeyGOHappy4.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-4.jpg?1448748832">
-        <span class="button-label">Monkey Go Happy 4</span>
-    </button>
-    <button onclick="openGame('https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/monkey-go-happy-5.swf&w=640&h=480&warnsupport=true')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-5.jpg?1448749082">
-        <span class="button-label">Monkey Go Happy 5</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-6/Monkey%20GO%20Happy%206.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-6.jpg?1448749300">
-        <span class="button-label">Monkey Go Happy 6</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-adventure/MonkeyGOHappyAdventure.swf')">
-        <img src="https://www.primarygames.com/puzzles/action/monkeygohappy/logo200.png">
-        <span class="button-label">Monkey Go Happy: Adventure</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/mghmar.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-marathon.jpg?1448899669">
-        <span class="button-label">Monkey Go Happy: Marathon 1</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-2/MonkeyGOHappyMarathon-2.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-marathon2.jpg?1448900028">
-        <span class="button-label">Monkey Go Happy: Marathon 2</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-3_v667571/MGHmarathon3.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-marathon-3.jpg?1448900266">
-        <span class="button-label">Monkey Go Happy: Marathon 3</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-4/Monkey%20GO%20Happy%20MARATHON%204.swf')">
-        <img src="https://gamaverse.com/c/i/g/monkey-go-happy-marathon-4.jpg?1448900512">
-        <span class="button-label">Monkey Go Happy: Marathon 4</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-mini-monkeys/MonkeyGOHappy-Mini-Monkeys.swf')">
-        <img src="">
-        <span class="button-label">Monkey Go Happy: Mini Monkeys 1</span>
-    </button>
-    <button onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-mini-monkeys-2/MonkeyGOHappy-MiniMonkeys2.swf')">
-        <img src="">
-        <span class="button-label">Monkey Go Happy: Mini Monkeys 2</span>
-    </button>
-    <button onclick="openGame('https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/monkeygohappy-minimonkeys3.swf')">
-        <img src="">
-        <span class="button-label">Monkey Go Happy: Mini Monkeys 3</span>
-    </button>
-    <!--p-->
-    <button onclick="openGame('https://originalpacman.com/game/index.html')">
-        <img src="https://tse1.mm.bing.net/th/id/OIP.chaR-yw7NtGAd5mrmpyWJwHaEf?rs=1&pid=ImgDetMain&o=7&rm=3">
-        <span class="button-label">PACMAN</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/c5d4966b176246748d6c847103ebfd51/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5981')">
-        <img src="https://img.gamedistribution.com/c5d4966b176246748d6c847103ebfd51-512x512.jpeg">
-        <span class="button-label">PAPER.IO 2</span>
-    </button>
-    <button onclick="openGame('https://static.arcadespot.com/wp-content/uploads/2017/03/paper-mario-world.swf')">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBNSOvH-dFwWeqM99EE8t42fAn_AZfhe2OQIchgHtzG0de55LAiC0CwQ&s">
-        <span class="button-label">PAPER MARIO WORLD</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/d1362abc246f43bdb5c26643aec2b61b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/d1362abc246f43bdb5c26643aec2b61b-512x512.jpeg">
-        <span class="button-label">POU</span>
-    </button>
-    <!--s-->
-    <button onclick="openGame('https://html5.gamedistribution.com/eb2919a29fac42e2a7882a3a85903d75/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2162')">
-        <img src="https://img.gamedistribution.com/eb2919a29fac42e2a7882a3a85903d75-512x384.jpeg">
-        <span class="button-label">Sky Rolling ball</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1276')">
-        <img src="https://img.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c.jpg">
-        <span class="button-label">Snail Bob 1</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/cf6d62af468b44ffbcb38b0f9e232f7e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2293')">
-        <img src="https://img.gamedistribution.com/cf6d62af468b44ffbcb38b0f9e232f7e.jpg">
-        <span class="button-label">Snail Bob 2</span>
-    </button>
-    <button onclick="openGame('https://gamaverse.com/c/f/g/snail-bob-3/index.html?key=y8&value=default')">
-        <img src="https://agamecdn.com/system/static/thumbs/spil_thumb_big/28127/webp_1441883249_576742227280287731_large.webp?1692358149">
-        <span class="button-label">Snail Bob 3</span>
-    </button>
-    <button onclick="openGame('https://img.y8.com/cloud/y8-flash-game/contents/item_versions/flash_games/45757/original/snail_bob_4_space.swf')">
-        <img src="https://img.gamedistribution.com/1b6b1812ae8149e987d4d9c7f2855131.jpg">
-        <span class="button-label">Snail Bob 4</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/7e2e56736eef49f78220605798903354/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/7e2e56736eef49f78220605798903354.jpg">
-        <span class="button-label">Snail Bob 5</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/043d401426d845ae990cb2583fe1ebff/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/043d401426d845ae990cb2583fe1ebff.jpg">
-        <span class="button-label">Snail Bob 6</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/9aefc9ef4a7f4d5d8062cfb563cc658c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/9aefc9ef4a7f4d5d8062cfb563cc658c-512x384.jpeg">
-        <span class="button-label">Snail Bob 7</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/03b3b4a7cc4243b6bbaac22285f14741/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/03b3b4a7cc4243b6bbaac22285f14741-512x384.jpeg">
-        <span class="button-label">Snail Bob 8</span>
-    </button>
-    <button onclick="openGame('https://g.igroutka.ru/games/164/Xm2W5MIcPqrF1Y90/12/subway_surfers_easter_edinburgh/')">
-        <img src="https://www.freebcc.com/games/images/20231011/subway_surfers.png">
-        <span class="button-label">SUBWAY SURFERS</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/3de0c1fd03414f92b4324ebfe54fc562/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5981')">
-        <img src="https://img.gamedistribution.com/3de0c1fd03414f92b4324ebfe54fc562.jpg">
-        <span class="button-label">Super Stacker</span>
-    </button>
-    <!--t-->
-    <button onclick="openGame('https://html5.gamedistribution.com/7980c23fbbae4af6851e01052fce3cce/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=7402')"> 
-        <img src="https://img.gamedistribution.com/7980c23fbbae4af6851e01052fce3cce-512x512.jpeg">
-        <span class="button-label">Tallman Run</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/dfbcabce16c640329b9f00867af35ae8/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')"> 
-        <img src="https://img.gamedistribution.com/dfbcabce16c640329b9f00867af35ae8-512x512.jpeg">
-        <span class="button-label">Tall Man Evolution</span>
-    </button>
-    <button onclick="openGame('https://html5.gamemonetize.co/pkyyuilfrqkcdnmrxsg60j22ypk0peje/')">
-        <img src="https://www.yo-yoo.co.il/uploads/runr23432tle.jpg">
-        <span class="button-label">TEMPLE RUN 2</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/cce9fadef40943e49d855501c7fce51c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/cce9fadef40943e49d855501c7fce51c-512x512.jpg">
-        <span class="button-label">Tropical Match</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/59719ccbc7764864bae2c4c7aea820b6/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://img.gamedistribution.com/59719ccbc7764864bae2c4c7aea820b6-512x512.jpg">
-        <span class="button-label">Tropical Match 2</span>
-    </button>
-    <!--w-->
-    <button onclick="openGame('https://html5.gamedistribution.com/957523bb6e8340249e8c5b8a0b989b8f/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')"> 
-        <img src="https://img.gamedistribution.com/957523bb6e8340249e8c5b8a0b989b8f-512x512.jpeg">
-        <span class="button-label">Water Sorting Puzzle</span>
-    </button>
-    <button onclick="openGame('https://wordle-game-online.github.io/#daily')"> 
-        <img src="https://twinfinite.net/wp-content/uploads/2023/06/Wordle-NYT-Game.jpg?fit=1200%2C675">
-        <span class="button-label">WORDLE</span>
-    </button>
-    <!--...-->
-    <button onclick="openGame('')">
-        <img src="">
-        <span class="button-label"></span>
-    </button>
-    <button onclick="openGame('https://1v1.lol/')">
-        <img src="https://th.bing.com/th/id/R.0cb9bdcd2f65d20f7354edf9fb7db5b5?rik=hjfoenJ0qhPZmQ&pid=ImgRaw&r=0">
-        <span class="button-label">1v1.lol</span>
-    </button>
-    <button onclick="openGame('https://agar.io')">
-        <img src="https://imgs.crazygames.com/agario/20230719092731/agario-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Agar.io</span>
-    </button>
-    <button onclick="openGame('https://bloxd.io/')">
-        <img src="https://imgs.crazygames.com/bloxdhop-io_16x9/20250829023851/bloxdhop-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Bloxd.io</span>
-    </button>
-    <button onclick="openGame('https://lifesimulator.net/embed/cell-to-singularity-evolution')">
-        <img src="https://tse2.mm.bing.net/th/id/OIP.GKA3zdDhsTlQ-oeWd9jKTQHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3">
-        <span class="button-label">CELL TO SINGULARITY</span>
-    </button>
-    <button onclick="openGame('https://scratch.mit.edu/projects/389464290/embed')">
-        <img src="https://www.noodlecake.com/wp-content/uploads/2018/04/feature-GettingOverIt-1280x720.jpg">
-        <span class="button-label">Getting Over It</span>
-    </button>
-    <button onclick="openGame('https://growden.io/')">
-        <img src="https://imgs.crazygames.com/grow-a-garden---growden-io_16x9/20250902110117/grow-a-garden---growden-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">GROWDEN.io</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/15e57f8ba30e4e20b80d6130acadd26c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://imgs.crazygames.com/ice-fishing_16x9/20230908074710/ice-fishing_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Ice fishing 3d</span>
-    </button>
-    <button onclick="openGame('https://lolshot.io/')">
-        <img src="">
-        <span class="button-label">LOLSHOT.io</span>
-    </button>
-    <button onclick="openGame('https://maddox05.github.io/basic-ruffle-player/html/minecraft/index.html')">
-        <img src="https://www.minecraft.net/content/dam/minecraftnet/franchise/logos/Homepage_Download-Launcher_Creeper-Logo_500x500.png">
-        <span class="button-label">Minecraft</span>
-    </button>
-    <button onclick="openGame('https://overtide.io')">
-        <img src="https://imgs.crazygames.com/overtide-io_16x9/20250501062749/overtide-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Overtide.io</span>
-    </button>
-    <button onclick="openGame('https://poxel.io')">
-        <img src="https://imgs.crazygames.com/poxel-io_16x9/20250422021430/poxel-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Poxel.io</span>
-    </button>
-    <button onclick="openGame('https://html5.gamedistribution.com/c4b54bfd0dfe4fd3a6a8e55681b420c3/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
-        <img src="https://imgs.crazygames.com/raft-life_16x9/20240723035444/raft-life_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Raft Life</span>
-    </button>
-    <button onclick="openGame('https://maddox05.github.io/basic-ruffle-player/html/ragdoll_archers/index.html')">
-        <img src="https://imgs.crazygames.com/ragdoll-archers_16x9/20250711092019/ragdoll-archers_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Ragdoll</span>
-    </button>
-    <button onclick="openGame('https://rumblerush.io/')">
-        <img src="https://tse2.mm.bing.net/th/id/OIP.fceVKe4CXI2f1ZTrpjAJQgHaDb?rs=1&pid=ImgDetMain&o=7&rm=3">
-        <span class="button-label">Rumble Rush</span>
-    </button>
-    <button onclick="openGame('https://slowroads.io')">
-        <img src="https://slowroads.io/img/logo-stacked.svg">
-        <span class="button-label">Slow Roads</span>
-    </button>
-    <button onclick="openGame('https://spacewaves.io/1.embed')">
-        <img src="https://imgs.crazygames.com/space-waves_16x9/20241203031650/space-waves_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Space Waves</span>
-    </button>
-    <button onclick="openGame('https://securepubads.g.doubleclick.net/static/topics/topics_frame.html')">
-        <img src="https://imgs.crazygames.com/steal-brainrot-online_16x9/20250916042622/steal-brainrot-online_16x9-cover?metadata=none&quality=75&width=196&dpr=2">
-        <span class="button-label">Steal A Brainrot</span>
-    </button>
-    <button onclick="openGame('https://www.worldguessr.com/')">
-        <img src="https://tse3.mm.bing.net/th/id/OIP.Y95Nm8f6SdL9_M0tt_JHCgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3">
-        <span class="button-label">World Guessr</span>
-    </button>
-</div>
+<header>
+  <div class="header-inner">
+    <div class="title-row">
+      <div>
+        <h1>🕹️ פינת המשחקים</h1>
+        <div class="subtitle">חפשו משחק — ולחיצה אחת ואתם בפנים</div>
+      </div>
+      <div class="game-count-pill">97 משחקים זמינים</div>
+    </div>
+
+    <div class="search-row">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="חיפוש משחק...">
+        <span class="icon">🔍</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="game-grid" id="gameGrid">
+      <button class="game-card" style="--accent:#7c8cff" data-name="1v1.lol" onclick="openGame('https://1v1.lol/')">
+        <img src="https://th.bing.com/th/id/R.0cb9bdcd2f65d20f7354edf9fb7db5b5?rik=hjfoenJ0qhPZmQ&amp;pid=ImgRaw&amp;r=0" alt="1v1.lol" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">1v1.lol</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="2048" onclick="openGame('https://games.monsteraplay.com/2048_classic/index.html')">
+        <img src="https://th.bing.com/th/id/R.0cb9bdcd2f65d20f7354edf9fb7db5b5?rik=hjfoenJ0qhPZmQ&amp;pid=ImgRaw&amp;r=0" alt="1v1.lol" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">2048</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="3dash" onclick="openGame('https://html5.gamedistribution.com/ba08d794f5c84775b848781e70497849/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/ba08d794f5c84775b848781e70497849-512x384.jpg" alt="3Dash" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">3Dash</span>
+      </button>
+      <button class="game-card" style="--accent:#ff5b9e" data-name="67 clicker tap tap" onclick="openGame('https://html5.gamedistribution.com/7fcb55f25f4a4a07848c630dffe1ae6e/')">
+        <img src="https://img.gamedistribution.com/7fcb55f25f4a4a07848c630dffe1ae6e-512x512.jpg" alt="67 Clicker Tap Tap" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">67 Clicker Tap Tap</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="agar.io" onclick="openGame('https://agar.io')">
+        <img src="https://imgs.crazygames.com/agario/20230719092731/agario-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Agar.io" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Agar.io</span>
+      </button>
+      <button class="game-card" style="--accent:#ff5b9e" data-name="amoung us" onclick="openGame('https://html5.gamemonetize.co/n2294odux88zuqkl35s7rjoyns90cebj/')">
+        <img src="https://tse3.mm.bing.net/th/id/OIP.eMKr4WZ8Ua76OhcPNRnHOQHaEK?r=0&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3" alt="Amoung Us" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Amoung Us</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="backgammon multiplayer" onclick="openGame('https://html5.gamedistribution.com/7e30875c404b442eb12597175bdb85dc/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/7e30875c404b442eb12597175bdb85dc-512x512.jpg" alt="Backgammon Multiplayer" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Backgammon Multiplayer</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="bad icecream 1" onclick="openGame('https://unblockeds-games.com/games/bad-ice-cream/index.html')">
+        <img src="https://unblockeds-games.com/images/bad-ice-cream.jpg" alt="Bad Icecream 1" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bad Icecream 1</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="bad icecream 2" onclick="openGame('https://unblockeds-games.com/games/bad-ice-cream-2/index.html')">
+        <img src="https://unblockeds-games.com/images/bad-ice-cream-2.jpg" alt="Bad Icecream 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bad Icecream 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="bad icecream 3" onclick="openGame('https://unblockeds-games.com/games/bad-ice-cream-3/index.html')">
+        <img src="https://unblockeds-games.com/images/bad-ice-cream-3.jpg" alt="Bad Icecream 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bad Icecream 3</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="ball jump switch the colors" onclick="openGame('https://html5.gamedistribution.com/4b89e6d06e474c0eb5d933a30972b36e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/4b89e6d06e474c0eb5d933a30972b36e-512x512.jpg" alt="Ball Jump Switch The Colors" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Ball Jump Switch The Colors</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="block blast" onclick="openGame('https://html5.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=8908')">
+        <img src="https://img.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015-512x512.jpeg" alt="Block Blast" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Block Blast</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="bloons tower defence 5" onclick="openGame('https://en.gameslol.net/data/bloons-td-5/index.php')">
+        <img src="https://tse2.mm.bing.net/th/id/OIP.anGKO-VPEnNqktkejjIawwHaEK?r=0&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3" alt="Bloons Tower Defence 5" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bloons Tower Defence 5</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="bloxd.io" onclick="openGame('https://bloxd.io/')">
+        <img src="https://imgs.crazygames.com/bloxdhop-io_16x9/20250829023851/bloxdhop-io_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Bloxd.io" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bloxd.io</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubble around" onclick="openGame('https://html5.gamedistribution.com/24ecc6238cea434b8730609226d5f0c2/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/24ecc6238cea434b8730609226d5f0c2-512x512.jpg" alt="Bubble Around" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubble Around</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubble plopper" onclick="openGame('https://html5.gamedistribution.com/1b3229bbbf6d4c519e216e8228b5d0a8/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/1b3229bbbf6d4c519e216e8228b5d0a8-512x512.jpg" alt="Bubble Plopper" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubble Plopper</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubble shooter billiards &amp; pool" onclick="openGame('https://html5.gamedistribution.com/f64448e3486a424eb60d72827083f05b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/f64448e3486a424eb60d72827083f05b-512x512.jpg" alt="Bubble Shooter Billiards &amp; Pool" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubble Shooter Billiards &amp; Pool</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubble shooter free 3" onclick="openGame('https://html5.gamedistribution.com/baa3715d0735443f9fe81631bb373f3d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/baa3715d0735443f9fe81631bb373f3d-512x512.jpg" alt="Bubble Shooter Free 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubble Shooter Free 3</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubble shooter neon" onclick="openGame('https://html5.gamedistribution.com/6de7fe918ed24506a45f8047a16bff72/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/6de7fe918ed24506a45f8047a16bff72-512x512.jpg" alt="Bubble Shooter Neon" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubble Shooter Neon</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubble shooter ultimate" onclick="openGame('https://html5.gamedistribution.com/d8a7d775a22146d083177953a5f44f68/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/d8a7d775a22146d083177953a5f44f68-512x512.jpg" alt="Bubble Shooter Ultimate" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubble Shooter Ultimate</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubbles" onclick="openGame('https://html5.gamedistribution.com/27673bc45d2e4b27b7cd24e422f7c257/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=345')">
+        <img src="https://img.gamedistribution.com/27673bc45d2e4b27b7cd24e422f7c257-512x512.jpg" alt="BUBBLES" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">BUBBLES</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="bubbles 3d" onclick="openGame('https://html5.gamedistribution.com/0212ccaec99b48ef876abbc86c326eac/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/0212ccaec99b48ef876abbc86c326eac-512x512.jpg" alt="Bubbles 3D" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Bubbles 3D</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="candy crush" onclick="openGame('https://html5.gamedistribution.com/6503629b90154938bf88cc4dd1abee77/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=3354')">
+        <img src="https://img.gamedistribution.com/6503629b90154938bf88cc4dd1abee77-512x512.jpeg" alt="Candy Crush" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Candy Crush</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="cell to singularity" onclick="openGame('https://lifesimulator.net/embed/cell-to-singularity-evolution')">
+        <img src="https://tse2.mm.bing.net/th/id/OIP.GKA3zdDhsTlQ-oeWd9jKTQHaHa?r=0&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3" alt="CELL TO SINGULARITY" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">CELL TO SINGULARITY</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="circle rush" onclick="openGame('https://play.famobi.com/circle-rush/A-4QBH7')">
+        <img src="https://img.cdn.famobi.com/portal/html5games/images/tmp/CircleRushTeaser.jpg" alt="CIRCLE RUSH" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">CIRCLE RUSH</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="color hoop sort" onclick="openGame('https://html5.gamedistribution.com/69953734f7b945618a0479a3db329c8e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/69953734f7b945618a0479a3db329c8e-512x384.jpg" alt="Color Hoop Sort" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Color Hoop Sort</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="dad n&#x27; me" onclick="openGame('https://www.yo-yoo.co.il/games/run_games/dadnme.swf')">
+        <img src="https://images.crazygames.com/games/dad-n-me/cover-1611918286048.png?auto=format,compress&amp;q=75&amp;cs=strip&amp;ch=DPR&amp;w=1200&amp;h=630&amp;fit=crop" alt="Dad n&#x27; Me" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Dad n&#x27; Me</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="dad n&#x27; me 2" onclick="openGame('https://mandalamaker.online/games/Fatherly Bonds_June_15th_2012.swf')">
+        <img src="https://www.popka.co.il/files/images/1160.jpg" alt="Dad n&#x27; Me 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Dad n&#x27; Me 2</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="devil dash" onclick="openGame('https://html5.gamedistribution.com/acc82d001dfa4471bde0818db2b7c1c4/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/acc82d001dfa4471bde0818db2b7c1c4-512x384.jpg" alt="Devil Dash" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Devil Dash</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="dino run" onclick="openGame('https://chromedino.com/embed/')">
+        <img src="https://www.yo-yoo.co.il/uploads/gam5k3464343.jpg" alt="DINO RUN" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">DINO RUN</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 1" onclick="openGame('https://html5.gamedistribution.com/a55c9cc9c21e4fc683c8c6857f3d0c75/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1836')">
+        <img src="https://img.gamedistribution.com/a55c9cc9c21e4fc683c8c6857f3d0c75-512x384.jpeg" alt="Fireboy and Watergirl 1" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 1</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 2" onclick="openGame('https://html5.gamedistribution.com/383ad09b92c7446b9113cccc29630517/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1420')">
+        <img src="https://img.gamedistribution.com/383ad09b92c7446b9113cccc29630517-512x384.jpeg" alt="Fireboy and Watergirl 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 3" onclick="openGame('https://html5.gamedistribution.com/f3a6e1ac0a77412289cbac47658b2b68/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2117')">
+        <img src="https://img.gamedistribution.com/f3a6e1ac0a77412289cbac47658b2b68-512x384.jpeg" alt="Fireboy and Watergirl 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 3</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 4" onclick="openGame('https://html5.gamedistribution.com/3790681b69584409b7f681a8e400102d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=3235')">
+        <img src="https://img.gamedistribution.com/3790681b69584409b7f681a8e400102d-512x384.jpeg" alt="Fireboy and Watergirl 4" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 4</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 5" onclick="openGame('https://html5.gamedistribution.com/03f124074b0049f89fdace0cacf8ead5/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5772')">
+        <img src="https://img.gamedistribution.com/03f124074b0049f89fdace0cacf8ead5-512x384.jpeg" alt="Fireboy and Watergirl 5" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 5</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 6" onclick="openGame('https://html5.gamedistribution.com/56da8a54fe204845b34ccff750d4a60b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=6932')">
+        <img src="https://img.gamedistribution.com/56da8a54fe204845b34ccff750d4a60b-512x512.jpeg" alt="Fireboy and Watergirl 6" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 6</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fireboy and watergirl 7" onclick="openGame('https://html5.gamedistribution.com/d4a3629101574bc39bd8f9d1888ca58e/')">
+        <img src="https://img.gamedistribution.com/d4a3629101574bc39bd8f9d1888ca58e-512x512.jpg" alt="Fireboy and Watergirl 7" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fireboy and Watergirl 7</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="fish eat getting big" onclick="openGame('https://html5.gamedistribution.com/3dfd7fcd9d7f4a16aadfa2b737cd4ac9/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=7909')">
+        <img src="https://img.gamedistribution.com/3dfd7fcd9d7f4a16aadfa2b737cd4ac9-512x512.jpeg" alt="Fish Eat Getting Big" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Fish Eat Getting Big</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="getting over it" onclick="openGame('https://scratch.mit.edu/projects/389464290/embed')">
+        <img src="https://www.noodlecake.com/wp-content/uploads/2018/04/feature-GettingOverIt-1280x720.jpg" alt="Getting Over It" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Getting Over It</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="growden.io" onclick="openGame('https://growden.io/')">
+        <img src="https://imgs.crazygames.com/grow-a-garden---growden-io_16x9/20250902110117/grow-a-garden---growden-io_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="GROWDEN.io" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">GROWDEN.io</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="helix jump" onclick="openGame('https://html5.gamedistribution.com/544cf55c6ad44a3299099e813f7f5a9d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/544cf55c6ad44a3299099e813f7f5a9d-512x512.jpeg" alt="Helix Jump" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Helix Jump</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="helix jump 2" onclick="openGame('https://html5.gamedistribution.com/c8f28089276c4d4eb8501a1f847843de/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/c8f28089276c4d4eb8501a1f847843de-512x512.jpeg" alt="Helix Jump 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Helix Jump 2</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="helix jump 2020" onclick="openGame('https://html5.gamedistribution.com/acb6678608a44d428072ca93d8a0d86c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/acb6678608a44d428072ca93d8a0d86c-512x512.jpeg" alt="Helix Jump 2020" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Helix Jump 2020</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="helix jump halloween" onclick="openGame('https://html5.gamedistribution.com/515bcc383cbe46a5b61cf9c3b13a57ef/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/515bcc383cbe46a5b61cf9c3b13a57ef-512x384.jpeg" alt="Helix Jump Halloween" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Helix Jump Halloween</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="helix jump piano" onclick="openGame('https://html5.gamedistribution.com/5ceab1b0d4e54246b793705ee7e00bbf/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/5ceab1b0d4e54246b793705ee7e00bbf-512x384.jpeg" alt="Helix Jump Piano" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Helix Jump Piano</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="hexa sort trick or treat" onclick="openGame('https://html5.gamedistribution.com/66fddb2022464fce86e045f78db3f46d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/66fddb2022464fce86e045f78db3f46d-512x512.jpg" alt="Hexa Sort Trick or Treat" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Hexa Sort Trick or Treat</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="ice fishing 3d" onclick="openGame('https://html5.gamedistribution.com/15e57f8ba30e4e20b80d6130acadd26c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://imgs.crazygames.com/ice-fishing_16x9/20230908074710/ice-fishing_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Ice fishing 3d" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Ice fishing 3d</span>
+      </button>
+      <button class="game-card" style="--accent:#ff5b9e" data-name="italian brainrot baby clicker" onclick="openGame('https://html5.gamedistribution.com/fe3c5c9d90f24f10a9e01cca22f5243f/')">
+        <img src="https://img.gamedistribution.com/fe3c5c9d90f24f10a9e01cca22f5243f-512x512.jpg" alt="Italian Brainrot Baby Clicker" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Italian Brainrot Baby Clicker</span>
+      </button>
+      <button class="game-card no-img" style="--accent:#7c8cff" data-name="lolshot.io" onclick="openGame('https://lolshot.io/')">
+        
+        <span class="card-shine"></span>
+        <span class="card-label">LOLSHOT.io</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="marble run - ultimate race!" onclick="openGame('https://html5.gamedistribution.com/ae42ea5c4e0b4ff4b9eddf47fbd2cc5e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/ae42ea5c4e0b4ff4b9eddf47fbd2cc5e-512x384.jpg" alt="Marble Run - Ultimate Race!" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Marble Run - Ultimate Race!</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="master chess" onclick="openGame('https://html5.gamedistribution.com/b2a3398e327b4f6da665759d6730aab4/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/b2a3398e327b4f6da665759d6730aab4-512x512.jpeg" alt="Master Chess" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Master Chess</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="master chess multiplayer" onclick="openGame('https://html5.gamedistribution.com/f9ea5f1f746c492d8fa217c1998fd992/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/f9ea5f1f746c492d8fa217c1998fd992-512x512.jpeg" alt="Master Chess Multiplayer" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Master Chess Multiplayer</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="minecraft" onclick="openGame('https://maddox05.github.io/basic-ruffle-player/html/minecraft/index.html')">
+        <img src="https://www.minecraft.net/content/dam/minecraftnet/franchise/logos/Homepage_Download-Launcher_Creeper-Logo_500x500.png" alt="Minecraft" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Minecraft</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy 1" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkeygohappy.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-logo-6gt.webp" alt="Monkey Go Happy 1" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy 1</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy 2" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/MonkeyGoHappy2.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-2-logo-9bq.webp" alt="Monkey Go Happy 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy 3" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/Monkey_GO_Happy_3.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-3-logo-lp9.webp" alt="Monkey Go Happy 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy 3</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy 4" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/MonkeyGOHappy4.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-4-logo-3oz.webp" alt="Monkey Go Happy 4" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy 4</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy 5" onclick="openGame('https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/monkey-go-happy-5.swf&amp;w=640&amp;h=480&amp;warnsupport=true')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-5-logo-t9d.webp" alt="Monkey Go Happy 5" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy 5</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy 6" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-6/Monkey%20GO%20Happy%206.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-6-logo-lg7.webp" alt="Monkey Go Happy 6" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy 6</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: adventure" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-adventure/MonkeyGOHappyAdventure.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-adventure-logo-ja4.webp" alt="Monkey Go Happy: Adventure" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Adventure</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: marathon 1" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/mghmar.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-logo-e7p.webp" alt="Monkey Go Happy: Marathon 1" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Marathon 1</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: marathon 2" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-2/MonkeyGOHappyMarathon-2.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-2-logo-oe3.webp" alt="Monkey Go Happy: Marathon 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Marathon 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: marathon 3" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-3_v667571/MGHmarathon3.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-3-logo-mc6.webp" alt="Monkey Go Happy: Marathon 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Marathon 3</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: marathon 4" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-4/Monkey%20GO%20Happy%20MARATHON%204.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-4-logo-4sj.webp" alt="Monkey Go Happy: Marathon 4" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Marathon 4</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: mini monkeys 1" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-mini-monkeys/MonkeyGOHappy-Mini-Monkeys.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-mini-monkeys-logo-9cd.webp" alt="Monkey Go Happy: Mini Monkeys 1" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Mini Monkeys 1</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: mini monkeys 2" onclick="openGame('https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-mini-monkeys-2/MonkeyGOHappy-MiniMonkeys2.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-mini-monkeys-2-logo-m3w.webp" alt="Monkey Go Happy: Mini Monkeys 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Mini Monkeys 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="monkey go happy: mini monkeys 3" onclick="openGame('https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/monkeygohappy-minimonkeys3.swf')">
+        <img src="https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-mini-monkeys-3-logo-9dt.webp" alt="Monkey Go Happy: Mini Monkeys 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Monkey Go Happy: Mini Monkeys 3</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="overtide.io" onclick="openGame('https://overtide.io')">
+        <img src="https://imgs.crazygames.com/overtide-io_16x9/20250501062749/overtide-io_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Overtide.io" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Overtide.io</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="pacman" onclick="openGame('https://originalpacman.com/game/index.html')">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.chaR-yw7NtGAd5mrmpyWJwHaEf?rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3" alt="PACMAN" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">PACMAN</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="paper mario world" onclick="openGame('https://static.arcadespot.com/wp-content/uploads/2017/03/paper-mario-world.swf')">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBNSOvH-dFwWeqM99EE8t42fAn_AZfhe2OQIchgHtzG0de55LAiC0CwQ&amp;s" alt="PAPER MARIO WORLD" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">PAPER MARIO WORLD</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="paper.io 2" onclick="openGame('https://html5.gamedistribution.com/c5d4966b176246748d6c847103ebfd51/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5981')">
+        <img src="https://img.gamedistribution.com/c5d4966b176246748d6c847103ebfd51-512x512.jpeg" alt="PAPER.IO 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">PAPER.IO 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="pou" onclick="openGame('https://html5.gamedistribution.com/d1362abc246f43bdb5c26643aec2b61b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/d1362abc246f43bdb5c26643aec2b61b-512x512.jpeg" alt="POU" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">POU</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="poxel.io" onclick="openGame('https://poxel.io')">
+        <img src="https://imgs.crazygames.com/poxel-io_16x9/20250422021430/poxel-io_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Poxel.io" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Poxel.io</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="raft life" onclick="openGame('https://html5.gamedistribution.com/c4b54bfd0dfe4fd3a6a8e55681b420c3/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://imgs.crazygames.com/raft-life_16x9/20240723035444/raft-life_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Raft Life" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Raft Life</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="ragdoll" onclick="openGame('https://maddox05.github.io/basic-ruffle-player/html/ragdoll_archers/index.html')">
+        <img src="https://imgs.crazygames.com/ragdoll-archers_16x9/20250711092019/ragdoll-archers_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Ragdoll" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Ragdoll</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="rumble rush" onclick="openGame('https://rumblerush.io/')">
+        <img src="https://tse2.mm.bing.net/th/id/OIP.fceVKe4CXI2f1ZTrpjAJQgHaDb?rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3" alt="Rumble Rush" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Rumble Rush</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="sky rolling ball" onclick="openGame('https://html5.gamedistribution.com/eb2919a29fac42e2a7882a3a85903d75/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2162')">
+        <img src="https://img.gamedistribution.com/eb2919a29fac42e2a7882a3a85903d75-512x384.jpeg" alt="Sky Rolling ball" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Sky Rolling ball</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="slow roads" onclick="openGame('https://slowroads.io')">
+        <img src="https://slowroads.io/img/logo-stacked.svg" alt="Slow Roads" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Slow Roads</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 1" onclick="openGame('https://html5.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1276')">
+        <img src="https://img.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c.jpg" alt="Snail Bob 1" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 1</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 2" onclick="openGame('https://html5.gamedistribution.com/cf6d62af468b44ffbcb38b0f9e232f7e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2293')">
+        <img src="https://img.gamedistribution.com/cf6d62af468b44ffbcb38b0f9e232f7e.jpg" alt="Snail Bob 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 2</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 3" onclick="openGame('https://gamaverse.com/c/f/g/snail-bob-3/index.html?key=y8&amp;value=default')">
+        <img src="https://agamecdn.com/system/static/thumbs/spil_thumb_big/28127/webp_1441883249_576742227280287731_large.webp?1692358149" alt="Snail Bob 3" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 3</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 4" onclick="openGame('https://img.y8.com/cloud/y8-flash-game/contents/item_versions/flash_games/45757/original/snail_bob_4_space.swf')">
+        <img src="https://img.gamedistribution.com/1b6b1812ae8149e987d4d9c7f2855131.jpg" alt="Snail Bob 4" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 4</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 5" onclick="openGame('https://html5.gamedistribution.com/7e2e56736eef49f78220605798903354/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/7e2e56736eef49f78220605798903354.jpg" alt="Snail Bob 5" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 5</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 6" onclick="openGame('https://html5.gamedistribution.com/043d401426d845ae990cb2583fe1ebff/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/043d401426d845ae990cb2583fe1ebff.jpg" alt="Snail Bob 6" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 6</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 7" onclick="openGame('https://html5.gamedistribution.com/9aefc9ef4a7f4d5d8062cfb563cc658c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/9aefc9ef4a7f4d5d8062cfb563cc658c-512x384.jpeg" alt="Snail Bob 7" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 7</span>
+      </button>
+      <button class="game-card" style="--accent:#7ee787" data-name="snail bob 8" onclick="openGame('https://html5.gamedistribution.com/03b3b4a7cc4243b6bbaac22285f14741/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/03b3b4a7cc4243b6bbaac22285f14741-512x384.jpeg" alt="Snail Bob 8" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Snail Bob 8</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="space waves" onclick="openGame('https://spacewaves.io/1.embed')">
+        <img src="https://imgs.crazygames.com/space-waves_16x9/20241203031650/space-waves_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Space Waves" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Space Waves</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="steal a brainrot" onclick="openGame('https://securepubads.g.doubleclick.net/static/topics/topics_frame.html')">
+        <img src="https://imgs.crazygames.com/steal-brainrot-online_16x9/20250916042622/steal-brainrot-online_16x9-cover?metadata=none&amp;quality=75&amp;width=196&amp;dpr=2" alt="Steal A Brainrot" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Steal A Brainrot</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="subway surfers" onclick="openGame('https://g.igroutka.ru/games/164/Xm2W5MIcPqrF1Y90/12/subway_surfers_easter_edinburgh/')">
+        <img src="https://www.freebcc.com/games/images/20231011/subway_surfers.png" alt="SUBWAY SURFERS" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">SUBWAY SURFERS</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="super stacker" onclick="openGame('https://html5.gamedistribution.com/3de0c1fd03414f92b4324ebfe54fc562/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5981')">
+        <img src="https://img.gamedistribution.com/3de0c1fd03414f92b4324ebfe54fc562.jpg" alt="Super Stacker" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Super Stacker</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="tall man evolution" onclick="openGame('https://html5.gamedistribution.com/dfbcabce16c640329b9f00867af35ae8/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/dfbcabce16c640329b9f00867af35ae8-512x512.jpeg" alt="Tall Man Evolution" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Tall Man Evolution</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="tallman run" onclick="openGame('https://html5.gamedistribution.com/7980c23fbbae4af6851e01052fce3cce/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=7402')">
+        <img src="https://img.gamedistribution.com/7980c23fbbae4af6851e01052fce3cce-512x512.jpeg" alt="Tallman Run" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Tallman Run</span>
+      </button>
+      <button class="game-card" style="--accent:#ff9f45" data-name="temple run 2" onclick="openGame('https://html5.gamemonetize.co/pkyyuilfrqkcdnmrxsg60j22ypk0peje/')">
+        <img src="https://www.yo-yoo.co.il/uploads/runr23432tle.jpg" alt="TEMPLE RUN 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">TEMPLE RUN 2</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="tropical match" onclick="openGame('https://html5.gamedistribution.com/cce9fadef40943e49d855501c7fce51c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/cce9fadef40943e49d855501c7fce51c-512x512.jpg" alt="Tropical Match" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Tropical Match</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="tropical match 2" onclick="openGame('https://html5.gamedistribution.com/59719ccbc7764864bae2c4c7aea820b6/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/59719ccbc7764864bae2c4c7aea820b6-512x512.jpg" alt="Tropical Match 2" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Tropical Match 2</span>
+      </button>
+      <button class="game-card" style="--accent:#33d6c0" data-name="water sorting puzzle" onclick="openGame('https://html5.gamedistribution.com/957523bb6e8340249e8c5b8a0b989b8f/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1')">
+        <img src="https://img.gamedistribution.com/957523bb6e8340249e8c5b8a0b989b8f-512x512.jpeg" alt="Water Sorting Puzzle" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">Water Sorting Puzzle</span>
+      </button>
+      <button class="game-card" style="--accent:#ffd23f" data-name="wordle" onclick="openGame('https://wordle-game-online.github.io/#daily')">
+        <img src="https://twinfinite.net/wp-content/uploads/2023/06/Wordle-NYT-Game.jpg?fit=1200%2C675" alt="WORDLE" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">WORDLE</span>
+      </button>
+      <button class="game-card" style="--accent:#7c8cff" data-name="world guessr" onclick="openGame('https://www.worldguessr.com/')">
+        <img src="https://tse3.mm.bing.net/th/id/OIP.Y95Nm8f6SdL9_M0tt_JHCgHaEK?r=0&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3" alt="World Guessr" loading="lazy" onerror="this.closest('button').classList.add('no-img')">
+        <span class="card-shine"></span>
+        <span class="card-label">World Guessr</span>
+      </button>
+  </div>
+
+  <div class="empty-state" id="emptyState">לא נמצאו משחקים תואמים 🙁 נסו חיפוש אחר</div>
+</main>
+
+<footer>נהנים? חפשו משחק ותנו לו לפתוח בלחיצה אחת.</footer>
 
 <script>
-    function openGame(url) {
-      // שומרים את הכתובת ב־localStorage
-      localStorage.setItem("gameUrl", url);
-      // עוברים לדף הבא בלי פרמטרים ב־URL
-      window.location.href = "game_player.html";
+  function openGame(url) {
+    localStorage.setItem("gameUrl", url);
+    window.location.href = "game_player.html";
+  }
+
+  // שומר את שם המשחק (הטקסט שכתוב על הכרטיס) לפני שעוברים לדף המשחק
+  document.getElementById('gameGrid').addEventListener('click', function (e) {
+    const card = e.target.closest('.game-card');
+    if (!card) return;
+    const label = card.querySelector('.card-label');
+    localStorage.setItem("gameName", label ? label.textContent.trim() : "");
+  }, true);
+
+  (function(){
+    const searchInput = document.getElementById('searchInput');
+    const cards = Array.from(document.querySelectorAll('.game-card'));
+    const emptyState = document.getElementById('emptyState');
+
+    function applyFilters(){
+      const q = searchInput.value.trim().toLowerCase();
+      let anyVisible = false;
+
+      cards.forEach(card => {
+        const show = !q || card.dataset.name.includes(q);
+        card.style.display = show ? '' : 'none';
+        if (show) anyVisible = true;
+      });
+
+      emptyState.classList.toggle('show', !anyVisible);
     }
+
+    searchInput.addEventListener('input', applyFilters);
+  })();
 </script>
+
 </body>
 </html>

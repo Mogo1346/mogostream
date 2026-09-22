@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פינת המשחקים</title>
+<link rel="icon" type="image/png" href="https://www.kankids.org.il/favicon-kids/favicon-32x32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#161129;
+    --bg-2:#1f1a3d;
+    --panel:#211a42;
+    --panel-2:#2a2154;
+    --ink:#f3f0ff;
+    --ink-dim:#b3aad6;
+    --line:rgba(255,255,255,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:'Rubik', Arial, sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 12% -10%, rgba(124,140,255,.30), transparent 45%),
+      radial-gradient(circle at 90% 0%, rgba(255,91,158,.22), transparent 40%),
+      radial-gradient(circle at 50% 120%, rgba(51,214,192,.18), transparent 45%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2) 60%, #120d24 100%);
+    background-attachment:fixed;
+    padding-bottom:60px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    backdrop-filter:blur(14px);
+    background:rgba(17,13,36,.72);
+    border-bottom:1px solid var(--line);
+    padding:22px 20px 16px;
+  }
+  .header-inner{max-width:1180px;margin:0 auto;}
+  .title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  h1{
+    font-family:'Suez One', 'Rubik', serif;
+    font-weight:400;
+    font-size:clamp(28px, 4vw, 42px);
+    margin:0;
+    letter-spacing:.5px;
+    background:linear-gradient(90deg,#7c8cff,#ff5b9e 45%,#ffd23f 85%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    line-height:1.15;
+  }
+  .subtitle{
+    color:var(--ink-dim);
+    font-size:14.5px;
+    margin-top:4px;
+  }
+  .game-count-pill{
+    font-size:13px;
+    color:var(--ink-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:6px 14px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  .search-row{
+    margin-top:16px;
+    display:flex;
+    gap:10px;
+  }
+  .search-box{
+    position:relative;
+    flex:1;
+    max-width:420px;
+  }
+  .search-box input{
+    width:100%;
+    padding:12px 44px 12px 16px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:15px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .search-box input::placeholder{color:var(--ink-dim);}
+  .search-box input:focus{
+    border-color:#7c8cff;
+    box-shadow:0 0 0 3px rgba(124,140,255,.25);
+  }
+  .search-box .icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:16px;
+    opacity:.6;
+    pointer-events:none;
+  }
+
+  .chip-row{
+    margin-top:14px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .chip{
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:7px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:transform .12s ease, color .15s, border-color .15s, background .15s;
+  }
+  .chip span{font-size:15px;}
+  .chip:hover{transform:translateY(-1px);}
+  .chip.active{
+    color:#181228;
+    background:var(--accent);
+    border-color:var(--accent);
+    font-weight:700;
+  }
+  .chip#chip-all.active{
+    color:var(--ink);
+    background:var(--panel-2);
+    border-color:#7c8cff;
+  }
+
+  /* ---------- sections ---------- */
+  main{max-width:1180px;margin:0 auto;padding:28px 20px 0;}
+  .cat-section{margin-top:34px;}
+  .cat-section:first-of-type{margin-top:26px;}
+  .cat-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:19px;
+    font-weight:700;
+    margin:0 0 14px;
+    padding-right:12px;
+    border-right:4px solid var(--accent);
+  }
+  .cat-emoji{font-size:20px;}
+  .cat-count{
+    margin-right:auto;
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--ink-dim);
+  }
+
+  .game-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(128px, 1fr));
+    gap:12px;
+  }
+
+  .game-card{
+    position:relative;
+    aspect-ratio:1/1;
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    padding:0;
+    cursor:pointer;
+    background:var(--panel);
+    transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  }
+  .game-card:hover, .game-card:focus-visible{
+    transform:translateY(-4px) scale(1.035);
+    border-color:var(--accent);
+    box-shadow:0 10px 24px -8px rgba(0,0,0,.55), 0 0 0 1px var(--accent), 0 0 22px -4px var(--accent);
+    outline:none;
+  }
+  .game-card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .game-card.no-img img{display:none;}
+  .game-card.no-img{
+    background:linear-gradient(135deg, var(--panel), var(--panel-2));
+  }
+  .game-card.no-img::before{
+    content:"🎲";
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    opacity:.5;
+  }
+  /* הצללה תחתונה – מתווספת אוטומטית לכל כרטיס */
+  .game-card::after{
+    content:"";
+    position:absolute;
+    inset:auto 0 0 0;
+    height:56%;
+    background:linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,0));
+    pointer-events:none;
+  }
+  .card-label{
+    position:absolute;
+    z-index:1;
+    right:8px;
+    bottom:7px;
+    left:8px;
+    font-size:12.5px;
+    font-weight:700;
+    line-height:1.25;
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.7);
+    pointer-events:none;
+  }
+
+  .empty-state{
+    display:none;
+    text-align:center;
+    color:var(--ink-dim);
+    padding:60px 20px;
+    font-size:15px;
+  }
+  .empty-state.show{display:block;}
+
+  footer{
+    max-width:1180px;
+    margin:40px auto 0;
+    padding:20px;
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--line);
+  }
+
+  @media (max-width:520px){
+    .game-grid{grid-template-columns:repeat(auto-fill, minmax(104px,1fr));}
+    h1{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="title-row">
+      <div>
+        <h1>🕹️ פינת המשחקים</h1>
+        <div class="subtitle">בחרו קטגוריה או חפשו משחק — ולחיצה אחת ואתם בפנים</div>
+      </div>
+      <div class="game-count-pill" id="gameCount"></div>
+    </div>
+
+    <div class="search-row">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="חיפוש משחק...">
+        <span class="icon">🔍</span>
+      </div>
+    </div>
+
+    <div class="chip-row" id="chipRow">
+      <button class="chip active" id="chip-all" style="--accent:#7c8cff"><span>✨</span>הכל</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="empty-state" id="emptyState">לא נמצאו משחקים תואמים 🙁 נסו חיפוש אחר</div>
+</main>
+
+<footer>נהנים? חפשו, סננו לפי קטגוריה, ותנו לכל משחק לפתוח בלחיצה אחת.</footer>
+
+<script>
+/* =====================================================================
+   1. הגדרת קטגוריות
+   הסדר כאן הוא הסדר שבו הן יופיעו בדף.
+   כדי להוסיף קטגוריה חדשה – מוסיפים שורה אחת.
+   ===================================================================== */
+const CATEGORIES = {
+  "נהיגה":            { emoji: "🏃", color: "#ff9f45" },
+  "יריות":               { emoji: "🐒", color: "#7ee787" },
+  "ילדים וחינוך":       { emoji: "🎮", color: "#ff5b9e" },
+  "הרפתקאות ומשחקי תפקידים":     { emoji: "♟️", color: "#ffd23f" },
+  "לבנות":  { emoji: "🌐", color: "#7c8cff" },
+  "ספורט":       { emoji: "🎮", color: "#ff5b9e" },
+  "חשיבה":       { emoji: "🎮", color: "#ff5b9e" },
+  "ניהול וסימולציות":          { emoji: "🫧", color: "#33d6c0" },
+  "אקשן ולחימה":       { emoji: "🎮", color: "#ff5b9e" },
+  "אסטרטגיה והגנה":       { emoji: "🎮", color: "#ff5b9e" },
+  "מיומנות":       { emoji: "🎮", color: "#ff5b9e" },
+  "משעשע ומשוגע":       { emoji: "🎮", color: "#ff5b9e" },
+  "ארקייד וקלאסי":       { emoji: "🎮", color: "#ff5b9e" }
+};
+
+/* =====================================================================
+   2. רשימת המשחקים
+   כדי להוסיף משחק – מוסיפים שורה אחת ורושמים את שם הקטגוריה.
+   img הוא אופציונלי (בלי תמונה יוצג קובייה).
+   ===================================================================== */
+const GAMES = [
+   { name: "1v1.lol", category: "יריות",
+    url: "https://1v1.lol/",
+    img: "https://th.bing.com/th/id/R.0cb9bdcd2f65d20f7354edf9fb7db5b5?rik=hjfoenJ0qhPZmQ&pid=ImgRaw&r=0" },
+  { name: "3Dash", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/ba08d794f5c84775b848781e70497849/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/ba08d794f5c84775b848781e70497849-512x384.jpg" },
+  { name: "67 Clicker Tap Tap", category: "משעשע ומשוגע",
+    url: "https://html5.gamedistribution.com/7fcb55f25f4a4a07848c630dffe1ae6e",
+    img: "https://img.gamedistribution.com/7fcb55f25f4a4a07848c630dffe1ae6e-512x512.jpg" },
+  { name: "Agar.io", category: "מיומנות",
+    url: "https://agar.io",
+    img: "https://imgs.crazygames.com/agario/20230719092731/agario-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Amoung Us", category: "משעשע ומשוגע",
+    url: "https://html5.gamemonetize.co/n2294odux88zuqkl35s7rjoyns90cebj/",
+    img: "https://tse3.mm.bing.net/th/id/OIP.eMKr4WZ8Ua76OhcPNRnHOQHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "Backgammon Multiplayer", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/7e30875c404b442eb12597175bdb85dc/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/7e30875c404b442eb12597175bdb85dc-512x512.jpg" },
+  { name: "Bad Icecream 1", category: "ארקייד וקלאסי",
+    url: "https://unblockeds-games.com/games/bad-ice-cream/index.html",
+    img: "https://unblockeds-games.com/images/bad-ice-cream.jpg" },
+  { name: "Bad Icecream 2", category: "ארקייד וקלאסי",
+    url: "https://unblockeds-games.com/games/bad-ice-cream-2/index.html",
+    img: "https://unblockeds-games.com/images/bad-ice-cream-2.jpg" },
+  { name: "Bad Icecream 3", category: "ארקייד וקלאסי",
+    url: "https://unblockeds-games.com/games/bad-ice-cream-3/index.html",
+    img: "https://unblockeds-games.com/images/bad-ice-cream-3.jpg" },
+  { name: "Ball Jump Switch The Colors", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/4b89e6d06e474c0eb5d933a30972b36e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/4b89e6d06e474c0eb5d933a30972b36e-512x512.jpg" },
+  { name: "Block Blast", category: "חשיבה",
+    url: "https://html5.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=8908",
+    img: "https://img.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015-512x512.jpeg" },
+  { name: "Bloons Tower Defence 5", category: "אסטרטגיה והגנה",
+    url: "https://en.gameslol.net/data/bloons-td-5/index.php",
+    img: "https://tse2.mm.bing.net/th/id/OIP.anGKO-VPEnNqktkejjIawwHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "Bloxd.io", category: "ניהול וסימולציות",
+    url: "https://bloxd.io/",
+    img: "https://imgs.crazygames.com/bloxdhop-io_16x9/20250829023851/bloxdhop-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "BUBBLES", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/27673bc45d2e4b27b7cd24e422f7c257/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=345",
+    img: "https://img.gamedistribution.com/27673bc45d2e4b27b7cd24e422f7c257-512x512.jpg" },
+  { name: "Bubbles 3D", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/0212ccaec99b48ef876abbc86c326eac/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/0212ccaec99b48ef876abbc86c326eac-512x512.jpg" },
+  { name: "Bubble Around", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/24ecc6238cea434b8730609226d5f0c2/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/24ecc6238cea434b8730609226d5f0c2-512x512.jpg" },
+  { name: "Bubble Plopper", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/1b3229bbbf6d4c519e216e8228b5d0a8/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/1b3229bbbf6d4c519e216e8228b5d0a8-512x512.jpg" },
+  { name: "Bubble Shooter Billiards & Pool", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/f64448e3486a424eb60d72827083f05b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/f64448e3486a424eb60d72827083f05b-512x512.jpg" },
+  { name: "Bubble Shooter Free 3", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/baa3715d0735443f9fe81631bb373f3d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/baa3715d0735443f9fe81631bb373f3d-512x512.jpg" },
+  { name: "Bubble Shooter Neon", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/6de7fe918ed24506a45f8047a16bff72/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/6de7fe918ed24506a45f8047a16bff72-512x512.jpg" },
+  { name: "Bubble Shooter Ultimate", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/d8a7d775a22146d083177953a5f44f68/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/d8a7d775a22146d083177953a5f44f68-512x512.jpg" },
+  { name: "Candy Crush", category: "חשיבה",
+    url: "https://html5.gamedistribution.com/6503629b90154938bf88cc4dd1abee77/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=3354",
+    img: "https://img.gamedistribution.com/6503629b90154938bf88cc4dd1abee77-512x512.jpeg" },
+  { name: "CELL TO SINGULARITY", category: "ילדים וחינוך",
+    url: "https://lifesimulator.net/embed/cell-to-singularity-evolution",
+    img: "https://tse2.mm.bing.net/th/id/OIP.GKA3zdDhsTlQ-oeWd9jKTQHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "CIRCLE RUSH", category: "מיומנות",
+    url: "https://play.famobi.com/circle-rush/A-4QBH7",
+    img: "https://img.cdn.famobi.com/portal/html5games/images/tmp/CircleRushTeaser.jpg" },
+  { name: "Color Hoop Sort", category: "חשיבה",
+    url: "https://html5.gamedistribution.com/69953734f7b945618a0479a3db329c8e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/69953734f7b945618a0479a3db329c8e-512x384.jpg" },
+  { name: "Dad n' Me", category: "משעשע ומשוגע",
+    url: "https://www.yo-yoo.co.il/games/run_games/dadnme.swf",
+    img: "https://images.crazygames.com/games/dad-n-me/cover-1611918286048.png?auto=format,compress&q=75&cs=strip&ch=DPR&w=1200&h=630&fit=crop" },
+  { name: "Dad n' Me 2", category: "משעשע ומשוגע",
+    url: "https://mandalamaker.online/games/Fatherly Bonds_June_15th_2012.swf",
+    img: "https://www.popka.co.il/files/images/1160.jpg" },
+  { name: "Devil Dash", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/acc82d001dfa4471bde0818db2b7c1c4/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/acc82d001dfa4471bde0818db2b7c1c4-512x384.jpg" },
+  { name: "DINO RUN", category: "מיומנות",
+    url: "https://games.monsteraplay.com/dino_run/index.html?client=ca-pub-7582061460326705&fullscreen=false",
+    img: "https://www.yo-yoo.co.il/uploads/gam5k3464343.jpg" },
+  { name: "Fireboy and Watergirl 1", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/a55c9cc9c21e4fc683c8c6857f3d0c75/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1836",
+    img: "https://img.gamedistribution.com/a55c9cc9c21e4fc683c8c6857f3d0c75-512x384.jpeg" },
+  { name: "Fireboy and Watergirl 2", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/383ad09b92c7446b9113cccc29630517/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1420",
+    img: "https://img.gamedistribution.com/383ad09b92c7446b9113cccc29630517-512x384.jpeg" },
+  { name: "Fireboy and Watergirl 3", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/f3a6e1ac0a77412289cbac47658b2b68/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2117",
+    img: "https://img.gamedistribution.com/f3a6e1ac0a77412289cbac47658b2b68-512x384.jpeg" },
+  { name: "Fireboy and Watergirl 4", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/3790681b69584409b7f681a8e400102d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=3235",
+    img: "https://img.gamedistribution.com/3790681b69584409b7f681a8e400102d-512x384.jpeg" },
+  { name: "Fireboy and Watergirl 5", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/03f124074b0049f89fdace0cacf8ead5/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5772",
+    img: "https://img.gamedistribution.com/03f124074b0049f89fdace0cacf8ead5-512x384.jpeg" },
+  { name: "Fireboy and Watergirl 6", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/56da8a54fe204845b34ccff750d4a60b/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=6932",
+    img: "https://img.gamedistribution.com/56da8a54fe204845b34ccff750d4a60b-512x512.jpeg" },
+  { name: "Fireboy and Watergirl 7", category: "הרפתקאות ומשחקי תפקידים",
+    url: "https://html5.gamedistribution.com/d4a3629101574bc39bd8f9d1888ca58e",
+    img: "https://img.gamedistribution.com/d4a3629101574bc39bd8f9d1888ca58e-512x512.jpg" },
+  { name: "Fish Eat Getting Big", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/3dfd7fcd9d7f4a16aadfa2b737cd4ac9/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=7909",
+    img: "https://img.gamedistribution.com/3dfd7fcd9d7f4a16aadfa2b737cd4ac9-512x512.jpeg" },
+  { name: "Getting Over It", category: "מיומנות",
+    url: "https://scratch.mit.edu/projects/389464290/embed",
+    img: "https://www.noodlecake.com/wp-content/uploads/2018/04/feature-GettingOverIt-1280x720.jpg" },
+  { name: "GROWDEN.io", category: "ניהול וסימולציות",
+    url: "https://growden.io/",
+    img: "https://imgs.crazygames.com/grow-a-garden---growden-io_16x9/20250902110117/grow-a-garden---growden-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Helix Jump", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/544cf55c6ad44a3299099e813f7f5a9d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/544cf55c6ad44a3299099e813f7f5a9d-512x512.jpeg" },
+  { name: "Helix Jump 2", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/c8f28089276c4d4eb8501a1f847843de/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/c8f28089276c4d4eb8501a1f847843de-512x512.jpeg" },
+  { name: "Helix Jump 2020", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/acb6678608a44d428072ca93d8a0d86c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/acb6678608a44d428072ca93d8a0d86c-512x512.jpeg" },
+  { name: "Helix Jump Halloween", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/515bcc383cbe46a5b61cf9c3b13a57ef/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/515bcc383cbe46a5b61cf9c3b13a57ef-512x384.jpeg" },
+  { name: "Helix Jump Piano", category: "מיומנות",
+    url: "https://html5.gamedistribution.com/5ceab1b0d4e54246b793705ee7e00bbf/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/5ceab1b0d4e54246b793705ee7e00bbf-512x384.jpeg" },
+  { name: "Hexa Sort Trick or Treat", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/66fddb2022464fce86e045f78db3f46d/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/66fddb2022464fce86e045f78db3f46d-512x512.jpg" },
+  { name: "Ice fishing 3d", category: "ניהול וסימולציות",
+    url: "https://html5.gamedistribution.com/15e57f8ba30e4e20b80d6130acadd26c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://imgs.crazygames.com/ice-fishing_16x9/20230908074710/ice-fishing_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Italian Brainrot Baby Clicker", category: "ארקייד וקלאסי",
+    url: "https://html5.gamedistribution.com/fe3c5c9d90f24f10a9e01cca22f5243f",
+    img: "https://img.gamedistribution.com/fe3c5c9d90f24f10a9e01cca22f5243f-512x512.jpg" },
+  { name: "LOLSHOT.io", category: "עולמות IO ומולטיפלייר",
+    url: "https://lolshot.io/" },
+  { name: "Marble Run - Ultimate Race!", category: "ריצה וקפיצה",
+    url: "https://html5.gamedistribution.com/ae42ea5c4e0b4ff4b9eddf47fbd2cc5e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/ae42ea5c4e0b4ff4b9eddf47fbd2cc5e-512x384.jpg" },
+  { name: "Master Chess", category: "קלאסיקות ואסטרטגיה",
+    url: "https://html5.gamedistribution.com/b2a3398e327b4f6da665759d6730aab4/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/b2a3398e327b4f6da665759d6730aab4-512x512.jpeg" },
+  { name: "Master Chess Multiplayer", category: "קלאסיקות ואסטרטגיה",
+    url: "https://html5.gamedistribution.com/f9ea5f1f746c492d8fa217c1998fd992/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/f9ea5f1f746c492d8fa217c1998fd992-512x512.jpeg" },
+  { name: "Minecraft", category: "עולמות IO ומולטיפלייר",
+    url: "https://maddox05.github.io/basic-ruffle-player/html/minecraft/index.html",
+    img: "https://www.minecraft.net/content/dam/minecraftnet/franchise/logos/Homepage_Download-Launcher_Creeper-Logo_500x500.png" },
+  { name: "Monkey Go Happy 1", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkeygohappy.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-logo-6gt.webp" },
+  { name: "Monkey Go Happy 2", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/MonkeyGoHappy2.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-2-logo-9bq.webp" },
+  { name: "Monkey Go Happy 3", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/Monkey_GO_Happy_3.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-3-logo-lp9.webp" },
+  { name: "Monkey Go Happy 4", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/MonkeyGOHappy4.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-4-logo-3oz.webp" },
+  { name: "Monkey Go Happy 5", category: "הרפתקאות",
+    url: "https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/monkey-go-happy-5.swf&w=640&h=480&warnsupport=true",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-5-logo-t9d.webp" },
+  { name: "Monkey Go Happy 6", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-6/Monkey%20GO%20Happy%206.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-6-logo-lg7.webp" },
+  { name: "Monkey Go Happy: Adventure", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-adventure/MonkeyGOHappyAdventure.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-adventure-logo-ja4.webp" },
+  { name: "Monkey Go Happy: Marathon 1", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/mghmar.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-logo-e7p.webp" },
+  { name: "Monkey Go Happy: Marathon 2", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-2/MonkeyGOHappyMarathon-2.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-2-logo-oe3.webp" },
+  { name: "Monkey Go Happy: Marathon 3", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-3_v667571/MGHmarathon3.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-3-logo-mc6.webp" },
+  { name: "Monkey Go Happy: Marathon 4", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-marathon-4/Monkey%20GO%20Happy%20MARATHON%204.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-marathon-4-logo-4sj.webp" },
+  { name: "Monkey Go Happy: Mini Monkeys 1", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-mini-monkeys/MonkeyGOHappy-Mini-Monkeys.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-mini-monkeys-logo-9cd.webp" },
+  { name: "Monkey Go Happy: Mini Monkeys 2", category: "הרפתקאות",
+    url: "https://www.yo-yoo.co.il/games/mgames/monkey-go-happy-mini-monkeys-2/MonkeyGOHappy-MiniMonkeys2.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-mini-monkeys-2-logo-m3w.webp" },
+  { name: "Monkey Go Happy: Mini Monkeys 3", category: "הרפתקאות",
+    url: "https://f.kbhgames.com/RS/game.php?r=//f.kbhgames.com/2018/swf/monkeygohappy-minimonkeys3.swf",
+    img: "https://flashmuseum.net/wp-content/uploads/images/game-logo/m/monkey-go-happy-mini-monkeys-3-logo-9dt.webp" },
+  { name: "Overtide.io", category: "עולמות IO ומולטיפלייר",
+    url: "https://overtide.io",
+    img: "https://imgs.crazygames.com/overtide-io_16x9/20250501062749/overtide-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "PACMAN", category: "קלאסיקות ואסטרטגיה",
+    url: "https://originalpacman.com/game/index.html",
+    img: "https://tse1.mm.bing.net/th/id/OIP.chaR-yw7NtGAd5mrmpyWJwHaEf?rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "PAPER.IO 2", category: "עולמות IO ומולטיפלייר",
+    url: "https://html5.gamedistribution.com/c5d4966b176246748d6c847103ebfd51/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5981",
+    img: "https://img.gamedistribution.com/c5d4966b176246748d6c847103ebfd51-512x512.jpeg" },
+  { name: "PAPER MARIO WORLD", category: "קלאסיקות ואסטרטגיה",
+    url: "https://static.arcadespot.com/wp-content/uploads/2017/03/paper-mario-world.swf",
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBNSOvH-dFwWeqM99EE8t42fAn_AZfhe2OQIchgHtzG0de55LAiC0CwQ&s" },
+  { name: "Poxel.io", category: "עולמות IO ומולטיפלייר",
+    url: "https://poxel.io",
+    img: "https://imgs.crazygames.com/poxel-io_16x9/20250422021430/poxel-io_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Raft Life", category: "עולמות IO ומולטיפלייר",
+    url: "https://html5.gamedistribution.com/c4b54bfd0dfe4fd3a6a8e55681b420c3/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://imgs.crazygames.com/raft-life_16x9/20240723035444/raft-life_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Ragdoll", category: "עולמות IO ומולטיפלייר",
+    url: "https://maddox05.github.io/basic-ruffle-player/html/ragdoll_archers/index.html",
+    img: "https://imgs.crazygames.com/ragdoll-archers_16x9/20250711092019/ragdoll-archers_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Rumble Rush", category: "עולמות IO ומולטיפלייר",
+    url: "https://rumblerush.io/",
+    img: "https://tse2.mm.bing.net/th/id/OIP.fceVKe4CXI2f1ZTrpjAJQgHaDb?rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "Sky Rolling ball", category: "ריצה וקפיצה",
+    url: "https://html5.gamedistribution.com/eb2919a29fac42e2a7882a3a85903d75/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2162",
+    img: "https://img.gamedistribution.com/eb2919a29fac42e2a7882a3a85903d75-512x384.jpeg" },
+  { name: "Slow Roads", category: "עולמות IO ומולטיפלייר",
+    url: "https://slowroads.io",
+    img: "https://slowroads.io/img/logo-stacked.svg" },
+  { name: "Snail Bob 1", category: "הרפתקאות",
+    url: "https://html5.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1276",
+    img: "https://img.gamedistribution.com/b115976d62a64cff8ca1cee6c971d61c.jpg" },
+  { name: "Snail Bob 2", category: "הרפתקאות",
+    url: "https://html5.gamedistribution.com/cf6d62af468b44ffbcb38b0f9e232f7e/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=2293",
+    img: "https://img.gamedistribution.com/cf6d62af468b44ffbcb38b0f9e232f7e.jpg" },
+  { name: "Snail Bob 3", category: "הרפתקאות",
+    url: "https://gamaverse.com/c/f/g/snail-bob-3/index.html?key=y8&value=default",
+    img: "https://agamecdn.com/system/static/thumbs/spil_thumb_big/28127/webp_1441883249_576742227280287731_large.webp?1692358149" },
+  { name: "Snail Bob 4", category: "הרפתקאות",
+    url: "https://img.y8.com/cloud/y8-flash-game/contents/item_versions/flash_games/45757/original/snail_bob_4_space.swf",
+    img: "https://img.gamedistribution.com/1b6b1812ae8149e987d4d9c7f2855131.jpg" },
+  { name: "Snail Bob 5", category: "הרפתקאות",
+    url: "https://html5.gamedistribution.com/7e2e56736eef49f78220605798903354/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/7e2e56736eef49f78220605798903354.jpg" },
+  { name: "Snail Bob 6", category: "הרפתקאות",
+    url: "https://html5.gamedistribution.com/043d401426d845ae990cb2583fe1ebff/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/043d401426d845ae990cb2583fe1ebff.jpg" },
+  { name: "Snail Bob 7", category: "הרפתקאות",
+    url: "https://html5.gamedistribution.com/9aefc9ef4a7f4d5d8062cfb563cc658c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/9aefc9ef4a7f4d5d8062cfb563cc658c-512x384.jpeg" },
+  { name: "Snail Bob 8", category: "הרפתקאות",
+    url: "https://html5.gamedistribution.com/03b3b4a7cc4243b6bbaac22285f14741/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/03b3b4a7cc4243b6bbaac22285f14741-512x384.jpeg" },
+  { name: "Space Waves", category: "עולמות IO ומולטיפלייר",
+    url: "https://spacewaves.io/1.embed",
+    img: "https://imgs.crazygames.com/space-waves_16x9/20241203031650/space-waves_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "Steal A Brainrot", category: "עולמות IO ומולטיפלייר",
+    url: "https://securepubads.g.doubleclick.net/static/topics/topics_frame.html",
+    img: "https://imgs.crazygames.com/steal-brainrot-online_16x9/20250916042622/steal-brainrot-online_16x9-cover?metadata=none&quality=75&width=196&dpr=2" },
+  { name: "SUBWAY SURFERS", category: "ריצה וקפיצה",
+    url: "https://g.igroutka.ru/games/164/Xm2W5MIcPqrF1Y90/12/subway_surfers_easter_edinburgh/",
+    img: "https://www.freebcc.com/games/images/20231011/subway_surfers.png" },
+  { name: "Super Stacker", category: "בועות ופאזלים",
+    url: "https://html5.gamedistribution.com/3de0c1fd03414f92b4324ebfe54fc562/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=5981",
+    img: "https://img.gamedistribution.com/3de0c1fd03414f92b4324ebfe54fc562.jpg" },
+  { name: "Tallman Run", category: "ריצה וקפיצה",
+    url: "https://html5.gamedistribution.com/7980c23fbbae4af6851e01052fce3cce/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=7402",
+    img: "https://img.gamedistribution.com/7980c23fbbae4af6851e01052fce3cce-512x512.jpeg" },
+  { name: "Tall Man Evolution", category: "ריצה וקפיצה",
+    url: "https://html5.gamedistribution.com/dfbcabce16c640329b9f00867af35ae8/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/dfbcabce16c640329b9f00867af35ae8-512x512.jpeg" },
+  { name: "TEMPLE RUN 2", category: "ריצה וקפיצה",
+    url: "https://html5.gamemonetize.co/pkyyuilfrqkcdnmrxsg60j22ypk0peje/",
+    img: "https://www.yo-yoo.co.il/uploads/runr23432tle.jpg" },
+  { name: "Tropical Match", category: "בועות ופאזלים",
+    url: "https://html5.gamedistribution.com/cce9fadef40943e49d855501c7fce51c/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/cce9fadef40943e49d855501c7fce51c-512x512.jpg" },
+  { name: "Tropical Match 2", category: "בועות ופאזלים",
+    url: "https://html5.gamedistribution.com/59719ccbc7764864bae2c4c7aea820b6/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/59719ccbc7764864bae2c4c7aea820b6-512x512.jpg" },
+  { name: "Water Sorting Puzzle", category: "בועות ופאזלים",
+    url: "https://html5.gamedistribution.com/957523bb6e8340249e8c5b8a0b989b8f/?gd_sdk_referrer_url=https://games.yo-yoo.co.il/games_play.php?game=1",
+    img: "https://img.gamedistribution.com/957523bb6e8340249e8c5b8a0b989b8f-512x512.jpeg" },
+  { name: "WORDLE", category: "קלאסיקות ואסטרטגיה",
+    url: "https://wordle-game-online.github.io/#daily",
+    img: "https://twinfinite.net/wp-content/uploads/2023/06/Wordle-NYT-Game.jpg?fit=1200%2C675" },
+  { name: "World Guessr", category: "עולמות IO ומולטיפלייר",
+    url: "https://www.worldguessr.com/",
+    img: "https://tse3.mm.bing.net/th/id/OIP.Y95Nm8f6SdL9_M0tt_JHCgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" }
+];
+
+
+/* =====================================================================
+   3. קוד ה-UI – אין צורך לגעת בו כשמוסיפים משחקים או קטגוריות
+   ===================================================================== */
+const DEFAULT_CATEGORY_STYLE = { emoji: "🎲", color: "#b3aad6" };
+
+function openGame(url, name) {
+  localStorage.setItem("gameUrl", url);
+  localStorage.setItem("gameName", name || "");
+  window.location.href = "game_player.html";
+}
+
+(function () {
+  const main        = document.getElementById('main');
+  const chipRow     = document.getElementById('chipRow');
+  const searchInput = document.getElementById('searchInput');
+  const emptyState  = document.getElementById('emptyState');
+  const countPill   = document.getElementById('gameCount');
+
+  // קיבוץ המשחקים לפי קטגוריה. קטגוריות מוגדרות קודם (לפי הסדר), ואחריהן קטגוריות "לא מוכרות"
+  const grouped = new Map(Object.keys(CATEGORIES).map(c => [c, []]));
+  GAMES.forEach(game => {
+    if (!grouped.has(game.category)) {
+      console.warn(`קטגוריה לא מוגדרת: "${game.category}" (המשחק "${game.name}") – נוצרה אוטומטית`);
+      grouped.set(game.category, []);
+    }
+    grouped.get(game.category).push(game);
+  });
+
+  const sections = [];   // { catName, el, countEl, cards: [{ el, name }] }
+  const chips    = [];
+  let activeCat  = 'all';
+
+  function buildCard(game, color) {
+    const btn = document.createElement('button');
+    btn.className = 'game-card';
+    btn.style.setProperty('--accent', color);
+    btn.addEventListener('click', () => openGame(game.url, game.name));
+
+    if (game.img) {
+      const img = document.createElement('img');
+      img.src = game.img;
+      img.alt = game.name;
+      img.loading = 'lazy';
+      img.onerror = () => btn.classList.add('no-img');
+      btn.appendChild(img);
+    } else {
+      btn.classList.add('no-img');
+    }
+
+    const label = document.createElement('span');
+    label.className = 'card-label';
+    label.textContent = game.name;
+    btn.appendChild(label);
+
+    return btn;
+  }
+
+  function buildSection(catName, games) {
+    const style = CATEGORIES[catName] || DEFAULT_CATEGORY_STYLE;
+
+    const section = document.createElement('section');
+    section.className = 'cat-section';
+    section.style.setProperty('--accent', style.color);
+
+    const title = document.createElement('h2');
+    title.className = 'cat-title';
+    title.innerHTML = '<span class="cat-emoji"></span><span class="cat-name"></span><span class="cat-count"></span>';
+    title.querySelector('.cat-emoji').textContent = style.emoji;
+    title.querySelector('.cat-name').textContent  = catName;
+    section.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'game-grid';
+    const cards = games.map(game => {
+      const el = buildCard(game, style.color);
+      grid.appendChild(el);
+      return { el, name: game.name.toLowerCase() };
+    });
+    section.appendChild(grid);
+
+    main.insertBefore(section, emptyState);
+    sections.push({ catName, el: section, countEl: title.querySelector('.cat-count'), cards });
+  }
+
+  function buildChip(catName) {
+    const style = CATEGORIES[catName] || DEFAULT_CATEGORY_STYLE;
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.style.setProperty('--accent', style.color);
+    chip.innerHTML = '<span></span>';
+    chip.querySelector('span').textContent = style.emoji;
+    chip.appendChild(document.createTextNode(catName));
+    chip.addEventListener('click', () => setCategory(catName, chip));
+    chipRow.appendChild(chip);
+    chips.push(chip);
+  }
+
+  function setCategory(cat, chip) {
+    chips.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeCat = cat;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = searchInput.value.trim().toLowerCase();
+    let anyVisible = false;
+
+    sections.forEach(s => {
+      const catMatches = activeCat === 'all' || activeCat === s.catName;
+      let visible = 0;
+
+      s.cards.forEach(card => {
+        const show = catMatches && (!q || card.name.includes(q));
+        card.el.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      s.el.style.display = visible > 0 ? '' : 'none';
+      s.countEl.textContent = `${visible} משחקים`;
+      if (visible > 0) anyVisible = true;
+    });
+
+    emptyState.classList.toggle('show', !anyVisible);
+  }
+
+  // בניית הדף
+  const allChip = document.getElementById('chip-all');
+  chips.push(allChip);
+  allChip.addEventListener('click', () => setCategory('all', allChip));
+
+  grouped.forEach((games, catName) => {
+    if (games.length === 0) return;   // קטגוריה בלי משחקים לא מוצגת
+    buildChip(catName);
+    buildSection(catName, games);
+  });
+
+  countPill.textContent = `${GAMES.length} משחקים זמינים`;
+  searchInput.addEventListener('input', applyFilters);
+  applyFilters();
+})();
+</script>
+
+</body>
+</html>

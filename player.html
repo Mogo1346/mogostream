@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>נגן וידאו IPTV</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/7733/7733346.png">
     <!-- ספריית hls.js לניגון שידורי m3u8 -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        [hidden] {
+            display: none !important;
+        }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #020617;
@@ -16,7 +21,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 90vh;
         }
 
@@ -75,6 +80,267 @@
             margin-top: 15px;
             display: none;
         }
+
+        /* ---------- לוח שידורים ---------- */
+        .epg {
+            margin-top: 28px;
+        }
+
+        .epg-head {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .epg-head h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: #f8fafc;
+        }
+
+        .epg-source {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .link-btn {
+            margin-inline-start: auto;
+            background: none;
+            border: none;
+            padding: 4px 0;
+            color: #93c5fd;
+            font: inherit;
+            font-size: 0.85rem;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .epg-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .epg-picker select {
+            flex: 1;
+            min-width: 200px;
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font: inherit;
+        }
+
+        .epg-hint {
+            flex-basis: 100%;
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .epg-hint code {
+            direction: ltr;
+            unicode-bidi: embed;
+            word-break: break-all;
+            color: #cbd5e1;
+        }
+
+        .epg-status {
+            margin: 8px 0 14px;
+            color: #f59e0b;
+            font-size: 0.95rem;
+        }
+
+        .epg-status.is-error {
+            color: #f87171;
+        }
+
+        .epg-debug {
+            margin: -6px 0 14px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .epg-debug pre {
+            margin: 6px 0 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .now-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+        }
+
+        .now-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .badge {
+            background: #3b82f6;
+            color: #fff;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .now-left {
+            margin-inline-start: auto;
+            color: #94a3b8;
+        }
+
+        .now-card h3 {
+            margin: 10px 0 0;
+            font-size: 1.15rem;
+            line-height: 1.35;
+        }
+
+        .bar {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .bar > div {
+            height: 100%;
+            width: 0;
+            background: #3b82f6;
+        }
+
+        .now-desc {
+            margin: 0 0 8px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .now-next {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .day-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .day-tab {
+            flex: none;
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font: inherit;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .day-tab:hover {
+            background: #334155;
+        }
+
+        .day-tab.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .day-tab:focus-visible,
+        .link-btn:focus-visible,
+        .epg-picker select:focus-visible,
+        .prog:focus-visible {
+            outline: 2px solid #93c5fd;
+            outline-offset: 2px;
+        }
+
+        .epg-list {
+            position: relative;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 420px;
+            overflow-y: auto;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+        }
+
+        .prog {
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .prog:last-child {
+            border-bottom: none;
+        }
+
+        .prog.has-desc {
+            cursor: pointer;
+        }
+
+        .prog.is-past {
+            opacity: 0.5;
+        }
+
+        .prog.is-now {
+            background: #1e293b;
+        }
+
+        .prog-time {
+            color: #93c5fd;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .prog-title {
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .prog-desc {
+            margin-top: 4px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .prog.open .prog-desc {
+            display: block;
+            -webkit-line-clamp: unset;
+        }
     </style>
 </head>
 <body>
@@ -90,13 +356,118 @@
         </div>
 
         <div id="error-message">לא ניתן לטעון ערוץ זה. הקישור עשוי להיות שבור או חסום לצפייה ישירה בדפדפן.</div>
+
+        <!-- לוח שידורים -->
+        <section class="epg" id="epg" aria-labelledby="epg-title" hidden>
+            <div class="epg-head">
+                <h2 id="epg-title">לוח שידורים</h2>
+                <span class="epg-source" id="epg-source"></span>
+                <button type="button" class="link-btn" id="epg-change">שינוי ערוץ במדריך</button>
+            </div>
+
+            <div class="epg-picker" id="epg-picker" hidden>
+                <label for="epg-select">ערוץ במדריך:</label>
+                <select id="epg-select"></select>
+                <p class="epg-hint" id="epg-hint" hidden></p>
+            </div>
+
+            <p class="epg-status" id="epg-status">טוען לוח שידורים...</p>
+            <details class="epg-debug" id="epg-debug-box" hidden>
+                <summary>פרטים טכניים</summary>
+                <pre id="epg-debug"></pre>
+            </details>
+
+            <div class="now-card" id="epg-now" hidden>
+                <div class="now-top">
+                    <span class="badge">משודר עכשיו</span>
+                    <span id="now-time"></span>
+                    <span class="now-left" id="now-left"></span>
+                </div>
+                <h3 id="now-title"></h3>
+                <div class="bar" aria-hidden="true"><div id="now-bar"></div></div>
+                <p class="now-desc" id="now-desc"></p>
+                <p class="now-next" id="now-next"></p>
+            </div>
+
+            <div class="day-tabs" id="day-tabs"></div>
+            <ul class="epg-list" id="epg-list"></ul>
+        </section>
     </div>
 
     <script>
+        // ================= הגדרות =================
+        const WORKER_URL = 'https://iptv-proxy.mogoprism0.workers.dev/';
+
+        // מקור לוח השידורים
+        const EPG_BASE = 'https://iptv-epg.org/files/epg-';
+
+        // כתובת ה-Worker שמביא את הלוח (ראו ההסבר). למשל: 'https://epg-proxy.YOURNAME.workers.dev/'
+        // הדפדפן לא יכול למשוך את הקובץ ישירות מ-iptv-epg.org, ולכן צריך את ה-Worker הזה.
+        const EPG_PROXY_URL = 'https://epg-proxy.mogoprism0.workers.dev/';
+
+        // מדינות שיש להן לוח שידורים: שם המדינה (כמו ב-channels.html) -> קוד המדינה בקובץ.
+        // אפשר להוסיף מדינות, אבל לא את ארה"ב (us): הקובץ שלה ענק ולא ייטען בדפדפן.
+        const EPG_COUNTRIES = { 'Israel': 'il' };
+
+        // כמה שעות לשמור את הלוח בדפדפן לפני שמורידים מחדש
+        const EPG_CACHE_HOURS = 3;
+
+        // ============================================================
+        //  התאמה ידנית: ערוץ באתר  ->  ערוץ בלוח השידורים
+        // ============================================================
+        // בצד שמאל: שם הערוץ כפי שהוא מופיע באתר. אפשר בלי (1080p) ובלי [Not 24/7],
+        //           ולא משנה אם האותיות גדולות או קטנות. אפשר גם לרשום את ה-tvg-id של הערוץ.
+        // בצד ימין: ה-id של הערוץ בלוח השידורים, או השם שלו שם. אפשר גם כמה אפשרויות ברשימה,
+        //           והקוד ינסה אותן לפי הסדר.
+        //
+        // איך מוצאים מה לכתוב בצד ימין:
+        //   1. פותחים את הערוץ באתר ולוחצים "שינוי ערוץ במדריך".
+        //   2. בוחרים מהרשימה את הערוץ הנכון (ליד כל שם מופיע ה-id שלו).
+        //   3. מתחת לרשימה תופיע שורה מוכנה. לוחצים "העתקה" ומדביקים אותה כאן.
+        //
+        // דוגמאות (תקנו לפי השמות שמופיעים אצלכם בלוח):
+        const EPG_MANUAL_MAP = {
+            '5Sport': '5sporthd.il',
+            '5Sport 4K': '5SPORT4K.il',
+            'Baby': 'בייבי.il',
+            'Channel 9': 'ישראלפלוס.il',
+            'Channel 24': 'ערוץ24החדש.il',
+            'Disney Channel': 'דיסניHD.il',
+            'Ego Total': 'ערוץאגו.il',
+            'Food Channel': 'ערוץהאוכל.il',
+            'Health Channel': 'ערוץבריאות.il',
+            'Hidabroot': 'ערוץהידברות.il',
+            'History': 'היסטוריהHD.il',
+            'Home +': 'בית+.il',
+            'Hop!': 'הופ!.il',
+            'Hot Drama': 'HOTHBO.il',
+            'Kan 11': 'כאן11.il',
+            'Kan Educational': 'ערוץ23חינוכית.il',
+            'Keshet 12': 'קשת.il',
+            'Knesset Channel': 'ערוץהכנסת.il',
+            'Makan 33': 'מכאן.il',
+            'One': 'ONE.il',
+            'Reality Channel': 'ערוץהריאליטי.il',
+            'Sport 2': 'ספורט2HD.il',
+            'Travel Channel': 'ערוץהטיולים.il',
+            'Vacation Channel': 'ערוץהנופש.il',
+            'Viva Istanbul': 'ויוה+.il',
+            'Viva Premium': 'VivaPremium.il',
+            'Viva Telenovelas': 'ויוה.il',
+            'Yaldut Israelit': 'ילדותישראלית.il',
+            'Yam Tichoni': 'יםתיכוני.il',
+            'Zoom': 'Zoom.il',
+
+            // הוסיפו שורות חדשות כאן, בפורמט:  'שם באתר': 'id או שם במדריך',
+        };
+
+        // ================= הנגן =================
         // שליפת פרמטרי ה-URL
         const urlParams = new URLSearchParams(window.location.search);
         const streamUrl = urlParams.get('url');
         const channelName = urlParams.get('name');
+        const streamId = urlParams.get('id') || '';
+        const streamCountry = urlParams.get('country') || 'Israel';
 
         const videoElement = document.getElementById('video-player');
         const channelNameElement = document.getElementById('channel-name');
@@ -115,8 +486,6 @@
 
         function playStream(url) {
             if (Hls.isSupported()) {
-                
-                const WORKER_URL = 'https://iptv-proxy.mogoprism0.workers.dev/';
 
                 // ערוצי HTTP עוברים דרך ה-Worker
                 if (url.startsWith('http://')) {
@@ -124,10 +493,10 @@
                 }
 
                 const hls = new Hls();
-                
+
                 hls.loadSource(url);
                 hls.attachMedia(videoElement);
-                
+
                 hls.on(Hls.Events.MANIFEST_PARSED, function () {
                     videoElement.play().catch(() => {});
                 });
@@ -148,6 +517,585 @@
                 errorMessage.innerText = 'הדפדפן שלך אינו תומך בניגון HLS.';
             }
         }
+
+        // ================= לוח שידורים =================
+        const $ = id => document.getElementById(id);
+
+        let epgData = null;      // { channels: [{id, names}], programmes: { channelId: [[start, stop, title, desc], ...] } }
+        let epgProgs = [];       // התוכניות של הערוץ הנוכחי
+        let epgDays = [];        // ימים (התחלת יום) שיש בהם תוכניות
+        let selectedDay = 0;
+        let currentIdx = -1;     // האינדקס של התוכנית שמשודרת עכשיו
+
+        const SAVE_KEY = 'epgMap:' + (channelName || streamId);
+
+        // ---------- אחסון מקומי (לא חובה, נכשל בשקט) ----------
+        function storageGet(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+        function storageSet(key, value) {
+            try {
+                if (value) localStorage.setItem(key, value);
+                else localStorage.removeItem(key);
+            } catch (e) { /* ignore */ }
+        }
+
+        // ---------- מטמון ב-IndexedDB כדי לא להוריד את הקובץ בכל כניסה לערוץ ----------
+        function openDb() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('epg-cache', 1);
+                req.onupgradeneeded = () => req.result.createObjectStore('kv');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        async function cacheGet(key) {
+            try {
+                const db = await openDb();
+                return await new Promise(resolve => {
+                    const q = db.transaction('kv').objectStore('kv').get(key);
+                    q.onsuccess = () => resolve(q.result || null);
+                    q.onerror = () => resolve(null);
+                });
+            } catch (e) { return null; }
+        }
+        async function cacheSet(key, value) {
+            try {
+                const db = await openDb();
+                await new Promise(resolve => {
+                    const tx = db.transaction('kv', 'readwrite');
+                    tx.objectStore('kv').put(value, key);
+                    tx.oncomplete = tx.onerror = tx.onabort = resolve;
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        // ---------- הורדה וניתוח של קובץ ה-XML ----------
+        async function bufferToText(buf) {
+            const bytes = new Uint8Array(buf);
+            // קובץ gzip מתחיל ב-1f 8b
+            if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+                if (typeof DecompressionStream === 'undefined') throw new Error('gzip not supported');
+                const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+                return await new Response(stream).text();
+            }
+            return new TextDecoder('utf-8').decode(buf);
+        }
+
+        // זמן בפורמט XMLTV: 20260920200000 +0300  ->  מילישניות (UTC)
+        function parseXmltvTime(s) {
+            const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?\s*([+-])?(\d{2})?(\d{2})?/.exec((s || '').trim());
+            if (!m) return null;
+            let t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+            if (m[7] && m[8]) {
+                const offsetMin = (+m[8] * 60 + +(m[9] || 0)) * (m[7] === '-' ? -1 : 1);
+                t -= offsetMin * 60000;
+            }
+            return t;
+        }
+
+        function startOfDay(ms) {
+            const d = new Date(ms);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime();
+        }
+
+        function addProgramme(programmes, today, chId, startStr, stopStr, title, desc) {
+            const start = parseXmltvTime(startStr);
+            const stop = parseXmltvTime(stopStr);
+            if (!start || !stop || stop < today || !chId) return;
+            (programmes[chId] || (programmes[chId] = [])).push([start, stop, title, desc.slice(0, 400)]);
+        }
+
+        function sortProgrammes(programmes) {
+            for (const k in programmes) programmes[k].sort((a, b) => a[0] - b[0]);
+        }
+
+        // ניתוח רגיל של XML
+        function parseEpgDom(doc) {
+            const channels = Array.from(doc.getElementsByTagName('channel')).map(c => ({
+                id: c.getAttribute('id') || '',
+                names: Array.from(c.getElementsByTagName('display-name'))
+                    .map(n => n.textContent.trim())
+                    .filter(Boolean)
+            })).filter(c => c.id);
+
+            // שומרים רק תוכניות מתחילת היום ואילך, כדי שהמטמון יישאר קטן
+            const today = startOfDay(Date.now());
+            const programmes = {};
+            const nodes = doc.getElementsByTagName('programme');
+            for (let i = 0; i < nodes.length; i++) {
+                const p = nodes[i];
+                const titleNode = p.getElementsByTagName('title')[0];
+                const descNode = p.getElementsByTagName('desc')[0];
+                addProgramme(programmes, today, p.getAttribute('channel'),
+                    p.getAttribute('start'), p.getAttribute('stop'),
+                    titleNode ? titleNode.textContent.trim() : '',
+                    descNode ? descNode.textContent.trim() : '');
+            }
+            sortProgrammes(programmes);
+            return { channels, programmes };
+        }
+
+        // ניתוח "סלחני" - למקרה שהקובץ אינו XML תקין לחלוטין
+        function decodeEntities(s) {
+            return s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+                .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+                .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
+                .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+        }
+        function attrOf(str, name) {
+            const m = new RegExp('\\b' + name + '=["\']([^"\']*)["\']').exec(str);
+            return m ? decodeEntities(m[1]) : '';
+        }
+        function innerText(str, tag) {
+            const m = new RegExp('<' + tag + '\\b[^>]*>([\\s\\S]*?)</' + tag + '>').exec(str);
+            return m ? decodeEntities(m[1]).trim() : '';
+        }
+        function parseEpgLoose(text) {
+            const channels = [];
+            const chRe = /<channel\b([^>]*)>([\s\S]*?)<\/channel>/g;
+            let m;
+            while ((m = chRe.exec(text))) {
+                const id = attrOf(m[1], 'id');
+                if (!id) continue;
+                const names = [];
+                const nRe = /<display-name\b[^>]*>([\s\S]*?)<\/display-name>/g;
+                let n;
+                while ((n = nRe.exec(m[2]))) {
+                    const t = decodeEntities(n[1]).trim();
+                    if (t) names.push(t);
+                }
+                channels.push({ id, names });
+            }
+
+            const today = startOfDay(Date.now());
+            const programmes = {};
+            const pRe = /<programme\b([^>]*)>([\s\S]*?)<\/programme>/g;
+            while ((m = pRe.exec(text))) {
+                addProgramme(programmes, today, attrOf(m[1], 'channel'),
+                    attrOf(m[1], 'start'), attrOf(m[1], 'stop'),
+                    innerText(m[2], 'title'), innerText(m[2], 'desc'));
+            }
+            sortProgrammes(programmes);
+            return { channels, programmes };
+        }
+
+        function parseEpg(text) {
+            let data = null;
+            try {
+                const doc = new DOMParser().parseFromString(text, 'text/xml');
+                if (!doc.getElementsByTagName('parsererror').length) data = parseEpgDom(doc);
+            } catch (e) { /* ננסה את הניתוח הסלחני */ }
+
+            if (!data || !data.channels.length) data = parseEpgLoose(text);
+            if (!data.channels.length) {
+                throw new Error('הקובץ לא מכיל ערוצים (התחלת הקובץ: ' + text.slice(0, 80).replace(/\s+/g, ' ') + ')');
+            }
+            return data;
+        }
+
+        async function downloadEpg(cc) {
+            const base = `${EPG_BASE}${cc}.xml`;
+            // קודם דרך ה-Worker שלכם, ואם אין / נכשל - ניסיון ישיר (עובד רק אם האתר מאפשר)
+            const attempts = [];
+            if (EPG_PROXY_URL) {
+                attempts.push(['Worker', EPG_PROXY_URL + (EPG_PROXY_URL.includes('?') ? '&' : '?') + 'cc=' + encodeURIComponent(cc)]);
+            } else {
+                attempts.push(['Worker', null]);
+            }
+            attempts.push(['ישיר .gz', base + '.gz'], ['ישיר .xml', base]);
+            const errors = [];
+            for (const [label, url] of attempts) {
+                if (!url) { errors.push(`${label}: לא הוגדרה כתובת (EPG_PROXY_URL ריק)`); continue; }
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) { errors.push(`${label}: HTTP ${res.status}`); continue; }
+                    return parseEpg(await bufferToText(await res.arrayBuffer()));
+                } catch (e) {
+                    errors.push(`${label}: ${e && e.message ? e.message : e}`);
+                }
+            }
+            const err = new Error('epg download failed');
+            err.details = errors;
+            throw err;
+        }
+
+        async function loadEpg(cc) {
+            const key = 'epg-' + cc;
+            const cached = await cacheGet(key);
+            if (cached && Date.now() - cached.ts < EPG_CACHE_HOURS * 3600 * 1000) return cached.data;
+            try {
+                const data = await downloadEpg(cc);
+                cacheSet(key, { ts: Date.now(), data });
+                return data;
+            } catch (e) {
+                if (cached) return cached.data; // עדיף לוח ישן מלוח ריק
+                throw e;
+            }
+        }
+
+        // ---------- התאמה בין ערוץ באתר לערוץ בקובץ ----------
+        function norm(s) {
+            return (s || '').toLowerCase()
+                .replace(/[\(\[].*?[\)\]]/g, ' ')                  // מסירים (1080p) ו-[Not 24/7]
+                .replace(/(^|\s)(hd|sd|fhd|uhd)(?=\s|$)/g, ' ')  // מסירים סימוני איכות
+                .replace(/[^\p{L}\p{N}]/gu, '');                    // משאירים אותיות ומספרים בלבד
+        }
+
+        // האם needle מופיע בתוך hay - בלי להתבלבל בין מספרים (ספורט 1 מול ספורט 10)
+        function looseContains(hay, needle) {
+            let i = hay.indexOf(needle);
+            while (i !== -1) {
+                const before = hay.charAt(i - 1);
+                const after = hay.charAt(i + needle.length);
+                const digitBefore = /\d/.test(before) && /^\d/.test(needle);
+                const digitAfter = /\d/.test(after) && /\d$/.test(needle);
+                if (!digitBefore && !digitAfter) return true;
+                i = hay.indexOf(needle, i + 1);
+            }
+            return false;
+        }
+
+        // התאמה ידנית מתוך EPG_MANUAL_MAP.
+        // מחזיר { ch } אם נמצא, { targets } אם יש הגדרה אבל היא לא נמצאה במדריך, או {} אם אין הגדרה לערוץ הזה.
+        function findManual(data, id, name) {
+            const n = norm(name);
+            const idl = (id || '').toLowerCase();
+            const idStripped = idl.split('@')[0];
+
+            let targets = null;
+            for (const key in EPG_MANUAL_MAP) {
+                const k = key.trim();
+                const kl = k.toLowerCase();
+                if ((n && norm(k) === n) || (idl && (kl === idl || kl === idStripped))) {
+                    targets = [].concat(EPG_MANUAL_MAP[key]);
+                    break;
+                }
+            }
+            if (!targets) return {};
+
+            const hasProgs = c => (data.programmes[c.id] || []).length > 0;
+            for (const t of targets) {
+                const tl = String(t).trim().toLowerCase();
+                const tn = norm(t);
+                const hit = data.channels.filter(c =>
+                    c.id.toLowerCase() === tl || (tn && c.names.some(x => norm(x) === tn)));
+                if (hit.length) return { ch: hit.find(hasProgs) || hit[0] };
+            }
+            return { targets };
+        }
+
+        // התאמה אוטומטית (כשאין התאמה ידנית)
+        function findChannel(data, id, name) {
+            const hasProgs = c => (data.programmes[c.id] || []).length > 0;
+
+            // 1. לפי tvg-id (עם ובלי הסיומת אחרי @, למשל Kan11.il@SD)
+            if (id) {
+                const raw = id.toLowerCase();
+                const stripped = raw.split('@')[0];
+                const byId = data.channels.filter(c => c.id.toLowerCase() === raw || c.id.toLowerCase() === stripped);
+                const hit = byId.find(hasProgs) || byId[0];
+                if (hit) return hit;
+            }
+
+            // 2. לפי שם
+            const n = norm(name);
+            if (n.length >= 2) {
+                const exact = data.channels.filter(c => norm(c.id) === n || c.names.some(x => norm(x) === n));
+                if (exact.length) return exact.find(hasProgs) || exact[0];
+
+                // 3. התאמה חלקית - רק אם יש תוצאה אחת ברורה
+                if (n.length >= 4) {
+                    const partial = data.channels.filter(c => hasProgs(c) && c.names.some(x => {
+                        const m = norm(x);
+                        return m.length >= 4 && (looseContains(m, n) || looseContains(n, m));
+                    }));
+                    if (partial.length === 1) return partial[0];
+                }
+            }
+            return null;
+        }
+
+        // ---------- תצוגה ----------
+        const fmtTime = ms => new Date(ms).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        function dayLabel(dayStart) {
+            const diff = Math.round((dayStart - startOfDay(Date.now())) / 86400000);
+            if (diff === 0) return 'היום';
+            if (diff === 1) return 'מחר';
+            if (diff === -1) return 'אתמול';
+            return new Date(dayStart).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'numeric' });
+        }
+
+        function setStatus(text, isError) {
+            const el = $('epg-status');
+            el.hidden = !text;
+            el.textContent = text || '';
+            el.classList.toggle('is-error', !!isError);
+        }
+
+        function renderTabs() {
+            const box = $('day-tabs');
+            box.textContent = '';
+            epgDays.forEach(d => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'day-tab' + (d === selectedDay ? ' active' : '');
+                b.setAttribute('aria-pressed', d === selectedDay ? 'true' : 'false');
+                b.textContent = dayLabel(d);
+                b.addEventListener('click', () => {
+                    selectedDay = d;
+                    renderTabs();
+                    renderList(true);
+                });
+                box.appendChild(b);
+            });
+        }
+
+        function renderList(scrollToNow) {
+            const list = $('epg-list');
+            const prevScroll = list.scrollTop;
+            const now = Date.now();
+            list.textContent = '';
+            let target = null;
+
+            epgProgs.forEach((p, i) => {
+                if (startOfDay(p[0]) !== selectedDay) return;
+
+                const li = document.createElement('li');
+                const isNow = i === currentIdx;
+                li.className = 'prog' + (isNow ? ' is-now' : (p[1] <= now ? ' is-past' : ''));
+
+                const time = document.createElement('div');
+                time.className = 'prog-time';
+                time.textContent = fmtTime(p[0]);
+
+                const body = document.createElement('div');
+                const title = document.createElement('div');
+                title.className = 'prog-title';
+                title.textContent = p[2] || 'ללא שם';
+                body.appendChild(title);
+
+                if (p[3]) {
+                    const desc = document.createElement('div');
+                    desc.className = 'prog-desc';
+                    desc.textContent = p[3];
+                    body.appendChild(desc);
+
+                    li.classList.add('has-desc');
+                    li.tabIndex = 0;
+                    const toggle = () => li.classList.toggle('open');
+                    li.addEventListener('click', toggle);
+                    li.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+                    });
+                }
+
+                li.appendChild(time);
+                li.appendChild(body);
+                list.appendChild(li);
+
+                if (!target && (isNow || p[0] > now)) target = li;
+            });
+
+            if (scrollToNow) {
+                list.scrollTop = target ? Math.max(0, target.offsetTop - 8) : 0;
+            } else {
+                list.scrollTop = prevScroll;
+            }
+        }
+
+        function renderNow() {
+            const card = $('epg-now');
+            const p = currentIdx >= 0 ? epgProgs[currentIdx] : null;
+            if (!p) { card.hidden = true; return; }
+
+            const now = Date.now();
+            card.hidden = false;
+            $('now-title').textContent = p[2] || 'ללא שם';
+            $('now-time').textContent = fmtTime(p[0]) + '–' + fmtTime(p[1]);
+
+            const pct = Math.min(100, Math.max(0, (now - p[0]) / (p[1] - p[0]) * 100));
+            $('now-bar').style.width = pct + '%';
+
+            const left = Math.round((p[1] - now) / 60000);
+            $('now-left').textContent = left > 0 ? `נותרו ${left} דק׳` : 'מסתיים עכשיו';
+
+            const desc = $('now-desc');
+            desc.textContent = p[3];
+            desc.hidden = !p[3];
+
+            const next = epgProgs[currentIdx + 1];
+            const nextEl = $('now-next');
+            nextEl.textContent = next ? `הבא: ${fmtTime(next[0])} ${next[2]}` : '';
+            nextEl.hidden = !next;
+        }
+
+        function tick() {
+            if (!epgProgs.length) return;
+            const now = Date.now();
+            const idx = epgProgs.findIndex(p => p[0] <= now && now < p[1]);
+            const changed = idx !== currentIdx;
+            currentIdx = idx;
+            renderNow();
+            if (changed) renderList(false);
+        }
+
+        function showChannel(ch, note) {
+            epgProgs = epgData.programmes[ch.id] || [];
+            $('epg-source').textContent = (ch.names[0] || ch.id) + (note ? ' (' + note + ')' : '');
+
+            if (!epgProgs.length) {
+                $('epg-now').hidden = true;
+                $('day-tabs').textContent = '';
+                $('epg-list').textContent = '';
+                setStatus('אין תוכניות זמינות לערוץ הזה כרגע.');
+                return;
+            }
+
+            setStatus('');
+            const now = Date.now();
+            epgDays = Array.from(new Set(epgProgs.map(p => startOfDay(p[0])))).sort((a, b) => a - b);
+            const today = startOfDay(now);
+            selectedDay = epgDays.includes(today) ? today
+                : (epgDays.find(d => d > today) || epgDays[epgDays.length - 1]);
+
+            currentIdx = epgProgs.findIndex(p => p[0] <= now && now < p[1]);
+            renderNow();
+            renderTabs();
+            renderList(true);
+        }
+
+        function clearEpgView() {
+            epgProgs = [];
+            currentIdx = -1;
+            $('epg-now').hidden = true;
+            $('day-tabs').textContent = '';
+            $('epg-list').textContent = '';
+            $('epg-source').textContent = '';
+        }
+
+        // שורה מוכנה להעתקה ל-EPG_MANUAL_MAP אחרי בחירה ידנית בתיבה
+        function updateHint(ch) {
+            const hint = $('epg-hint');
+            hint.textContent = '';
+            if (!ch) { hint.hidden = true; return; }
+
+            const shortName = (channelName || '').replace(/\s*[\(\[].*?[\)\]]/g, '').trim();
+            const esc = t => t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const line = `'${esc(shortName)}': '${esc(ch.id)}',` + (ch.names[0] ? ` // ${ch.names[0]}` : '');
+
+            hint.appendChild(document.createTextNode('כדי שההתאמה תחול על כל הגולשים, הוסיפו ל-EPG_MANUAL_MAP בקובץ את השורה: '));
+            const code = document.createElement('code');
+            code.textContent = line;
+            hint.appendChild(code);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'link-btn';
+            btn.style.marginInlineStart = '8px';
+            btn.textContent = 'העתקה';
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(line);
+                    btn.textContent = 'הועתק';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'סומן - העתיקו ידנית';
+                }
+            });
+            hint.appendChild(btn);
+            hint.hidden = false;
+        }
+
+        function resolveAndShow() {
+            // סדר עדיפויות: בחירה בדפדפן הזה, אחר כך EPG_MANUAL_MAP, ובסוף התאמה אוטומטית
+            const saved = storageGet(SAVE_KEY);
+            let ch = saved ? epgData.channels.find(c => c.id === saved) : null;
+            let via = ch ? 'browser' : '';
+
+            let manualMiss = null;
+            if (!ch) {
+                const m = findManual(epgData, streamId, channelName);
+                if (m.ch) { ch = m.ch; via = 'map'; }
+                else if (m.targets) manualMiss = m.targets;
+            }
+            if (!ch) {
+                ch = findChannel(epgData, streamId, channelName);
+                via = 'auto';
+            }
+
+            $('epg-select').value = via === 'browser' ? ch.id : '';
+            updateHint(via === 'browser' ? ch : null);
+
+            if (!ch) {
+                clearEpgView();
+                setStatus(manualMiss
+                    ? 'ההתאמה הידנית לערוץ הזה (' + manualMiss.join(' / ') + ') לא נמצאה בלוח השידורים. בדקו את הכתיב או את ה-id.'
+                    : 'לא נמצא לוח שידורים לערוץ הזה. אפשר לבחור ערוץ מהרשימה.');
+                $('epg-picker').hidden = false;
+                return;
+            }
+            if (manualMiss) console.warn('EPG_MANUAL_MAP: לא נמצא במדריך:', manualMiss);
+
+            showChannel(ch, via === 'map' ? 'התאמה ידנית' : (via === 'browser' ? 'נבחר בדפדפן הזה' : ''));
+        }
+
+        function buildPicker() {
+            const sel = $('epg-select');
+            sel.textContent = '';
+            sel.appendChild(new Option('התאמה אוטומטית', ''));
+
+            epgData.channels
+                .filter(c => (epgData.programmes[c.id] || []).length)
+                .map(c => ({ id: c.id, label: c.names[0] || c.id }))
+                .sort((a, b) => a.label.localeCompare(b.label, 'he'))
+                .forEach(i => sel.appendChild(new Option(i.label === i.id ? i.label : `${i.label} (${i.id})`, i.id)));
+
+            sel.addEventListener('change', () => {
+                storageSet(SAVE_KEY, sel.value);
+                resolveAndShow();
+            });
+            $('epg-change').addEventListener('click', () => {
+                $('epg-picker').hidden = !$('epg-picker').hidden;
+            });
+        }
+
+        async function initEpg() {
+            const cc = EPG_COUNTRIES[streamCountry];
+            if (!cc || !streamUrl || (!channelName && !streamId)) return; // אין לוח למדינה הזו - הקטע נשאר מוסתר
+
+            $('epg').hidden = false;
+            $('epg-change').hidden = true;
+            setStatus('טוען לוח שידורים...');
+
+            try {
+                epgData = await loadEpg(cc);
+            } catch (e) {
+                setStatus('לא הצלחנו לטעון את לוח השידורים. נסו לרענן את הדף בעוד כמה דקות.', true);
+                if (e && e.details) {
+                    $('epg-debug').textContent = e.details.join('\n');
+                    $('epg-debug-box').hidden = false;
+                    console.warn('EPG load failed:', e.details);
+                }
+                return;
+            }
+
+            buildPicker();
+            $('epg-change').hidden = false;
+            resolveAndShow();
+
+            // עדכון ההתקדמות והתוכנית הנוכחית כל חצי דקה
+            setInterval(tick, 30000);
+        }
+
+        initEpg();
     </script>
 </body>
 </html>

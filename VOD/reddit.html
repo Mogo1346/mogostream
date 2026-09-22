@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reddit</title>
+
+<style>
+
+/* ========================= משתנים ========================= */
+:root {
+    --bg: #ffffff;
+    --text: #1a1a1b;
+    --secondary: #7c7c7c;
+    --hover: #f2f2f2;
+    --border: #e5e5e5;
+    --header: #ffffff;
+    --orange: #ff4500;
+    --card-bg: #ffffff;
+}
+
+body.dark {
+    --bg: #030303;
+    --text: #d7dadc;
+    --secondary: #9a9a9a;
+    --hover: #272729;
+    --border: #343536;
+    --header: #1a1a1b;
+    --card-bg: #1a1a1b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ========================= HEADER ========================= */
+header {
+    height: 64px;
+    background: var(--header);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 18px;
+    position: fixed;
+    top: 0; right: 0; left: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border);
+}
+
+.menu {
+    width: 42px; height: 42px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+.menu:hover { background: var(--hover); }
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 21px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.reddit-logo {
+    width: 36px; height: 36px;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.search-area {
+    flex: 1;
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    direction: ltr;
+}
+
+.search-area input {
+    flex: 1;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 21px 0 0 21px;
+    background: var(--hover);
+    color: var(--text);
+    padding: 0 18px;
+    font-size: 16px;
+    outline: none;
+}
+.search-area input:focus { border-color: #777; }
+
+.search-button {
+    width: 64px;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 21px 21px 0;
+    background: var(--hover);
+    color: var(--text);
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.header-buttons { display: flex; gap: 5px; }
+.header-buttons button {
+    width: 42px; height: 42px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 19px;
+}
+.header-buttons button:hover { background: var(--hover); }
+
+.sort-select {
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 21px;
+    background: var(--hover);
+    color: var(--text);
+    padding: 0 14px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* ========================= SIDEBAR ========================= */
+.sidebar {
+    position: fixed;
+    top: 64px; right: 0; bottom: 0;
+    width: 230px;
+    background: var(--bg);
+    padding: 12px;
+    overflow-y: auto;
+    transition: 0.2s;
+    z-index: 900;
+}
+.sidebar.closed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+}
+.sidebar.closed .side-text { display: none; }
+.sidebar.closed .side-item { justify-content: center; }
+
+.side-item {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    padding: 0 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.side-item:hover { background: var(--hover); }
+.side-item.active { background: var(--hover); font-weight: bold; }
+
+.side-icon { width: 25px; text-align: center; font-size: 20px; }
+.side-title { color: var(--secondary); font-size: 13px; padding: 20px 15px 7px; }
+
+/* ========================= MAIN ========================= */
+main {
+    margin-right: 230px;
+    padding: 88px 25px 40px;
+    transition: 0.2s;
+}
+main.full { margin-right: 0; }
+
+/* ========================= SORT BAR ========================= */
+.sortbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: 22px;
+    flex-wrap: wrap;
+}
+.sortbar h2 { margin: 0; font-size: 20px; flex: 1; min-width: 150px; }
+
+/* ========================= POST LIST ========================= */
+.post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 800px;
+}
+
+.post-card {
+    display: flex;
+    gap: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+}
+.post-card:hover { border-color: #888; }
+
+.post-score {
+    flex-shrink: 0;
+    width: 46px;
+    text-align: center;
+    color: var(--orange);
+    font-weight: bold;
+    font-size: 14px;
+    padding-top: 4px;
+}
+
+.post-thumb {
+    width: 110px; height: 78px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: var(--hover);
+}
+.post-thumb.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+}
+
+.post-body { min-width: 0; flex: 1; }
+
+.post-title {
+    font-weight: bold;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+.post-meta { color: var(--secondary); font-size: 12px; }
+.post-sub { color: var(--text); font-weight: bold; }
+
+/* ========================= SKELETON LOADING ========================= */
+.skeleton-post {
+    display: flex;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-width: 800px;
+}
+.skeleton-thumb, .skeleton-line {
+    background: linear-gradient(90deg, var(--hover) 25%, var(--border) 37%, var(--hover) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+.skeleton-thumb { width: 110px; height: 78px; border-radius: 8px; flex-shrink: 0; }
+.skeleton-line { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+
+@keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}
+
+/* ========================= POST PAGE ========================= */
+.post-page { max-width: 800px; margin: auto; }
+
+.detail-title { font-size: 22px; font-weight: bold; line-height: 1.4; margin-top: 4px; }
+.detail-meta { color: var(--secondary); margin-top: 8px; font-size: 13px; }
+
+.detail-actions { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+
+.watch-button {
+    border: none;
+    background: var(--hover);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.watch-button:hover { opacity: .8; }
+
+.detail-media img, .detail-media video {
+    width: 100%;
+    border-radius: 12px;
+    background: black;
+    max-height: 600px;
+    object-fit: contain;
+}
+
+.selftext {
+    background: var(--hover);
+    border-radius: 12px;
+    padding: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-size: 14px;
+}
+
+.link-card {
+    background: var(--hover);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.link-card span { color: var(--secondary); }
+
+.comments-section { margin-top: 35px; }
+.comments-section h2 { font-size: 20px; }
+
+.comment {
+    border-right: 2px solid var(--border);
+    padding: 8px 0 8px 0;
+    margin-top: 10px;
+}
+.comment-body-wrap { padding-right: 14px; }
+.comment-meta { font-size: 12px; color: var(--secondary); margin-bottom: 4px; }
+.comment-meta b { color: var(--text); }
+.comment-body { font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+.comment .comment { margin-right: 4px; }
+.more-note { color: var(--secondary); font-size: 12px; margin-top: 6px; }
+
+/* ========================= LOADING (spinner) ========================= */
+.loading { text-align: center; padding: 80px 20px; color: var(--secondary); }
+
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--border);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: auto auto 20px;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========================= INFINITE SCROLL ========================= */
+.scroll-sentinel { height: 1px; }
+
+.load-more-indicator {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+.load-more-indicator .spinner {
+    width: 26px; height: 26px;
+    margin: 0;
+    border-width: 3px;
+}
+
+/* ========================= ERROR ========================= */
+.error { text-align: center; padding: 80px 20px; }
+.error h2 { font-size: 25px; }
+.error p { color: var(--secondary); }
+
+/* ========================= MOBILE ========================= */
+@media(max-width: 900px) {
+    .sidebar { width: 75px; }
+    .side-text { display: none; }
+    .side-item { justify-content: center; }
+    main { margin-right: 75px; }
+    .logo span:last-child { display: none; }
+}
+
+@media(max-width: 650px) {
+    header { gap: 7px; padding: 0 8px; }
+    .header-buttons { display: none; }
+    .search-area { max-width: none; }
+    main { margin-right: 0; padding: 80px 10px 30px; }
+    .sidebar { display: none; }
+    .post-thumb { width: 80px; height: 60px; }
+    .detail-title { font-size: 18px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ========================= HEADER ========================= -->
+<header>
+    <button class="menu" onclick="toggleSidebar()">☰</button>
+
+    <div class="logo" onclick="home()">
+        <div class="reddit-logo">👽</div>
+        <span>Reddit</span>
+    </div>
+
+    <div class="search-area">
+        <input id="searchInput" type="text" placeholder="חיפוש ב-Reddit" onkeydown="searchEnter(event)">
+        <button class="search-button" onclick="search()">🔍</button>
+    </div>
+
+    <select id="sortSelect" class="sort-select" onchange="onSortChange()">
+        <option value="hot">חם</option>
+        <option value="new">חדש</option>
+        <option value="top">מובילים</option>
+        <option value="rising">עולה</option>
+    </select>
+
+    <div class="header-buttons">
+        <button onclick="toggleDark()">🌙</button>
+        <button onclick="home()">🏠</button>
+    </div>
+</header>
+
+<!-- ========================= SIDEBAR ========================= -->
+<aside id="sidebar" class="sidebar">
+
+    <div class="side-item active" onclick="home()">
+        <span class="side-icon">🏠</span>
+        <span class="side-text">דף הבית (r/popular)</span>
+    </div>
+
+    <div class="side-item" onclick="allPosts()">
+        <span class="side-icon">🌐</span>
+        <span class="side-text">r/all</span>
+    </div>
+
+    <div class="side-item" onclick="historyPage()">
+        <span class="side-icon">🕘</span>
+        <span class="side-text">היסטוריה</span>
+    </div>
+
+    <div class="side-title">קהילות פופולריות</div>
+
+    <div class="side-item" onclick="subreddit('AskReddit')">
+        <span class="side-icon">💬</span>
+        <span class="side-text">AskReddit</span>
+    </div>
+
+    <div class="side-item" onclick="subreddit('worldnews')">
+        <span class="side-icon">📰</span>
+        <span class="side-text">worldnews</span>
+    </div>
+
+    <div class="side-item" onclick="subreddit('technology')">
+        <span class="side-icon">💻</span>
+        <span class="side-text">technology</span>
+    </div>
+
+    <div class="side-item" onclick="subreddit('gaming')">
+        <span class="side-icon">🎮</span>
+        <span class="side-text">gaming</span>
+    </div>
+
+    <div class="side-item" onclick="subreddit('movies')">
+        <span class="side-icon">🎬</span>
+        <span class="side-text">movies</span>
+    </div>
+
+    <div class="side-item" onclick="subreddit('science')">
+        <span class="side-icon">🔬</span>
+        <span class="side-text">science</span>
+    </div>
+
+    <div class="side-item" onclick="subreddit('funny')">
+        <span class="side-icon">😂</span>
+        <span class="side-text">funny</span>
+    </div>
+
+</aside>
+
+<!-- ========================= MAIN ========================= -->
+<main id="main">
+    <div id="app"></div>
+</main>
+
+<script>
+
+/* =====================================================
+   STATE
+   Reddit's public listing/search JSON endpoints can be
+   read without an API key or login - no key needed here.
+===================================================== */
+let currentMode = "popular";   // "popular" | "all" | "subreddit" | "search"
+let currentTarget = "";        // subreddit name or search query
+let currentSort = "hot";
+let afterToken = "";
+let infiniteObserver = null;
+
+/* =====================================================
+   START
+===================================================== */
+window.addEventListener("load", function() {
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
+    }
+    home();
+});
+
+/* =====================================================
+   SIDEBAR / DARK MODE
+===================================================== */
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("closed");
+    document.getElementById("main").classList.toggle("full");
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+}
+
+/* =====================================================
+   SEARCH / SORT
+===================================================== */
+function searchEnter(event) {
+    if (event.key === "Enter") search();
+}
+
+function search() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) return;
+
+    currentMode = "search";
+    currentTarget = query;
+    afterToken = "";
+    loadListing(false);
+}
+
+function onSortChange() {
+    currentSort = document.getElementById("sortSelect").value;
+    afterToken = "";
+    loadListing(false);
+}
+
+function subreddit(name) {
+    document.getElementById("searchInput").value = "";
+    currentMode = "subreddit";
+    currentTarget = name;
+    afterToken = "";
+    loadListing(false);
+}
+
+function allPosts() {
+    document.getElementById("searchInput").value = "";
+    currentMode = "all";
+    currentTarget = "all";
+    afterToken = "";
+    loadListing(false);
+}
+
+/* =====================================================
+   BUILD LISTING URL
+===================================================== */
+function buildListingUrl() {
+    const base = "https://www.reddit.com/";
+    let url;
+
+    if (currentMode === "search") {
+        url = base + "search.json?q=" + encodeURIComponent(currentTarget) + "&limit=25&raw_json=1";
+    } else if (currentMode === "subreddit") {
+        url = base + "r/" + encodeURIComponent(currentTarget) + "/" + currentSort + ".json?limit=25&raw_json=1";
+    } else if (currentMode === "all") {
+        url = base + "r/all/" + currentSort + ".json?limit=25&raw_json=1";
+    } else {
+        url = base + "r/popular/" + currentSort + ".json?limit=25&raw_json=1";
+    }
+
+    if (afterToken) url += "&after=" + encodeURIComponent(afterToken);
+    return url;
+}
+
+/* =====================================================
+   FRIENDLY ERROR MESSAGES
+===================================================== */
+function friendlyErrorMessage(status, fallback) {
+    if (status === 429) {
+        return "יותר מדי בקשות ל-Reddit ברגע זה. נסה שוב בעוד דקה.";
+    }
+    if (status === 404) {
+        return "הקהילה לא נמצאה. בדוק את שם ה-subreddit.";
+    }
+    return fallback;
+}
+
+/* =====================================================
+   INFINITE SCROLL
+===================================================== */
+function disconnectInfiniteScroll() {
+    if (infiniteObserver) {
+        infiniteObserver.disconnect();
+        infiniteObserver = null;
+    }
+}
+
+function setupInfiniteScroll() {
+    disconnectInfiniteScroll();
+    const sentinel = document.getElementById("scrollSentinel");
+    if (!sentinel) return;
+
+    infiniteObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting && afterToken) loadListing(true);
+        });
+    }, { rootMargin: "600px" });
+
+    infiniteObserver.observe(sentinel);
+}
+
+/* =====================================================
+   LOAD LISTING
+===================================================== */
+async function loadListing(append) {
+    disconnectInfiniteScroll();
+
+    if (!append) {
+        document.getElementById("app").innerHTML = headingHTML() + skeletonList();
+    } else {
+        const indicator = document.getElementById("loadMoreIndicator");
+        if (indicator) indicator.style.display = "flex";
+    }
+
+    try {
+        const response = await fetch(buildListingUrl());
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(friendlyErrorMessage(response.status, "שגיאה בטעינת הנתונים מ-Reddit."));
+        }
+
+        const posts = (data.data && data.data.children) || [];
+        afterToken = (data.data && data.data.after) || "";
+
+        displayPosts(posts, append);
+
+    } catch (error) {
+        console.error(error);
+        const indicator = document.getElementById("loadMoreIndicator");
+        if (indicator) indicator.style.display = "none";
+        showError(error.message || "לא ניתן היה להתחבר ל-Reddit.");
+    }
+}
+
+/* =====================================================
+   HEADING (title + sort bar) shown above the post list
+===================================================== */
+function headingHTML() {
+    let title = "🏠 r/popular";
+    if (currentMode === "all") title = "🌐 r/all";
+    else if (currentMode === "subreddit") title = "r/" + escapeHTML(currentTarget);
+    else if (currentMode === "search") title = "תוצאות חיפוש: " + escapeHTML(currentTarget);
+
+    return `<div class="sortbar"><h2>${title}</h2></div>`;
+}
+
+/* =====================================================
+   DISPLAY POSTS
+===================================================== */
+function displayPosts(posts, append) {
+    if (!posts.length) {
+        if (!append) showError("לא נמצאו פוסטים.");
+        return;
+    }
+
+    let cards = "";
+    posts.forEach((item) => {
+        if (item.kind === "t3") cards += renderPostCard(item.data);
+    });
+
+    if (!append) {
+        document.getElementById("app").innerHTML = `
+            ${headingHTML()}
+            <div id="postList" class="post-list">${cards}</div>
+            <div id="loadMoreIndicator" class="load-more-indicator"><div class="spinner"></div></div>
+            <div id="scrollSentinel" class="scroll-sentinel"></div>
+        `;
+        setupInfiniteScroll();
+    } else {
+        const list = document.getElementById("postList");
+        if (list) list.insertAdjacentHTML("beforeend", cards);
+        const indicator = document.getElementById("loadMoreIndicator");
+        if (indicator) indicator.style.display = "none";
+    }
+}
+
+/* =====================================================
+   POST CARD
+===================================================== */
+function renderPostCard(post) {
+    const title = escapeHTML(post.title);
+    const sub = escapeHTML(post.subreddit_name_prefixed || ("r/" + post.subreddit));
+    const author = escapeHTML(post.author);
+    const comments = Number(post.num_comments || 0).toLocaleString("he-IL");
+    const score = Number(post.score || 0).toLocaleString("he-IL");
+    const nsfw = post.over_18 ? " 🔞" : "";
+
+    let thumbHTML;
+    if (post.thumbnail && post.thumbnail.startsWith("http")) {
+        thumbHTML = `<img class="post-thumb" src="${post.thumbnail}" alt="">`;
+    } else {
+        const icon = post.is_self ? "📝" : (post.is_video ? "🎬" : "🔗");
+        thumbHTML = `<div class="post-thumb placeholder">${icon}</div>`;
+    }
+
+    return `
+        <div class="post-card" onclick="openPost('${post.id}')">
+            <div class="post-score">▲<br>${score}</div>
+            ${thumbHTML}
+            <div class="post-body">
+                <div class="post-title">${title}${nsfw}</div>
+                <div class="post-meta">
+                    <span class="post-sub">${sub}</span> · פורסם ע"י ${author} · ${comments} תגובות
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* =====================================================
+   SKELETON LIST
+===================================================== */
+function skeletonList(count = 10) {
+    let items = "";
+    for (let i = 0; i < count; i++) {
+        items += `
+            <div class="skeleton-post">
+                <div class="skeleton-thumb"></div>
+                <div style="flex:1;">
+                    <div class="skeleton-line" style="width:85%;"></div>
+                    <div class="skeleton-line" style="width:40%;"></div>
+                </div>
+            </div>
+        `;
+    }
+    return `<div class="post-list">${items}</div>`;
+}
+
+/* =====================================================
+   HOME
+===================================================== */
+function home() {
+    document.getElementById("searchInput").value = "";
+    currentMode = "popular";
+    currentTarget = "";
+    currentSort = "hot";
+    document.getElementById("sortSelect").value = "hot";
+    afterToken = "";
+    loadListing(false);
+}
+
+/* =====================================================
+   OPEN POST (detail + comments)
+===================================================== */
+async function openPost(id) {
+    disconnectInfiniteScroll();
+    saveHistory(id);
+
+    document.getElementById("app").innerHTML = loading();
+
+    try {
+        const url = "https://www.reddit.com/comments/" + encodeURIComponent(id) + ".json?raw_json=1";
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(friendlyErrorMessage(response.status, "שגיאה בטעינת הפוסט."));
+        }
+
+        const post = data[0].data.children[0].data;
+        const comments = data[1].data.children;
+
+        renderPostPage(post, comments);
+
+    } catch (error) {
+        showError(error.message || "לא ניתן היה לטעון את הפוסט.");
+    }
+}
+
+/* =====================================================
+   POST DETAIL PAGE
+===================================================== */
+function renderPostPage(post, comments) {
+    const title = escapeHTML(post.title);
+    const sub = escapeHTML(post.subreddit_name_prefixed || ("r/" + post.subreddit));
+    const author = escapeHTML(post.author);
+    const score = Number(post.score || 0).toLocaleString("he-IL");
+    const commentCount = Number(post.num_comments || 0).toLocaleString("he-IL");
+
+    let mediaHTML = "";
+    if (post.is_video && post.media && post.media.reddit_video) {
+        mediaHTML = `<div class="detail-media"><video src="${post.media.reddit_video.fallback_url}" controls muted></video></div>`;
+    } else if (post.post_hint === "image" || /\.(jpg|jpeg|png|gif|webp)$/i.test(post.url || "")) {
+        mediaHTML = `<div class="detail-media"><img src="${post.url}" alt=""></div>`;
+    } else if (post.is_self) {
+        mediaHTML = `<div class="selftext">${escapeHTML(post.selftext) || "(אין תוכן טקסט)"}</div>`;
+    } else {
+        mediaHTML = `<div class="link-card"><span>${escapeHTML(post.domain || "")}</span><button class="watch-button" onclick="window.open('${post.url}', '_blank')">🔗 פתח קישור</button></div>`;
+    }
+
+    document.getElementById("app").innerHTML = `
+        <div class="post-page">
+            <div class="detail-title">${title}</div>
+            <div class="detail-meta">
+                <span class="post-sub">${sub}</span> · פורסם ע"י ${author} · ▲ ${score} נקודות · ${commentCount} תגובות
+            </div>
+
+            <div class="detail-actions">
+                <button class="watch-button" onclick="share('${post.id}')">🔗 שיתוף</button>
+                <button class="watch-button" onclick="window.open('https://www.reddit.com${post.permalink}', '_blank')">▶ פתח ב-Reddit</button>
+                <button class="watch-button" onclick="home()">← חזרה</button>
+            </div>
+
+            ${mediaHTML}
+
+            <div class="comments-section">
+                <h2>תגובות</h2>
+                <div id="commentsWrap">${renderComments(comments, 0)}</div>
+            </div>
+        </div>
+    `;
+}
+
+/* =====================================================
+   COMMENTS (recursive, limited depth)
+===================================================== */
+function renderComments(comments, depth) {
+    if (!comments || !comments.length) {
+        return depth === 0 ? '<p style="color:var(--secondary);">אין תגובות עדיין.</p>' : "";
+    }
+    if (depth > 4) return '<div class="more-note">יש עוד תגובות מקוננות — צפה בהן ב-Reddit.</div>';
+
+    let html = "";
+
+    comments.forEach((c) => {
+        if (c.kind === "more") {
+            if (c.data.count > 0) {
+                html += `<div class="more-note">+ ${c.data.count} תגובות נוספות (צפה ב-Reddit)</div>`;
+            }
+            return;
+        }
+        if (c.kind !== "t1") return;
+
+        const d = c.data;
+        const author = escapeHTML(d.author);
+        const body = escapeHTML(d.body || "");
+        const score = Number(d.score || 0).toLocaleString("he-IL");
+
+        let replies = "";
+        if (d.replies && d.replies.data && d.replies.data.children) {
+            replies = renderComments(d.replies.data.children, depth + 1);
+        }
+
+        html += `
+            <div class="comment">
+                <div class="comment-body-wrap">
+                    <div class="comment-meta"><b>${author}</b> · ${score} נקודות</div>
+                    <div class="comment-body">${body}</div>
+                    ${replies}
+                </div>
+            </div>
+        `;
+    });
+
+    return html;
+}
+
+/* =====================================================
+   HISTORY
+===================================================== */
+function saveHistory(id) {
+    let history = JSON.parse(localStorage.getItem("history") || "[]");
+    history = history.filter((x) => x !== id);
+    history.unshift(id);
+    history = history.slice(0, 30);
+    localStorage.setItem("history", JSON.stringify(history));
+}
+
+async function historyPage() {
+    disconnectInfiniteScroll();
+
+    const history = JSON.parse(localStorage.getItem("history") || "[]");
+
+    if (!history.length) {
+        document.getElementById("app").innerHTML = `
+            <div class="error">
+                <h2>🕘 היסטוריה</h2>
+                <p>עדיין לא צפית בפוסטים.</p>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById("app").innerHTML = `<h2 style="margin-bottom:20px;">🕘 היסטוריה</h2>${skeletonList(Math.min(history.length, 10))}`;
+
+    try {
+        // Reddit's "info" endpoint accepts a comma-separated list of fullnames (t3_<id>)
+        const fullnames = history.map((id) => "t3_" + id).join(",");
+        const url = "https://www.reddit.com/by_id/" + encodeURIComponent(fullnames) + ".json?raw_json=1";
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(friendlyErrorMessage(response.status, "שגיאה בטעינת ההיסטוריה."));
+
+        const posts = (data.data && data.data.children) || [];
+        let cards = "";
+        posts.forEach((item) => { if (item.kind === "t3") cards += renderPostCard(item.data); });
+
+        document.getElementById("app").innerHTML = `
+            <h2 style="margin-bottom:20px;">🕘 היסטוריה</h2>
+            <div class="post-list">${cards || '<p style="color:var(--secondary);">לא נמצאו פוסטים.</p>'}</div>
+        `;
+
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+/* =====================================================
+   SHARE
+===================================================== */
+function share(id) {
+    const url = "https://www.reddit.com/comments/" + id;
+    if (navigator.share) {
+        navigator.share({ title: "Reddit", url: url });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert("הקישור הועתק!");
+    }
+}
+
+/* =====================================================
+   LOADING / ERROR
+===================================================== */
+function loading() {
+    return `<div class="loading"><div class="spinner"></div>טוען...</div>`;
+}
+
+function showError(message) {
+    document.getElementById("app").innerHTML = `
+        <div class="error">
+            <h2>⚠️ משהו השתבש</h2>
+            <p>${escapeHTML(message)}</p>
+        </div>
+    `;
+}
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+function escapeHTML(text) {
+    if (text === undefined || text === null) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+</script>
+
+</body>
+</html>

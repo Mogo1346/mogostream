@@ -1,88 +1,492 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>משחק</title>
-    <link rel="icon" type="image/png" href="https://img.freepik.com/premium-photo/video-game-controller-with-black-background-blue-red-design_1117469-9870.jpg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>משחק</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/10855/10855296.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --night: #1c1746;
+      --night-deep: #14103a;
+      --bezel-top: #3b3190;
+      --bezel-bottom: #2a2266;
+      --cream: #fff6dc;
+      --yellow: #ffd23f;
+      --yellow-edge: #b8901a;
+      --teal: #2ee6c5;
+      --teal-edge: #178f7b;
+      --coral: #ff5d73;
+      --coral-edge: #b32e42;
+    }
+
+    * { box-sizing: border-box; }
+
     html, body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 0;
-        height: 100%;
+      margin: 0;
+      min-height: 100%;
     }
-    .wrap {
-      height: 100%;
+
+    body {
+      min-height: 100dvh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      gap: 22px;
+      padding: 20px 16px 28px;
+      font-family: 'Rubik', Arial, sans-serif;
+      color: var(--cream);
+      text-align: center;
+      background-color: var(--night);
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(120, 100, 255, .35), transparent 60%),
+        radial-gradient(rgba(255, 246, 220, .07) 1.5px, transparent 1.5px);
+      background-size: auto, 26px 26px;
     }
-    iframe {
-      width: 75%;
-      height: 75%;
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: .01em;
+      text-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ---------- מסגרת המסך ---------- */
+    .cabinet {
+      padding: 14px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, var(--bezel-top), var(--bezel-bottom));
+      box-shadow:
+        0 0 0 3px rgba(255, 246, 220, .12),
+        0 24px 60px rgba(8, 5, 40, .6),
+        0 0 80px rgba(120, 100, 255, .25);
+    }
+
+    .screen {
+      position: relative;
+      width: min(92vw, 1100px);
+      height: clamp(320px, 66dvh, 740px);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--night-deep);
+      box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .35);
+    }
+
+    .screen:fullscreen {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .screen:-webkit-full-screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .game {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       border: 0;
+      display: block;
+      background: transparent;
+    }
+
+    /* ---------- טעינה והודעות ---------- */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px;
+      background: var(--night-deep);
+    }
+    .overlay[hidden] { display: none; }
+
+    .spinner {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 5px solid rgba(255, 246, 220, .15);
+      border-top-color: var(--yellow);
+      animation: spin .9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .overlay p {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+    .overlay .title {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    /* ---------- לוח הכפתורים ---------- */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .btn {
+      --face: var(--yellow);
+      --edge: var(--yellow-edge);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-width: 170px;
+      padding: 12px 22px;
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--night);
+      background: var(--face);
+      border: 0;
+      border-radius: 16px;
+      box-shadow: 0 6px 0 var(--edge), 0 12px 20px rgba(0, 0, 0, .3);
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+    }
+    .btn svg {
+      width: 22px;
+      height: 22px;
+      flex: none;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .btn:hover { filter: brightness(1.06); }
+    .btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 var(--edge), 0 4px 8px rgba(0, 0, 0, .3);
+    }
+    .btn:focus-visible {
+      outline: 3px solid var(--cream);
+      outline-offset: 4px;
+    }
+    .btn:disabled {
+      filter: grayscale(.8) brightness(.7);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, .3);
+    }
+
+    .btn-fs     { --face: var(--teal);   --edge: var(--teal-edge); }
+    .btn-mute   { --face: var(--yellow); --edge: var(--yellow-edge); }
+    .btn-reload { --face: var(--coral);  --edge: var(--coral-edge); }
+
+    /* החלפת אייקונים לפי מצב */
+    .btn-mute .ico-off { display: none; }
+    .btn-mute[aria-pressed="true"] .ico-on  { display: none; }
+    .btn-mute[aria-pressed="true"] .ico-off { display: block; }
+
+    .btn-fs .ico-exit { display: none; }
+    .btn-fs.is-full .ico-enter { display: none; }
+    .btn-fs.is-full .ico-exit  { display: block; }
+
+    /* ---------- הודעה קופצת ---------- */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translate(-50%, 20px);
+      max-width: 90vw;
+      padding: 12px 20px;
+      font-size: .98rem;
+      font-weight: 500;
+      color: var(--night);
+      background: var(--cream);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 560px) {
+      .cabinet { padding: 9px; border-radius: 20px; }
+      .btn { min-width: 0; flex: 1 1 100%; }
+      .controls { width: min(92vw, 420px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation-duration: 2.4s; }
+      .btn, .toast { transition: none; }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="wrap">
-    <iframe id="gameFrame"
-      src= gameurl
-      allow="fullscreen"
-      webkitallowfullscreen
-      mozallowfullscreen>
-    </iframe>
+  <h1 id="gameTitle">משחק</h1>
+
+  <div class="cabinet">
+    <div class="screen" id="screen">
+      <div class="overlay" id="loader" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>המשחק נטען...</p>
+      </div>
+    </div>
   </div>
 
-  <button onclick="goFullscreen()">מסך מלא</button>
+  <div class="controls">
+    <button type="button" class="btn btn-fs" id="fsBtn" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-enter"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-exit"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+      <span id="fsLabel">מסך מלא</span>
+    </button>
+
+    <button type="button" class="btn btn-mute" id="muteBtn" aria-pressed="false" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-on"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-off"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+      <span id="muteLabel">השתק</span>
+    </button>
+
+    <button type="button" class="btn btn-reload" id="reloadBtn" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+      <span>טען מחדש</span>
+    </button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-      function goFullscreen() {
-        const game = document.getElementById('gameFrame');
-        if (game.requestFullscreen) {
-          game.requestFullscreen();
-        } else if (game.mozRequestFullScreen) {
-          game.mozRequestFullScreen();
-        } else if (game.webkitRequestFullscreen) {
-          game.webkitRequestFullscreen();
-        } else if (game.msRequestFullscreen) {
-          game.msRequestFullscreen();
+    (() => {
+      // ---------- נתונים מהדף הקודם ----------
+      let gameURL = null;
+      let gameName = null;
+      try {
+        gameURL = localStorage.getItem("gameUrl");
+        gameName = localStorage.getItem("gameName"); // אופציונלי
+      } catch (e) {}
+
+      const $ = (id) => document.getElementById(id);
+      const screenEl = $("screen");
+      const loader = $("loader");
+      const fsBtn = $("fsBtn");
+      const fsLabel = $("fsLabel");
+      const muteBtn = $("muteBtn");
+      const muteLabel = $("muteLabel");
+      const reloadBtn = $("reloadBtn");
+      const toastEl = $("toast");
+
+      const isSwf = gameURL ? /\.swf(\?|#|$)/i.test(gameURL) : false;
+
+      let muted = false;
+      let player = null; // Ruffle
+      let frame = null;  // iframe
+
+      if (gameName) {
+        $("gameTitle").textContent = gameName;
+        document.title = gameName + " | משחק";
+      }
+
+      // ---------- עזרים ----------
+      let toastTimer;
+      function toast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
+      }
+
+      function setLoading(on) { loader.hidden = !on; }
+
+      function showMessage(title, text, withBack) {
+        removeGame();
+        loader.hidden = false;
+        loader.innerHTML = "";
+        const h = document.createElement("p");
+        h.className = "title";
+        h.textContent = title;
+        loader.appendChild(h);
+        if (text) {
+          const p = document.createElement("p");
+          p.textContent = text;
+          loader.appendChild(p);
+        }
+        if (withBack) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "btn";
+          b.textContent = "חזרה לרשימת המשחקים";
+          b.addEventListener("click", () => history.back());
+          loader.appendChild(b);
         }
       }
 
+      function removeGame() {
+        if (player) { player.remove(); player = null; }
+        if (frame) { frame.remove(); frame = null; }
+      }
+
+      function focusGame() {
+        const el = player || frame;
+        if (el && el.focus) el.focus();
+      }
+
+      // ---------- הרצת המשחק ----------
+      function mountIframe() {
+        removeGame();
+        setLoading(true);
+        frame = document.createElement("iframe");
+        frame.className = "game";
+        frame.title = gameName || "משחק";
+        frame.allow = "fullscreen; autoplay";
+        frame.setAttribute("allowfullscreen", "");
+        frame.addEventListener("load", () => {
+          setLoading(false);
+          if (muted) applyIframeMute();
+        }, { once: true });
+        screenEl.appendChild(frame);
+        frame.src = gameURL;
+      }
+
+      function loadRuffle() {
+        return new Promise((resolve, reject) => {
+          if (window.RufflePlayer) return resolve();
+          const s = document.createElement("script");
+          s.src = "https://unpkg.com/@ruffle-rs/ruffle";
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      async function mountFlash() {
+        removeGame();
+        setLoading(true);
+        try {
+          await loadRuffle();
+          const ruffle = window.RufflePlayer.newest();
+          player = ruffle.createPlayer();
+          player.className = "game";
+          screenEl.appendChild(player);
+          await player.load({ url: gameURL });
+          setLoading(false);
+          if (muted) player.volume = 0;
+        } catch (err) {
+          showMessage("לא הצלחנו לטעון את המשחק", "אפשר לנסות שוב עם כפתור הטעינה מחדש.", false);
+          reloadBtn.disabled = false;
+        }
+      }
+
+      function mountGame() {
+        if (isSwf) return mountFlash();
+        mountIframe();
+      }
+
+      // ---------- השתקה ----------
+      // משחקי HTML5 בדומיין אחר לא ניתנים לשליטה מבחוץ (מגבלת אבטחה של הדפדפן),
+      // לכן שם ההשתקה עובדת רק אם המשחק נמצא באותו דומיין.
+      function applyIframeMute() {
+        try {
+          const doc = frame && frame.contentDocument;
+          if (!doc) return false;
+          doc.querySelectorAll("audio, video").forEach((m) => { m.muted = muted; });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function renderMute() {
+        muteBtn.setAttribute("aria-pressed", String(muted));
+        muteLabel.textContent = muted ? "בטל השתקה" : "השתק";
+      }
+
+      function toggleMute() {
+        const next = !muted;
+        if (isSwf) {
+          if (!player) return;
+          muted = next;
+          player.volume = muted ? 0 : 1;
+        } else {
+          muted = next;
+          if (!applyIframeMute()) {
+            muted = !next;
+            toast("אי אפשר להשתיק את המשחק הזה מהדף. אפשר להשתיק את הלשונית בדפדפן.");
+            return;
+          }
+        }
+        renderMute();
+        focusGame();
+      }
+
+      // ---------- מסך מלא ----------
+      const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+
+      function toggleFullscreen() {
+        if (fsElement()) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+          return;
+        }
+        const request = screenEl.requestFullscreen || screenEl.webkitRequestFullscreen;
+        if (!request) {
+          toast("הדפדפן הזה לא תומך במסך מלא.");
+          return;
+        }
+        request.call(screenEl);
+      }
+
+      function renderFullscreen() {
+        const on = fsElement() === screenEl;
+        fsBtn.classList.toggle("is-full", on);
+        fsLabel.textContent = on ? "יציאה ממסך מלא" : "מסך מלא";
+        focusGame();
+      }
+
+      // ---------- טעינה מחדש ----------
+      function reloadGame() {
+        mountGame();
+        renderMute();
+      }
+
+      // ---------- חיבור אירועים ----------
+      fsBtn.addEventListener("click", toggleFullscreen);
+      muteBtn.addEventListener("click", toggleMute);
+      reloadBtn.addEventListener("click", reloadGame);
+      document.addEventListener("fullscreenchange", renderFullscreen);
+      document.addEventListener("webkitfullscreenchange", renderFullscreen);
+
+      // ---------- התחלה ----------
+      if (!gameURL) {
+        showMessage("לא נבחר משחק", "בחרו משחק מהרשימה כדי להתחיל לשחק.", true);
+      } else {
+        fsBtn.disabled = false;
+        muteBtn.disabled = false;
+        reloadBtn.disabled = false;
+        mountGame();
+      }
+    })();
   </script>
-
-<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-<script>
-  const gameURL = localStorage.getItem("gameUrl");
-
-  if (gameURL) {
-    const frame = document.getElementById("gameFrame");
-
-    if (gameURL.endsWith(".swf")) {
-      // כאן אפשר לשים את הגודל המקורי של המשחק
-      const originalWidth = 800; // רוחב מקורי של המשחק
-      const originalHeight = 600; // גובה מקורי של המשחק
-
-      const embed = document.createElement("embed");
-      embed.src = gameURL;
-      embed.width = originalWidth;
-      embed.height = originalHeight;
-      embed.style.width = originalWidth + "px";
-      embed.style.height = originalHeight + "px";
-      embed.id = "gameFrame";
-
-      frame.replaceWith(embed);
-    } else {
-      // לא פלאש - פשוט שמים את ה-iframe
-      frame.src = gameURL;
-    }
-  } else {
-    document.body.innerHTML = "<h2>לא נבחר משחק!</h2>";
-  }
-</script>
 
 </body>
 </html>

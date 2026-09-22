@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הכיתה שלי</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --header-bg:#ffffff;
+    --accent:#1a73e8;
+    --text:#202124;
+    --subtext:#5f6368;
+    --border:#e0e0e0;
+    --card-colors: #1e88e5,#43a047,#fb8c00,#8e24aa,#00897b,#e53935;
+    --bg:#f1f3f4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: "Google Sans", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header{
+    background: var(--header-bg);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:10px 20px;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header .title{
+    font-size:22px;
+    font-weight:500;
+    color:var(--subtext);
+    flex:1;
+  }
+  header .title b{ color: var(--text); }
+  #signout-btn{
+    display:none;
+    background:#fff;
+    border:1px solid var(--border);
+    padding:8px 16px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  main{
+    max-width:1100px;
+    margin:24px auto;
+    padding:0 20px;
+  }
+  #login-screen{
+    text-align:center;
+    margin-top:80px;
+  }
+  #login-screen h2{ font-weight:400; color:var(--subtext); margin-bottom:24px;}
+  .g-signin-wrap{ display:flex; justify-content:center; }
+  #courses-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+    gap:24px;
+    display:none;
+  }
+  .course-card{
+    background:#fff;
+    border-radius:8px;
+    border:1px solid var(--border);
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.08);
+    transition:box-shadow .15s;
+  }
+  .course-card:hover{ box-shadow:0 4px 10px rgba(0,0,0,.15); }
+  .course-banner{
+    height:100px;
+    padding:16px;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    position:relative;
+  }
+  .course-banner .name{ font-size:18px; font-weight:500; }
+  .course-banner .section{ font-size:13px; opacity:.9; }
+  .avatar{
+    position:absolute;
+    bottom:-24px;
+    left:16px;
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:#fff;
+    border:2px solid #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:600;
+    color:#555;
+  }
+  .course-body{
+    padding:32px 16px 16px;
+    min-height:60px;
+    color:var(--subtext);
+    font-size:14px;
+  }
+  .course-footer{
+    border-top:1px solid var(--border);
+    padding:8px 16px;
+    text-align:left;
+  }
+  .course-footer a{
+    color:var(--subtext);
+    text-decoration:none;
+    font-size:13px;
+  }
+  #status{
+    text-align:center;
+    color:var(--subtext);
+    margin-top:40px;
+  }
+  #error-box{
+    display:none;
+    background:#fce8e6;
+    color:#c5221f;
+    border:1px solid #f6aea9;
+    border-radius:6px;
+    padding:12px 16px;
+    margin-bottom:16px;
+    font-size:14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">📚 <b>הכיתה שלי</b></div>
+  <button id="signout-btn">התנתק</button>
+</header>
+
+<main>
+
+  <div id="error-box"></div>
+
+  <div id="login-screen">
+    <h2>התחבר/י עם חשבון Google כדי לראות את הקורסים שלך</h2>
+    <div class="g-signin-wrap" id="signin-btn"></div>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="courses-grid"></div>
+
+</main>
+
+<script>
+/* =========================================================
+   הגדרות שיש למלא בעצמך:
+   1. היכנס/י ל- https://console.cloud.google.com/
+   2. צור פרויקט, הפעל בו "Google Classroom API"
+   3. צור OAuth Client ID מסוג "Web application"
+   4. הוסף את הכתובת שבה תארח/י את הקובץ הזה
+      תחת Authorized JavaScript origins (לדוג' http://localhost:5500 או הדומיין שלך)
+   5. הדבק כאן את ה-Client ID שקיבלת:
+   ========================================================= */
+const CLIENT_ID = "780113784155-et2jf31r8g80iq18n10imk20t57u2soh.apps.googleusercontent.com";
+
+const SCOPES = "https://www.googleapis.com/auth/classroom.courses.readonly " +
+               "https://www.googleapis.com/auth/classroom.rosters.readonly";
+
+let accessToken = null;
+let tokenClient = null;
+
+const bannerColors = ["#1e88e5","#43a047","#fb8c00","#8e24aa","#00897b","#e53935"];
+
+function showError(msg){
+  const box = document.getElementById("error-box");
+  box.textContent = msg;
+  box.style.display = "block";
+}
+
+window.onload = () => {
+  if (CLIENT_ID.includes("הדבק_כאן")) {
+    showError("צריך להכניס Client ID אמיתי בתוך הקובץ (במשתנה CLIENT_ID) כדי שההתחברות תעבוד.");
+    return;
+  }
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (response) => {
+      if (response.error) {
+        showError("שגיאת התחברות: " + response.error);
+        return;
+      }
+      accessToken = response.access_token;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("signout-btn").style.display = "inline-block";
+      loadCourses();
+    }
+  });
+
+  document.getElementById("signin-btn").innerHTML =
+    '<button id="real-signin" style="background:#1a73e8;color:#fff;border:none;padding:10px 24px;border-radius:20px;font-size:15px;cursor:pointer;">התחבר עם Google</button>';
+
+  document.getElementById("real-signin").onclick = () => {
+    tokenClient.requestAccessToken();
+  };
+
+  document.getElementById("signout-btn").onclick = () => {
+    if (accessToken) {
+      google.accounts.oauth2.revoke(accessToken, () => {});
+    }
+    accessToken = null;
+    document.getElementById("login-screen").style.display = "block";
+    document.getElementById("signout-btn").style.display = "none";
+    document.getElementById("courses-grid").style.display = "none";
+    document.getElementById("courses-grid").innerHTML = "";
+  };
+};
+
+async function loadCourses(){
+  const statusEl = document.getElementById("status");
+  statusEl.textContent = "טוען קורסים...";
+
+  try {
+    const res = await fetch("https://classroom.googleapis.com/v1/courses?courseStates=ACTIVE", {
+      headers: { "Authorization": "Bearer " + accessToken }
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(()=>({}));
+      throw new Error(errData.error?.message || ("HTTP " + res.status));
+    }
+
+    const data = await res.json();
+    statusEl.textContent = "";
+
+    const grid = document.getElementById("courses-grid");
+    grid.innerHTML = "";
+
+    if (!data.courses || data.courses.length === 0) {
+      statusEl.textContent = "לא נמצאו קורסים פעילים בחשבון הזה.";
+      return;
+    }
+
+    data.courses.forEach((course, i) => {
+      const color = bannerColors[i % bannerColors.length];
+      const initial = (course.name || "?").trim().charAt(0).toUpperCase();
+
+      const card = document.createElement("div");
+      card.className = "course-card";
+      card.innerHTML = `
+        <div class="course-banner" style="background:${color}">
+          <div class="name">${escapeHtml(course.name || "")}</div>
+          <div class="section">${escapeHtml(course.section || "")}</div>
+          <div class="avatar">${initial}</div>
+        </div>
+        <div class="course-body">
+          ${escapeHtml(course.descriptionHeading || course.room || "")}
+        </div>
+        <div class="course-footer">
+          <a href="${course.alternateLink}" target="_blank">פתח ב-Classroom →</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    grid.style.display = "grid";
+
+  } catch (err) {
+    statusEl.textContent = "";
+    showError("שגיאה בטעינת הקורסים: " + err.message);
+  }
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>

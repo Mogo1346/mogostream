@@ -95,6 +95,39 @@ async function fetchIMDBRating(imdbId) {
   }
 }
 
+// OMDb מאפשר לבקש דירוגים של עונה שלמה בקריאה אחת (במקום פר-פרק),
+// דרך i=<imdb_id של הסדרה>&Season=<מספר עונה>.
+// שומרים בקאש לפי imdbId+season כדי לא לבקש שוב אם פותחים/סוגרים את העונה.
+const omdbSeasonCache = new Map();
+
+async function fetchOmdbSeasonRatings(imdbId, seasonNumber) {
+  const ratingsMap = {};
+  if (!imdbId) return ratingsMap;
+
+  const cacheKey = `${imdbId}_S${seasonNumber}`;
+  if (omdbSeasonCache.has(cacheKey)) {
+    return omdbSeasonCache.get(cacheKey);
+  }
+
+  try {
+    const res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${imdbId}&Season=${seasonNumber}`);
+    const data = await res.json();
+
+    if (data.Response !== "False" && Array.isArray(data.Episodes)) {
+      data.Episodes.forEach(ep => {
+        if (ep.imdbRating && ep.imdbRating !== "N/A") {
+          ratingsMap[String(ep.Episode)] = ep.imdbRating;
+        }
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  omdbSeasonCache.set(cacheKey, ratingsMap);
+  return ratingsMap;
+}
+
 async function loadSeries() {
   try {
     const [series, credits, externalIds] = await Promise.all([
@@ -115,10 +148,12 @@ async function loadSeries() {
             <div class="header-info">
               <h1>${series.name}</h1>
               <div class="meta-info">
+                ${imdbRating ? `
                 <div class="rating">
                   <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                  ${imdbRating || series.vote_average.toFixed(1)}
+                  ${imdbRating}
                 </div>
+                ` : ''}
                 <span class="year">${series.first_air_date ? series.first_air_date.split('-')[0] : ''}</span>
                 <span class="status">${series.status === 'Returning Series' ? 'מתחדש' : series.status === 'Ended' ? 'הסתיים' : series.status}</span>
               </div>
@@ -185,12 +220,16 @@ async function loadSeries() {
         if (seasonDiv.classList.contains('open') && !episodesDiv.dataset.loaded) {
           episodesDiv.innerHTML = '<div style="text-align:center;padding:20px;">טוען פרקים...</div>';
 
-          const seasonData = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${API_KEY}&language=he-IL`).then(r => r.json());
+          // שני מקורות במקביל: TMDB (פרקים + תמונות) ו-OMDb (דירוגי IMDB לכל העונה, קריאה אחת)
+          const [seasonData, omdbRatings] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${season.season_number}?api_key=${API_KEY}&language=he-IL`).then(r => r.json()),
+            fetchOmdbSeasonRatings(externalIds.imdb_id, season.season_number)
+          ]);
 
-          episodesDiv.innerHTML = await Promise.all(seasonData.episodes.map(async ep => {
-            let epRating = ep.vote_average.toFixed(1); // ברירת מחדל TMDB
-            // אם יש IMDB ID עבור הסדרה, ניתן לבדוק OMDb לפי מספר הפרק (לא תמיד מדויק)
-            // כאן נותר ברירת מחדל
+          episodesDiv.innerHTML = seasonData.episodes.map(ep => {
+            // רק דירוג IMDB — אם אין, לא מציגים כלום (בלי נפילה חזרה ל-TMDB)
+            const epRating = omdbRatings[String(ep.episode_number)] || '';
+
             return `
               <div class="episode" data-season="${season.season_number}" data-episode="${ep.episode_number}">
                 <img src="${ep.still_path ? IMAGE_BASE + 'w300' + ep.still_path : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'112\'%3E%3Crect fill=\'%23333\' width=\'200\' height=\'112\'/%3E%3C/svg%3E'}" alt="${ep.name}" class="episode-still">
@@ -211,7 +250,7 @@ async function loadSeries() {
                 </div>
               </div>
             `;
-          }));
+          }).join('');
 
           episodesDiv.querySelectorAll('.episode').forEach(epEl => {
             epEl.addEventListener('click', () => {
