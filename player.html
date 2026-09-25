@@ -432,30 +432,42 @@
             'Baby': 'בייבי.il',
             'Channel 9': 'ישראלפלוס.il',
             'Channel 24': 'ערוץ24החדש.il',
+            'Channel 98': 'ערוץ98.il',
+            'Discovery': 'דיסקבריHD.il',
             'Disney Channel': 'דיסניHD.il',
+            'E!': 'E!.il',
             'Ego Total': 'ערוץאגו.il',
             'Food Channel': 'ערוץהאוכל.il',
             'Health Channel': 'ערוץבריאות.il',
             'Hidabroot': 'ערוץהידברות.il',
-            'History': 'היסטוריהHD.il',
+            'History': 'ערוץההיסטוריה.il',
+            'History HD': 'היסטוריהHD.il',
             'Home +': 'בית+.il',
             'Hop!': 'הופ!.il',
             'Hot Drama': 'HOTHBO.il',
+            'HOT Bidur': 'HOTEntertainment.il',
             'Kan 11': 'כאן11.il',
             'Kan Educational': 'ערוץ23חינוכית.il',
             'Keshet 12': 'קשת.il',
             'Knesset Channel': 'ערוץהכנסת.il',
             'Makan 33': 'מכאן.il',
+            'Nat Geo Wild': 'NGWILD.il',
             'One': 'ONE.il',
             'Reality Channel': 'ערוץהריאליטי.il',
             'Sport 2': 'ספורט2HD.il',
+            'Sport 3': 'ספורט3HD.il',
+            'Sport 4': 'ספורט4HD.il',
             'Travel Channel': 'ערוץהטיולים.il',
+            'Turkish Dramas+': 'ערוץהדרמותהטורקיות+.il',
             'Vacation Channel': 'ערוץהנופש.il',
             'Viva Istanbul': 'ויוה+.il',
             'Viva Premium': 'VivaPremium.il',
             'Viva Telenovelas': 'ויוה.il',
+            'Wiz': 'ערוץWiZ.il',
             'Yaldut Israelit': 'ילדותישראלית.il',
             'Yam Tichoni': 'יםתיכוני.il',
+            'Yes Docu': 'yesדוקו.il',
+            'Yes Israeli': 'yesקולנועישראלי.il',
             'Zoom': 'Zoom.il',
 
             // הוסיפו שורות חדשות כאן, בפורמט:  'שם באתר': 'id או שם במדריך',
@@ -740,7 +752,7 @@
         function norm(s) {
             return (s || '').toLowerCase()
                 .replace(/[\(\[].*?[\)\]]/g, ' ')                  // מסירים (1080p) ו-[Not 24/7]
-                .replace(/(^|\s)(hd|sd|fhd|uhd)(?=\s|$)/g, ' ')  // מסירים סימוני איכות
+                .replace(/(^|\s)(sd|fhd|uhd)(?=\s|$)/g, ' ')  // מסירים סימוני איכות
                 .replace(/[^\p{L}\p{N}]/gu, '');                    // משאירים אותיות ומספרים בלבד
         }
 
