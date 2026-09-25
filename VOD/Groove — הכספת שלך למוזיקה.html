@@ -396,7 +396,17 @@ function loadEmbedVideo(videoId) {
   const container = document.getElementById('yt-player');
   ytState = { playerState: -1, currentTime: 0, duration: 0 };
   const origin = encodeURIComponent(location.origin);
-  container.innerHTML = `<iframe id="yt-iframe" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&origin=https%3A%2F%2Ftunefree.in&autoplay=1&mute=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  container.innerHTML = `<iframe
+  id="yt-iframe"
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/${videoId}"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen>
+</iframe>`;
   ytIframe = document.getElementById('yt-iframe');
   ytIframe.addEventListener('load', () => {
     // מבקשים מהנגן המוטמע להתחיל לשלוח לנו עדכוני מצב (infoDelivery)
