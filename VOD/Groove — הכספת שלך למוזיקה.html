@@ -396,7 +396,7 @@ function loadEmbedVideo(videoId) {
   const container = document.getElementById('yt-player');
   ytState = { playerState: -1, currentTime: 0, duration: 0 };
   const origin = encodeURIComponent(location.origin);
-  container.innerHTML = `<iframe id="yt-iframe" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&playsinline=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&origin=https%3A%2F%2Fmogo1346.github.io/mogostream&widgetid=1&forigin=https%3A%2F%2Fmogo1346.github.io/mogostream%2F&aoriginsup=1&vf=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  container.innerHTML = `<iframe id="yt-iframe" src="https://www.skipad.io/embed/${videoId}></iframe>`;
   ytIframe = document.getElementById('yt-iframe');
   ytIframe.addEventListener('load', () => {
     // מבקשים מהנגן המוטמע להתחיל לשלוח לנו עדכוני מצב (infoDelivery)
