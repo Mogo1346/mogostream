@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מזל טוב לחלול</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: 'Heebo', sans-serif;
+    background: linear-gradient(180deg, #ff6fa0 0%, #7a5cff 50%, #3fc1a5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    max-width: 520px;
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    backdrop-filter: blur(2px);
+  }
+
+  h1 {
+    font-family: 'Suez One', serif;
+    font-size: clamp(32px, 7vw, 48px);
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    text-shadow: 0 3px 0 #ff6fa0, 0 6px 14px rgba(0,0,0,0.25);
+  }
+
+  .image-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto 24px auto;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    aspect-ratio: 1 / 1;
+    background: #2a2440;
+  }
+
+  .image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .play-btn:hover {
+    transform: translate(-50%, -50%) scale(1.06);
+    background: #ffffff;
+  }
+
+  .play-btn:active {
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+
+  .play-btn svg {
+    width: 34px;
+    height: 34px;
+    fill: #7a5cff;
+    margin-right: -4px;
+  }
+
+  .play-btn.playing svg.icon-play { display: none; }
+  .play-btn:not(.playing) svg.icon-pause { display: none; }
+
+  .status {
+    color: #ffffff;
+    font-size: 15px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .progress-wrap {
+    width: 100%;
+    max-width: 420px;
+    margin: 14px auto 0 auto;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 999px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #ffffff;
+    border-radius: 999px;
+    transition: width 0.1s linear;
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #ffffff;
+    opacity: 0.8;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>מזל טוב לחלול 🎉</h1>
+
+    <div class="image-wrap">
+      <img src="img.png" alt="תמונת השיר של חלול">
+      <button class="play-btn" id="playBtn" aria-label="נגן שיר">
+        <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="time-row">
+        <span id="curTime">0:00</span>
+        <span id="durTime">0:00</span>
+      </div>
+    </div>
+
+    <div class="status" id="status">לחצו על הכפתור כדי לנגן את השיר</div>
+
+    <audio id="song" src="song.mp3" preload="metadata"></audio>
+  </div>
+
+<script>
+  const audio = document.getElementById('song');
+  const playBtn = document.getElementById('playBtn');
+  const statusEl = document.getElementById('status');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  const curTimeEl = document.getElementById('curTime');
+  const durTimeEl = document.getElementById('durTime');
+
+  function formatTime(sec) {
+    if (!isFinite(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play().catch(() => {
+        statusEl.textContent = 'לא הצלחתי לנגן — ודאו שקובץ song.mp3 נמצא באותה תיקייה';
+      });
+    } else {
+      audio.pause();
+    }
+  });
+
+  audio.addEventListener('play', () => {
+    playBtn.classList.add('playing');
+    statusEl.textContent = 'מנגן עכשיו... 🎶';
+  });
+
+  audio.addEventListener('pause', () => {
+    playBtn.classList.remove('playing');
+    statusEl.textContent = 'הושהה — לחצו כדי להמשיך';
+  });
+
+  audio.addEventListener('ended', () => {
+    playBtn.classList.remove('playing');
+    statusEl.textContent = 'השיר נגמר — לחצו כדי לנגן שוב';
+    progressFill.style.width = '0%';
+    curTimeEl.textContent = '0:00';
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    durTimeEl.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + '%';
+      curTimeEl.textContent = formatTime(audio.currentTime);
+    }
+  });
+
+  progressBar.addEventListener('click', (e) => {
+    if (!audio.duration) return;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = clickX / rect.width;
+    audio.currentTime = ratio * audio.duration;
+  });
+
+  audio.addEventListener('error', () => {
+    statusEl.textContent = 'לא נמצא קובץ song.mp3 — שימו אותו באותה תיקייה כמו הקובץ הזה';
+  });
+</script>
+
+</body>
+</html>
